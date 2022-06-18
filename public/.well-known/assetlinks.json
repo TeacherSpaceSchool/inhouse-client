@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "store.salyk.twa",
+    "sha256_cert_fingerprints": [
+      "E1:4E:F3:3A:8D:E1:01:F8:AA:1A:2C:70:6C:EF:35:B1:A9:8D:E3:1B:46:F2:C5:6C:F5:09:FA:30:E9:D0:5B:F9",
+      "49:9C:E0:A6:6A:B7:8F:7C:74:2D:8E:7A:BC:9B:0C:51:61:1D:34:81:94:37:70:9A:25:FD:6C:29:72:1C:BF:27"
+    ]
+  }
+}]
