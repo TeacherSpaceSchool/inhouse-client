@@ -6,39 +6,40 @@ import * as appActions from '../../src/redux/actions/app'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
-import { pdDatePicker } from '../../src/lib'
+import { pdDatePickerMonth } from '../../src/lib'
 
 const SetDate =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        let [dateChange, setDateChange] = useState(pdDatePicker(new Date()));
+        const { date, setDate, type } = props;
         const { isMobileApp } = props.app;
+        let [_date, _setDate] = useState(pdDatePickerMonth(date));
         const { showMiniDialog } = props.mini_dialogActions;
-        const { setDate } = props.appActions;
-        const width = isMobileApp? (window.innerWidth-112) : 500
+        const width = isMobileApp? (window.innerWidth-113) : 500
         return (
             <div className={classes.main}>
                 <TextField variant='standard'
-                    style={{width: width}}
+                           id='date'
+                           style={{width}}
                     className={classes.textField}
                     label='Дата'
-                    type='date'
+                    type={type?type:'date'}
                     InputLabelProps={{
                         shrink: true,
                     }}
-                    value={dateChange}
+                    value={_date}
                     onKeyPress={async event => {
                         if (event.key === 'Enter'){
-                            await setDate(new Date(dateChange))
+                            await setDate(_date)
                             showMiniDialog(false);
                         }
                     }}
-                    onChange={ event => setDateChange(event.target.value) }
+                    onChange={ event => _setDate(event.target.value) }
                 />
                 <br/>
                 <div>
                     <Button variant="contained" color="primary" onClick={async()=>{
-                       await setDate(new Date(dateChange))
+                       setDate(_date)
                        showMiniDialog(false);
                     }} className={classes.button}>
                         Сохранить

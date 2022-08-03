@@ -16,7 +16,7 @@ const MyDialog =  React.memo(
                     onClose={()=>{showMiniDialog(false)}}
                     aria-labelledby='alert-dialog-title'
                     aria-describedby='alert-dialog-description'>
-                    <DialogTitle onClose={()=>{showMiniDialog(false)}}>{title}</DialogTitle>
+                    <DialogTitle onClose={()=>{showMiniDialog(false)}}><center>{title}</center></DialogTitle>
                     <DialogContent>
                         {child}
                     </DialogContent>

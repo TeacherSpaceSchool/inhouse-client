@@ -17,12 +17,14 @@ const History =  React.memo(
             (async()=>{
                 setHistory(await getHistory({where}))
             })()
-        },[])
+        },[where])
+        const { isMobileApp } = props.app;
+        const width = isMobileApp? (window.innerWidth-113) : 500
         return (
-            <div className={classes.main} style={{alignItems: 'baseline'}}>
+            <div className={classes.main} style={{width, alignItems: 'baseline'}}>
                 {history?history.map((element)=>
-                    <div>
-                        <div className={classes.row}  key={element._id}>
+                    <div  key={element._id}>
+                        <div className={classes.row}>
                             <div className={classes.nameField}>
                                 Дата:&nbsp;
                             </div>
@@ -32,7 +34,7 @@ const History =  React.memo(
                         </div>
                         {
                             element.who?
-                                <div className={classes.row}  key={element._id}>
+                                <div className={classes.row}>
                                     <div className={classes.nameField}>
                                         Кто:&nbsp;
                                     </div>
@@ -45,7 +47,7 @@ const History =  React.memo(
                         }
                         {
                             element.what?
-                                <div className={classes.row}  key={element._id}>
+                                <div className={classes.row}>
                                     <div className={classes.nameField}>
                                         Что:&nbsp;
                                     </div>
@@ -59,10 +61,11 @@ const History =  React.memo(
                         <br/>
                     </div>
                 ):null}
-                <br/>
-                <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
-                    Закрыть
-                </Button>
+                <center style={{width: '100%'}}>
+                    <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
+                        Закрыть
+                    </Button>
+                </center>
             </div>
         );
     }

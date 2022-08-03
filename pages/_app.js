@@ -24,7 +24,7 @@ function MyApp(props) {
     return (
         <CacheProvider value={emotionCache}>
             <Head>
-                <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" />
+                <meta name='viewport' content='maximum-scale=1.0, initial-scale=1.0, width=device-width, shrink-to-fit=no' />
             </Head>
             <ApolloProvider client={client}>
                 <ThemeProvider theme={theme}>

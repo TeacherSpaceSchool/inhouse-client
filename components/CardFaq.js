@@ -12,18 +12,12 @@ import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import * as snackbarActions from '../src/redux/actions/snackbar'
 import Confirmation from './dialog/Confirmation'
-import PdfViewer from '../components/dialog/PdfViewer'
 import VideoViewer from '../components/dialog/VideoViewer'
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import Input from '@mui/material/Input';
+import ViewText from './dialog/ViewText';
 
 const CardFaq = React.memo((props) => {
     const {classes} = cardFaqStyle();
-    const { element, setList, list, idx } = props;
-    const { profile } = props.user;
+    const { element, setList, list, idx, edit, deleted } = props;
     const { isMobileApp } = props.app;
     //addCard
     let [file, setFile] = useState(undefined);
@@ -35,6 +29,7 @@ const CardFaq = React.memo((props) => {
             showSnackBar('Файл слишком большой')
         }
     })
+    let [text, setText] = useState(element&&element.text?element.text:'');
     let [name, setName] = useState(element&&element.name?element.name:'');
     let [video, setVideo] = useState(element&&element.video?element.video:'');
     let handleVideo =  (event) => {
@@ -44,109 +39,98 @@ const CardFaq = React.memo((props) => {
     let handleName =  (event) => {
         setName(event.target.value)
     };
-    let _roles = ['кассир', 'оператор', 'супервайзер', 'управляющий']
-    let [roles, setRoles] = useState(element&&element.roles?element.roles:[]);
-    let handleRoles =  (event) => {
-        setRoles(event.target.value)
-    };
     const { setMiniDialog, showMiniDialog, showFullDialog, setFullDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     let faqRef = useRef(null);
     return (
         <>
         {
-            ['admin', 'superadmin'].includes(profile.role)&&profile.add?
+            !element||edit||deleted?
                 <Card className={isMobileApp?classes.cardM:classes.cardD}>
                     <CardContent>
-                        <FormControl className={classes.input}>
-                            <InputLabel>Роли</InputLabel>
-                            <Select variant='standard'
-                                multiple
-                                value={roles}
-                                onChange={handleRoles}
-                                input={<Input/>}
-                                MenuProps={{
-                                    PaperProps: {
-                                        style: {
-                                            maxHeight: 500,
-                                            width: 250,
-                                        },
-                                    },
-                                }}
-                            >
-                                {_roles.map((role) => (
-                                    <MenuItem key={role} value={role}
-                                              style={{background: roles.includes(role) ? '#f5f5f5' : '#ffffff'}}>
-                                        {role}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <br/>
-                        <br/>
-                        <TextField variant='standard'
+                        <TextField
+                            variant='standard'
                             label='Название'
-                            value={name}
+                                   id='name'
+                                   value={name}
                             className={classes.input}
                             onChange={handleName}
                         />
-                        <br/>
-                        <br/>
-                        <TextField variant='standard'
-                            label='Видео'
+                        <TextField
+                            variant='standard'
+                                   id='video'
+                                   label='Видео'
                             value={video}
                             className={classes.input}
                             onChange={handleVideo}
                         />
                         <br/>
                         <br/>
-                        <Button color={url?'primary':'secondary'} onClick={async()=>{faqRef.current.click()}}>
+                        <Button size='small' color={url?'primary':'secondary'} onClick={async()=>{faqRef.current.click()}}>
                             Загрузить инструкцию
+                        </Button>
+                        <br/>
+                        <br/>
+                        <Button size='small' color={text?'primary':'secondary'} onClick={()=>{
+                            setMiniDialog('', <ViewText text={text} setText={setText}/>)
+                            showMiniDialog(true)
+                        }}>
+                            Редактировать текст
                         </Button>
                     </CardContent>
                     <CardActions>
                         {
                             element!==undefined?
                                 <>
-                                <Button onClick={async()=>{
-                                    let editElement = {_id: element._id}
-                                    if(name.length>0&&name!==element.name)editElement.name = name
-                                    if(video!==element.video)editElement.video = video
-                                    if(file!==undefined)editElement.file = file
-                                    if(JSON.stringify(roles)!==JSON.stringify(element.roles))editElement.roles = roles
-                                    const action = async() => {
-                                        await setFaq(editElement)
-                                    }
-                                    setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                    showMiniDialog(true)
-                                }} color='primary'>
-                                    Сохранить
-                                </Button>
-                                <Button onClick={async()=>{
-                                    const action = async() => {
-                                        await deleteFaq(element._id)
-                                        let _list = [...list]
-                                        _list.splice(idx, 1)
-                                        setList(_list)
-                                    }
-                                    setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                    showMiniDialog(true)
-                                }} color='secondary'>
-                                    Удалить
-                                </Button>
+                                {
+                                    edit?
+                                        <Button onClick={async()=>{
+                                            let editElement = {_id: element._id}
+                                            if(name.length>0&&name!==element.name)editElement.name = name
+                                            if(video!==element.video)editElement.video = video
+                                            if(file!==undefined)editElement.file = file
+                                            if(text!==element.text)editElement.text = text
+                                            const action = async() => {
+                                                await setFaq(editElement)
+                                            }
+                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            showMiniDialog(true)
+                                        }} color='primary'>
+                                            Сохранить
+                                        </Button>
+                                        :
+                                        null
+                                }
+                                {
+                                    deleted?
+                                        <Button onClick={async()=>{
+                                            const action = async() => {
+                                                await deleteFaq(element._id)
+                                                let _list = [...list]
+                                                _list.splice(idx, 1)
+                                                setList(_list)
+                                            }
+                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            showMiniDialog(true)
+                                        }} color='secondary'>
+                                            Удалить
+                                        </Button>
+                                        :
+                                        null
+                                }
                                 </>
                                 :
                                 <Button onClick={async()=> {
                                     if (name.length > 0) {
                                         const action = async() => {
                                             setList([
-                                                await addFaq({roles: roles, video: video, file: file, name: name}),
+                                                await addFaq({video, file, name, text}),
                                                 ...list
                                             ])
                                         }
                                         setFile(undefined)
                                         setName('')
-                                        setRoles([])
+                                        setText('')
                                         setVideo('')
                                         setUrl(false)
                                         setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
@@ -179,12 +163,13 @@ const CardFaq = React.memo((props) => {
                                     video?
                                         <>
                                         <br/>
-                                        <Button onClick={async()=> {
+                                        <Button size='small' onClick={async()=> {
                                             setFullDialog(element.name, <VideoViewer video={element.video}/>)
                                             showFullDialog(true)
                                         }} color='primary'>
                                             Просмотреть видео инструкцию
                                         </Button>
+                                        <br/>
                                         </>
                                         :
                                         null
@@ -193,12 +178,25 @@ const CardFaq = React.memo((props) => {
                                     element.url?
                                         <>
                                         <br/>
-                                        <br/>
-                                        <Button onClick={async()=> {
-                                            setFullDialog(element.name, <PdfViewer pdf={element.url}/>)
-                                            showFullDialog(true)
+                                        <Button size='small' onClick={async()=> {
+                                            window.open(url,'_blank')
                                         }} color='primary'>
                                             Прочитать инструкцию
+                                        </Button>
+                                        <br/>
+                                        </>
+                                        :
+                                        null
+                                }
+                                {
+                                    element.text?
+                                        <>
+                                        <br/>
+                                        <Button size='small' color='primary' onClick={()=>{
+                                            setMiniDialog('', <ViewText text={text}/>)
+                                            showMiniDialog(true)
+                                        }}>
+                                            Прочитать текст
                                         </Button>
                                         </>
                                         :
@@ -214,7 +212,6 @@ const CardFaq = React.memo((props) => {
 
 function mapStateToProps (state) {
     return {
-        user: state.user,
         app: state.app
     }
 }

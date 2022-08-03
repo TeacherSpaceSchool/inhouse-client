@@ -1,6 +1,6 @@
 {
-  "short_name": "SALYK.STORE",
-  "name": "SALYK.STORE",
+  "short_name": "INHOUSE CRM",
+  "name": "INHOUSE CRM",
   "icons": [
     {
       "src": "/192x192.png",
@@ -20,6 +20,6 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#10183D",
+  "theme_color": "#183B37",
   "background_color": "#ffffff"
 }

@@ -30,17 +30,12 @@ export function signin(payload) {
                 mutation : gql`
                     mutation ($login: String!, $password: String!) {
                         signinuser(login: $login, password: $password) {
-                           _id
+                            _id
                             role
                             status
                             login
-                            legalObject
-                            branch
-                            statistic
-                            add
-                            credit
-                            payment
                             error
+                            store
                         }
                     }`})
             if(result.data.signinuser.error) {
@@ -95,12 +90,6 @@ export function logout(reload) {
             type: SHOW_LOAD,
             payload: true
         })
-        const client = getClientGql();
-        await client.mutate({
-            mutation : gql`
-                    mutation {
-                        logoutuser 
-                    }`})
         await dispatch({
             type: UNAUTHENTICATED,
         })
@@ -131,16 +120,15 @@ export function setProfile() {
                     query: gql`
                     query {
                         getStatus {
-                           _id
+                            _id
                             role
                             status
                             login
-                            legalObject
-                            branch
-                            statistic
+                            error
+                            store
                             add
-                            credit
-                            payment
+                            edit
+                            deleted
                         }
                     }`
                 })
@@ -167,12 +155,11 @@ export async function getProfile(client) {
                           role
                           status
                           login
-                          legalObject
-                          branch
-                          statistic
-                          add
-                          credit
-                          payment
+                          error
+                          store
+                            add
+                            edit
+                            deleted
                        }
                    }`
             })

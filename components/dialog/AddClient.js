@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
@@ -14,106 +14,132 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Input from '@mui/material/Input';
 import Remove from '@mui/icons-material/Remove';
-import { validPhone1, validMail, inputPhone } from '../../src/lib'
+import { validPhone1, validMail, inputPhone, pdDatePicker, validPhones1, validMails } from '../../src/lib'
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+
+const levels = ['Бронза', 'Серебро', 'Золото', 'Платина']
 
 const AddClient =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { setClient, value, setInputValue, legalObject } = props;
+        const { value, setClient } = props;
         const { isMobileApp } = props.app;
         const { showMiniDialog } = props.mini_dialogActions;
         const { showSnackBar } = props.snackbarActions;
-        const width = isMobileApp? (window.innerWidth-112) : 500
-        const { setShowAppBar, setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
+        const width = isMobileApp? (window.innerWidth-113) : 500
         let [name, setName] = useState(value);
-        let [info, setInfo] = useState('');
+        let [work, setWork] = useState('');
+        let [passport, setPassport] = useState('');
         let [inn, setInn] = useState('');
-        let [files, setFiles] = useState([]);
-        let [uploads, setUploads] = useState([]);
+        let [level, setLevel] = useState('');
+        let handleLevel = (event) => {
+            setLevel(event.target.value)
+        };
+        let [birthday, setBirthday] = useState(pdDatePicker(new Date()));
+        let [info, setInfo] = useState('');
         let [address, setAddress] = useState('');
-        let [phone, setPhone] = useState([]);
-        let addPhone = ()=>{
-            phone = [...phone, '']
-            setPhone(phone)
+        let [emails, setEmails] = useState([]);
+        let addEmails = ()=>{
+            emails = [...emails, '']
+            setEmails(emails)
         };
-        let editPhone = (event, idx)=>{
-            phone[idx] = inputPhone(event.target.value)
-            setPhone([...phone])
+        let editEmails = (event, idx)=>{
+            emails[idx] = event.target.value
+            setEmails([...emails])
         };
-        let deletePhone = (idx)=>{
-            phone.splice(idx, 1);
-            setPhone([...phone])
+        let deleteEmails = (idx)=>{
+            emails.splice(idx, 1);
+            setEmails([...emails])
         };
-        let [email, setEmail] = useState([]);
-        let addEmail = ()=>{
-            email = [...email, '']
-            setEmail(email)
+        let [phones, setPhones] = useState([]);
+        let addPhones = ()=>{
+            phones = [...phones, '']
+            setPhones(phones)
         };
-        let editEmail = (event, idx)=>{
-            email[idx] = event.target.value
-            setEmail([...email])
+        let editPhones = (event, idx)=>{
+            phones[idx] = inputPhone(event.target.value)
+            setPhones([...phones])
         };
-        let deleteEmail = (idx)=>{
-            email.splice(idx, 1);
-            setEmail([...email])
+        let deletePhones = (idx)=>{
+            phones.splice(idx, 1);
+            setPhones([...phones])
         };
-        let fileRef = useRef(null);
-        let handleChangeFile = (async (event) => {
-            if(files.length<5) {
-                if(event.target.files[0]&&event.target.files[0].size / 1024 / 1024 < 50) {
-                    setUploads([event.target.files[0], ...uploads])
-                    setFiles([URL.createObjectURL(event.target.files[0]), ...files])
-                } else {
-                    showSnackBar('Файл слишком большой')
-                }
-            } else {
-                showSnackBar('Cлишком много документов')
-            }
-        })
         return (
-            <div className={classes.main}>
+            <div className={classes.main} style={{width}}>
+                <FormControl className={classes.input}>
+                    <InputLabel error={!level}>Уровень</InputLabel>
+                    <Select variant='standard' value={level} onChange={handleLevel} error={!level}>
+                        {levels.map((element)=>
+                            <MenuItem key={element} value={element}>{element}</MenuItem>
+                        )}
+                    </Select>
+                </FormControl>
                 <TextField variant='standard'
-                    style={{width: width}}
-                    className={classes.textField}
-                    label='Имя'
-                    margin='normal'
-                    value={name}
-                    onChange={(event)=>{setName(event.target.value)}}
+                           id='name'
+                           error={!name.length}
+                           label='ФИО'
+                           value={name}
+                           onChange={(event) => setName(event.target.value)}
+                           className={classes.input}
                 />
                 <TextField variant='standard'
-                    style={{width: width}}
-                    className={classes.textField}
-                    label='ИНН'
-                    margin='normal'
-                    value={inn}
-                    onChange={(event)=>{setInn(event.target.value)}}
+                           id='inn'
+                           error={!inn.length}
+                           label='ИНН'
+                           value={inn}
+                           onChange={(event) => setInn(event.target.value)}
+                           className={classes.input}
                 />
                 <TextField variant='standard'
-                    label='Адрес'
-                    style={{width: width}}
-                    className={classes.textField}
-                    margin='normal'
-                    value={address}
-                    onChange={(event)=>{setAddress(event.target.value)}}
+                           id='passport'
+                           error={!passport.length}
+                           label='Паспорт'
+                           value={passport}
+                           onChange={(event) => setPassport(event.target.value)}
+                           className={classes.input}
                 />
-                {phone?phone.map((element, idx)=>
-                    <FormControl key={`phone${idx}`}
-                                 style={{width: width}}
-                                 className={classes.textField}>
-                        <InputLabel error={!validPhone1(element)}>Телефон. Формат: +996556899871</InputLabel>
+                <TextField variant='standard'
+                           error={!work.length}
+                           id='work'
+                           label='Работа'
+                           value={work}
+                           onChange={(event) => setWork(event.target.value)}
+                           className={classes.input}
+                />
+                <TextField variant='standard'
+                           id='address'
+                           error={!address.length}
+                           label='Адрес'
+                           onChange={(event) => setAddress(event.target.value)}
+                           value={address}
+                           className={classes.input}
+                />
+                <TextField variant='standard'
+                           id='birthday'
+                           type='date'
+                           error={!birthday.length}
+                           label='День рождения'
+                           onChange={(event) => setBirthday(event.target.value)}
+                           value={birthday}
+                           className={classes.input}
+                />
+                <br/>
+                {phones?phones.map((element, idx)=>
+                    <FormControl key={`phones${idx}`} className={classes.input}>
+                        <InputLabel error={!validPhone1(element)}>Телефон</InputLabel>
                         <Input
-                            startAdornment={<InputAdornment position='start'>+996</InputAdornment>}
                             error={!validPhone1(element)}
-                            placeholder='Телефон. Формат: +996556899871'
+                            placeholder='Телефон'
+                            type={isMobileApp?'number':'text'}
                             value={element}
-                            style={{width: width}}
-                            className={classes.textField}
-                            onChange={(event)=>{editPhone(event, idx)}}
+                            className={classes.input}
+                            onChange={(event)=>{editPhones(event, idx)}}
                             endAdornment={
                                 <InputAdornment position='end'>
                                     <IconButton
                                         onClick={()=>{
-                                            deletePhone(idx)
+                                            deletePhones(idx)
                                         }}
                                         aria-label='toggle password visibility'
                                     >
@@ -121,30 +147,30 @@ const AddClient =  React.memo(
                                     </IconButton>
                                 </InputAdornment>
                             }
+                            startAdornment={<InputAdornment position='start'>+996</InputAdornment>}
                         />
                     </FormControl>
                 ): null}
                 <Button onClick={async()=>{
-                    addPhone()
-                }} color='primary'>
+                    addPhones()
+                }} size='small'  color={phones.length?'primary':'secondary'}>
                     Добавить телефон
                 </Button>
-                {email?email.map((element, idx)=>
-                    <FormControl key={`email${idx}`} style={{width: width}}
-                    className={classes.textField}>
-                        <InputLabel error={!validMail(element)}>Email</InputLabel>
+                <br/>
+                {emails?emails.map((element, idx)=>
+                    <FormControl key={`emails${idx}`} className={classes.input}>
+                        <InputLabel error={!validMail(element)}>Emails</InputLabel>
                         <Input
                             error={!validMail(element)}
-                            placeholder='Email'
+                            placeholder='Emails'
                             value={element}
-                            style={{width: width}}
-                            className={classes.textField}
-                            onChange={(event)=>{editEmail(event, idx)}}
+                            className={classes.input}
+                            onChange={(event)=>{editEmails(event, idx)}}
                             endAdornment={
                                 <InputAdornment position='end'>
                                     <IconButton
                                         onClick={()=>{
-                                            deleteEmail(idx)
+                                            deleteEmails(idx)
                                         }}
                                         aria-label='toggle password visibility'
                                     >
@@ -155,62 +181,50 @@ const AddClient =  React.memo(
                         />
                     </FormControl>
                 ): null}
-                <Button onClick={async()=>{
-                    addEmail()
+                <Button size='small' onClick={async()=>{
+                    addEmails()
                 }} color='primary'>
                     Добавить email
                 </Button>
-                <br/>
-                <div className={classes.row}>
-                    <div className={classes.nameField}>Документы:</div>
-                    <div className={classes.noteImageList}>
-                        <img className={classes.noteImage} src='/add.png' onClick={()=>{fileRef.current.click()}} />
-                        {files.map((element, idx)=> <div className={classes.noteImageDiv}>
-                            <img className={classes.noteImage} src={element} onClick={()=>{
-                                setShowAppBar(false)
-                                setShowLightbox(true)
-                                setImagesLightbox(files)
-                                setIndexLightbox(idx)
-                            }}/>
-                            <div className={classes.noteImageButton} style={{background: 'red'}} onClick={()=>{
-                                files.splice(idx, 1)
-                                setFiles([...files])
-                            }}>X</div>
-                        </div>)}
-                    </div>
-                </div>
-                <TextField variant='standard'
-                    multiline={true}
+                <TextField
+                    id='info'
+                    variant='standard'
+                    onChange={(event) => setInfo(event.target.value)}
                     label='Информация'
+                    multiline={true}
+                    maxRows='5'
                     value={info}
-                    style={{width: width}}
-                    className={classes.textField}
-                    onChange={(event)=>{setInfo(event.target.value)}}
+                    className={classes.input}
                 />
                 <br/>
                 <div>
                     <Button variant='contained' color='primary' onClick={async()=>{
-                        if(name.length) {
-                            setInputValue(name)
-                            setClient(await addClient({legalObject, phone, name, inn, uploads, email, address, info}))
-                            showMiniDialog(false)
+                        let checkPhones = phones.length&&validPhones1(phones)
+                        let checkMail = !emails.length||validMails(emails)
+                        let res
+                        if (name.length&&checkPhones&&checkMail&&address&&work&&passport&&inn&&level&&birthday) {
+                            let client = {name, emails, phones, address, info, work, passport, inn, level, birthday}
+                            res = await addClient(client)
+                            if(res!=='ERROR'&&res) {
+                                showSnackBar('Успешно', 'success')
+                                client._id = res
+                                setClient(client)
+                                showMiniDialog(false);
+                            }
+                            else
+                                showSnackBar('Ошибка', 'error')
                         } else
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Сохранить
                     </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                        setClient(null)
+                    }} className={classes.button}>
                         Закрыть
                     </Button>
                 </div>
-                <input
-                    ref={fileRef}
-                    accept='image/*'
-                    style={{ display: 'none' }}
-                    id='contained-button-file'
-                    type='file'
-                    onChange={handleChangeFile}
-                />
             </div>
         );
     }

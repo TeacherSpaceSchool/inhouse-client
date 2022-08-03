@@ -1,14 +1,49 @@
 import { makeStyles } from 'tss-react/mui';
 export default makeStyles()(()=>{
     return {
-        noteImageDiv: {
-            position: 'relative'
+        table: {
+            minWidth: '100%',
         },
-        noteImage: {
-            marginLeft: 10,
-            width: 80,
-            height: 80,
-            cursor: 'pointer'
+        rowTop: {
+            width: '100%',
+            alignItems: 'flexStart',
+            display: 'flex',
+            flexDirection: 'row',
+        },
+        tableHead: {
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+            fontSize: '0.875rem',
+            color: 'black',
+            flexDirection: 'row',
+            borderBottom: '1px solid #00000040',
+            fontWeight: 500
+        },
+        tableRow: {
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+            fontSize: '0.875rem',
+            color: 'black',
+            borderBottom: '1px solid #00000040',
+            flexDirection: 'row'
+        },
+        tableCell: {
+            padding: 10,
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'baseline',
+        },
+        tableCellGrid: {
+            padding: 10,
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'baseline',
         },
         selectClient: {
             height: 20,
@@ -44,9 +79,25 @@ export default makeStyles()(()=>{
             justifyContent: 'center',
             alignItems: 'center'
         },
+        noteImage: {
+            width: 150,
+            height: 150,
+            objectFit: 'cover',
+            cursor: 'pointer'
+        },
+        noteImageDiv: {
+            width: 150,
+            height: 150,
+            position: 'relative'
+        },
         noteImageList: {
+            width: '100%',
+            paddingLeft: 10,
+            gap: '10px',
             display: 'flex',
-            overflowX: 'auto'
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            marginBottom: 5
         },
         list: {
             display: 'flex',
@@ -71,8 +122,9 @@ export default makeStyles()(()=>{
         },
 
         pageCenter: {
-            width: '100%',
-            height: '100%',
+            margin: 10,
+            width: 'calc(100% - 20px)!important',
+            height: 'calc(100% - 20px)!important',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -80,6 +132,7 @@ export default makeStyles()(()=>{
         status: {
             padding: 4,
             borderRadius: 10,
+            cursor: 'pointer',
             fontSize: '0.8125rem',
             fontWeight: 'bold',
             color: 'white',
@@ -88,7 +141,7 @@ export default makeStyles()(()=>{
             right: 10,
             display: 'flex',
             flexDirection: 'row',
-            gap: 5,
+            gap: 20,
             alignItems: 'center',
             position: 'absolute'
         },
@@ -104,11 +157,13 @@ export default makeStyles()(()=>{
             background: 'white'
         },
         logo: {
+            objectFit: 'cover',
             width: 200
         },
         page: {
+            margin: 10,
+            width: 'calc(100% - 20px)',
             position: 'relative',
-            paddingTop: 10,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -123,7 +178,7 @@ export default makeStyles()(()=>{
             fontFamily: 'Roboto',
             whiteSpace: 'pre-wrap',
             cursor: 'pointer',
-            borderBottom: '1px dashed #10183D',
+            borderBottom: '1px dashed #183B37',
             userSelect: 'none'
         },
         fab: {
@@ -133,11 +188,17 @@ export default makeStyles()(()=>{
         },
         fab2: {
             position: 'fixed!important',
-            bottom: '90px',
-            right: '20px'
+            bottom: '20px',
+            right: '90px'
         },
         row:{
             alignItems: 'baseline',
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+        },
+        rowCenter:{
+            alignItems: 'center',
             display: 'flex',
             flexDirection: 'row',
             width: '100%',
@@ -153,16 +214,22 @@ export default makeStyles()(()=>{
             width: 100
         },
         input: {
+            fontSize: '0.875rem',
             margin: '10px !important',
             width: 'calc(100% - 20px)',
         },
+        inputNoMargin: {
+            fontSize: '0.875rem',
+            margin: '0px !important',
+            width: '100%',
+        },
         inputHalf: {
-            fontSize: '0.9375rem',
-            margin: 10,
+            fontSize: '0.875rem',
+            margin: '10px !important',
             width: 'calc(50% - 20px)'
         },
         inputThird: {
-            fontSize: '0.9375rem',
+            fontSize: '0.875rem',
             margin: 10,
             width: 'calc((100% / 3) - 20px)'
         },
@@ -172,6 +239,7 @@ export default makeStyles()(()=>{
             fontWeight: '500',
             fontSize: '0.9375rem',
             fontFamily: 'Roboto',
+            whiteSpace: 'pre-wrap',
             wordBreak: 'break-all'
         },
         nameField: {
@@ -318,7 +386,7 @@ export default makeStyles()(()=>{
             fontSize: '0.8125rem',
             fontWeight: 'bold',
             color: 'white',
-            background: '#10183D'
+            background: '#183B37'
         },
     }
 })

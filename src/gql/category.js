@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getCategorysCount = async({ search, category, type}, client)=>{
+export const getCategorysCount = async({search}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, category, type},
+                variables: {search},
                 query: gql`
-                    query ($search: String, $category: ID, $type: String) {
-                        categorysCount(search: $search, category: $category, type: $type)
+                    query ($search: String) {
+                        categorysCount(search: $search)
                     }`,
             })
         return res.data.categorysCount
@@ -18,21 +18,18 @@ export const getCategorysCount = async({ search, category, type}, client)=>{
     }
 }
 
-export const getCategorys = async({skip, search, category, type}, client)=>{
+export const getCategorys = async({skip, search, limit}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {skip, search, category, type},
+                variables: {skip, search, limit},
                 query: gql`
-                    query ($skip: Int, $search: String, $category: ID, $type: String) {
-                        categorys(skip: $skip, search: $search, category: $category, type: $type) {
+                    query ($search: String, $skip: Int) {
+                        categorys(search: $search, skip: $skip) {
                             _id
                             createdAt
-                            type
                             name
-                            category {_id name}
-                            del
                         }
                     }`,
             })
@@ -45,48 +42,47 @@ export const getCategorys = async({skip, search, category, type}, client)=>{
 export const deleteCategory = async(_id)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
+        let res = await client.mutate({
             variables: {_id},
             mutation : gql`
                     mutation ($_id: ID!) {
                         deleteCategory(_id: $_id)
                     }`})
+        return res.data.deleteCategory
     } catch(err){
         console.error(err)
     }
 }
 
-export const addCategory = async(element)=>{
+export const addCategory = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: element,
+            variables,
             mutation : gql`
-                    mutation ($name: String!, $category: ID, $type: String!) {
-                        addCategory(name: $name, category: $category, type: $type) {
+                    mutation ($name: String!) {
+                        addCategory(name: $name) {
                             _id
                             createdAt
-                            type
                             name
-                            category {_id name}
-                            del
                         }
                     }`})
-        return res.data
+        return res.data.addCategory
     } catch(err){
         console.error(err)
     }
 }
 
-export const setCategory = async(element)=>{
+export const setCategory = async(variables)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
-            variables: element,
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($_id: ID!, $name: String) {
+                    mutation ($_id: ID!, $name: String!) {
                         setCategory(_id: $_id, name: $name)
                     }`})
+        return res.data.setCategory
     } catch(err){
         console.error(err)
     }

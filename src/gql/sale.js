@@ -1,142 +1,44 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getSales = async({skip, date, legalObject, branch, cashbox, client, type, cashier, workShift, limit}, apolloClient)=>{
-    try{
-        apolloClient = apolloClient? apolloClient : getClientGql()
-        let res = await apolloClient
-            .query({
-                variables: {skip, date, legalObject, branch, cashbox, client, type, cashier, workShift, limit},
-                query: gql`
-                    query ($skip: Int, $limit: Int, $workShift: ID, $date: String, $legalObject: ID, $branch: ID, $cashbox: ID, $client: ID, $type: String, $cashier: ID) {
-                        sales(skip: $skip, limit: $limit, workShift: $workShift, date: $date, legalObject: $legalObject, branch: $branch, cashbox: $cashbox, client: $client, type: $type, cashier: $cashier) {
-                            _id
-                            createdAt
-                            number
-                            legalObject {_id name}
-                            branch {_id name}
-                            cashier {_id name}
-                            cashbox {_id name}
-                            workShift {_id number}
-                            client {_id name}
-                            sale {_id number}
-                            typePayment
-                            type
-                            returned
-                            paid
-                            usedPrepayment
-                            change
-                            extra
-                            sync
-                            syncMsg
-                            discount
-                            amountEnd
-                            nds
-                            nsp
-                            comment
-                            items {
-                                name
-                                unit
-                                count
-                                price
-                                discount
-                                extra
-                                amountStart
-                                amountEnd
-                                nds
-                                nsp
-                                tnved
-                                mark
-                                nspType
-                                ndsType
-                            }
-                        }
-                    }`,
-            })
-        return res.data.sales
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const getSalesCount = async({date, legalObject, workShift, branch, cashbox, client, type, cashier}, apolloClient)=>{
-    try{
-        apolloClient = apolloClient? apolloClient : getClientGql()
-        let res = await apolloClient
-            .query({
-                variables: {date, legalObject, branch, workShift, cashbox, client, type, cashier},
-                query: gql`
-                    query ($date: String, $workShift: ID, $legalObject: ID, $branch: ID, $cashbox: ID, $client: ID, $type: String, $cashier: ID) {
-                        salesCount(date: $date, workShift: $workShift, legalObject: $legalObject, branch: $branch, cashbox: $cashbox, client: $client, type: $type, cashier: $cashier) {
-                            sale
-                            returned
-                            prepayment
-                            consignation
-                            paidConsignation
-                            discount
-                            extra  
-                            count   
-                        }
-                    }`,
-            })
-        return res.data.salesCount
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const getSale = async({_id, type, rnmNumber, number}, client)=>{
+export const getSale = async({_id}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {_id, type, rnmNumber, number},
+                variables: {_id},
                 query: gql`
-                    query ($_id: ID!, $rnmNumber: String, $type: String, $number: String) {
-                        sale(_id: $_id, rnmNumber: $rnmNumber, type: $type, number: $number) {
+                    query ($_id: ID!) {
+                        sale(_id: $_id) {
                             _id
                             createdAt
-                            qr
                             number
-                            legalObject {_id name inn rateTaxe}
-                            branch {_id name address}
-                            cashier {_id name}
-                            cashbox {_id name rnmNumber}
-                            workShift {_id number}
+                            manager {_id name}
                             client {_id name}
-                            sale {_id number}
-                            typePayment
-                            type
-                            returned
-                            ndsPrecent
-                            nspPrecent
-                            paid
-                            usedPrepayment
-                            change
-                            comment
-                            extra
-                            discount
-                            sync
-                            syncMsg
+                            itemsSale {_id name item count price amount characteristics status unit}
+                            discount 
+                            paymentConfirmation
+                            cpa {_id name}
+                            geo
+                            percentCpa 
+                            bonusManager 
+                            bonusCpa 
+                            amountStart
                             amountEnd
-                            nds
-                            nsp
-                            items {
-                                name
-                                unit
-                                count
-                                price
-                                discount
-                                extra
-                                amountStart
-                                amountEnd
-                                nds
-                                nsp
-                                tnved
-                                mark
-                                nspType
-                                ndsType
-                            }
+                            typePayment
+                            installment {_id status}
+                            address
+                            prepaid
+                            addressInfo
+                            comment
+                            currency
+                            paid
+                            delivery
+                            status
+                            store {_id name}
+                            orders {_id number}
+                            reservations {_id number}
+                            refunds {_id number}
                         }
                     }`,
             })
@@ -146,13 +48,126 @@ export const getSale = async({_id, type, rnmNumber, number}, client)=>{
     }
 }
 
-export const addSale = async({ndsPrecent, nspPrecent, sale, client, typePayment, comment, type, paid, usedPrepayment, change, extra, discount, amountEnd, nds, nsp, items})=>{
+export const getSales = async({skip, items, limit, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+    let res
     try{
-        let res = await (getClientGql()).mutate({
-            variables: {ndsPrecent, nspPrecent, sale, client, typePayment, type, comment, paid, usedPrepayment, change, extra, discount, amountEnd, nds, nsp, items},
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+                variables: {skip, items, limit, manager, client, cpa, date, delivery, status, store},
+                query: gql`
+                    query ($skip: Int, $items: Boolean, $limit: Int, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        sales(skip: $skip, items: $items, limit: $limit, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store) {
+                            _id
+                            createdAt
+                            number
+                            manager {_id name}
+                            client {_id name}
+                            itemsSale {_id name item count price amount characteristics status unit images}
+                            discount 
+                            geo
+                            prepaid
+                            cpa {_id name}
+                            percentCpa 
+                            paymentConfirmation
+                            bonusManager 
+                            bonusCpa 
+                            amountStart
+                            amountEnd
+                            typePayment
+                            installment {_id status}
+                            address
+                            addressInfo
+                            comment
+                            currency
+                            paid
+                            delivery
+                            status
+                            store {_id name}
+                            orders {_id number}
+                            reservations {_id number}
+                            refunds {_id number}
+                        }
+                    }`,
+            })
+        return res.data.sales
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getSalesCount = async({manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        let res = await clientGql
+            .query({
+                variables: {manager, client, cpa, date, delivery, status, store},
+                query: gql`
+                    query ($manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        salesCount(manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store)
+                    }`,
+            })
+        return res.data.salesCount
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getAttachment = async(_id, clientGql)=>{
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        let res = await clientGql
+            .query({
+                variables: {_id},
+                query: gql`
+                    query ($_id: ID!) {
+                        getAttachment(_id: $_id)
+                    }`,
+            })
+        return res.data.getAttachment
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getSalesBonusManager = async(clientGql)=>{
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        let res = await clientGql
+            .query({
+                query: gql`
+                    query {
+                        salesBonusManager
+                    }`,
+            })
+        return res.data.salesBonusManager
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const setSale = async(variables, client)=>{
+    try{
+        client = client? client : getClientGql()
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($sale: ID, $ndsPrecent: Float!, $nspPrecent: Float!, $client: ID, $typePayment: String!, $comment: String, $type: String!, $paid: Float!, $usedPrepayment: Float!, $change: Float!, $extra: Float!, $discount: Float!, $amountEnd: Float!, $nds: Float!, $nsp: Float!, $items: [InputItemSale]!) {
-                        addSale(nspPrecent: $nspPrecent, ndsPrecent: $ndsPrecent, sale: $sale, client: $client, comment: $comment, typePayment: $typePayment, type: $type, paid: $paid, usedPrepayment: $usedPrepayment, change: $change, extra: $extra, discount: $discount, amountEnd: $amountEnd, nds: $nds, nsp: $nsp, items: $items)
+                    mutation ($_id: ID!, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
+                        setSale(_id: $_id, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
+                    }`})
+        return res.data.setSale
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const addSale = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($client: ID!, $prepaid: Float, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $percentCpa: Float, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date!, $orders: [ID], $reservations: [ID]!) {
+                        addSale(client: $client, geo: $geo, prepaid: $prepaid, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, orders: $orders, reservations: $reservations) 
                     }`})
         return res.data.addSale
     } catch(err){

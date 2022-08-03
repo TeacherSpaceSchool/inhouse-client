@@ -2,201 +2,153 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
+import * as appActions from '../../src/redux/actions/app'
 import * as snackbarActions from '../../src/redux/actions/snackbar'
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
-import { checkFloat, inputFloat } from '../../src/lib';
+import { checkFloat, inputFloat, inputInt } from '../../src/lib';
+import { getCpas } from '../../src/gql/cpa';
+import { addOrder } from '../../src/gql/order';
+import { addReservation } from '../../src/gql/reservation';
+import { addInstallment } from '../../src/gql/installment';
 import { addSale } from '../../src/gql/sale';
-import Link from 'next/link';
-import { ndsTypes, nspTypes } from '../../src/const'
+import { addRefund } from '../../src/gql/refund';
 import TextField from '@mui/material/TextField';
+import Router from 'next/router'
+import AutocomplectOnline from '../../components/app/AutocomplectOnline'
+import dynamic from 'next/dynamic'
+import {endConsultation} from '../../src/gql/consultation'
+const Geo = dynamic(import('./Geo'), { ssr: false });
+
+const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юань']
 
 const BuyBasket =  React.memo(
     (props) =>{
-        const { isMobileApp } = props.app;
+        const { amountStart, type, items, client, orders, reservations, prepaid, installmentsDebt, _currency, sale, _discount } = props;
         const { profile } = props.user;
+        const { isMobileApp } = props.app;
         const { classes } = dialogContentStyle();
-        let { client, amountStart, _setComment, cashbox, items, allNsp, allNds, ndsPrecent, nspPrecent, type, usedPrepayment, consignation, sale, setItems, setType, setClient, setSale, setAllAmount } = props;
-        const { showMiniDialog } = props.mini_dialogActions;
+        const { showMiniDialog, showFullDialog, setFullDialog } = props.mini_dialogActions;
+        const { showLoad } = props.appActions;
         const { showSnackBar } = props.snackbarActions;
-        const width = isMobileApp? (window.innerWidth-112) : 500
+        const width = isMobileApp? (window.innerWidth-113) : 500
+        let [currency, setCurrency] = useState(_currency?_currency:'сом');
         let [typePayment, setTypePayment] = useState('Наличными');
-        let [res, setRes] = useState(undefined);
-        let [discount, setDiscount] = useState('');
-        let [amountEnd, setAmountEnd] = useState(amountStart);
-        let [paid, setPaid] = useState(0);
-        let [discountType, setDiscountType] = useState('%');
+        let [renew, setRenew] = useState(false);
+        let [paid, setPaid] = useState(prepaid?amountStart-prepaid:amountStart);
+        let [date, setDate] = useState();
+        let [geo, setGeo] = useState(client.geo);
+        let [cpa, setCpa] = useState();
+        let [monthInstallment, setMonthInstallment] = useState('');
+        let [paidInstallment, setPaidInstallment] = useState('');
+        let [percentCpa, setPercentCpa] = useState(0);
+        let [address, setAddress] = useState(client.address);
+        let [addressInfo, setAddressInfo] = useState('');
         let [comment, setComment] = useState('');
         let [commentShow, setCommentShow] = useState(false);
-        let [extra, setExtra] = useState('');
-        let [change, setChange] = useState('');
-        let [extraType, setExtraType] = useState('%');
+        let [discount, setDiscount] = useState(_discount?_discount:'');
+        let [discountType, setDiscountType] = useState('сом');
+        let [amountEnd, setAmountEnd] = useState(amountStart);
         useEffect(() => {
-            amountEnd = amountStart + (extraType==='%'?amountStart/100*extra:checkFloat(extra)) - (discountType==='%'?amountStart/100*discount:discount) - consignation
-            if(typePayment==='Безналичный'&&type==='Продажа')
-                amountEnd -= allNsp
-            amountEnd = checkFloat(amountEnd)
+            amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
+            if(amountEnd<0)
+                amountEnd = 0
             setAmountEnd(amountEnd)
-            if (typePayment === 'Безналичный')
-                paid = amountEnd
+            setPaid(prepaid?amountEnd-prepaid:amountEnd)
+        }, [typePayment, discount, discountType]);
+        useEffect(() => {
+            monthInstallment = checkFloat(monthInstallment)
+            if(monthInstallment)
+                paidInstallment = checkFloat((amountEnd+(renew?installmentsDebt:0)-checkFloat(paid)-checkFloat(prepaid)) / monthInstallment)
             else
-                paid = Math.ceil(amountEnd)
-            change = (checkFloat(paid)+('Продажа'===type?usedPrepayment:0)) - amountEnd
-            if(change<0)
-                change = Math.ceil(change*-1)*-1
-            else
-                change = parseInt(change)
-            setChange(change)
-            setPaid(paid)
-        }, [typePayment, extra, discount, extraType, discountType]);
+                paidInstallment = 0
+            setPaidInstallment(paidInstallment)
+        }, [paid, amountEnd, monthInstallment, renew]);
         return (
             <div className={classes.main} style={{width}}>
                 {
-                    !res?
-                        <>
-                        {
-                            ['Возврат продажи', 'Продажа', 'Возврат покупки'].includes(type)?
-                                <>
-                                {
-                                    sale&&sale.returned?
-                                        <div className={classes.row} style={{color: 'red'}}>
-                                            <div className={classes.value}>На операцию оформлен возврат</div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    sale&&sale.used&&sale.type==='Аванс'?
-                                        <div className={classes.row} style={{color: 'red'}}>
-                                            <div className={classes.value}>Аванс был использован</div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    consignation?
-                                        <div className={classes.row} style={{color: 'red'}}>
-                                            <div className={classes.nameField}>{'Продажа'===type?'Текущий кредит':'Кредит'}:&nbsp;</div>
-                                            <div className={classes.value}>{` ${consignation} сом`}</div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                <div style={{width}} className={isMobileApp?classes.column:classes.row}>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>{'Продажа'===type?'Скидка':'Уценка'}:&nbsp;&nbsp;&nbsp;&nbsp;</div>
-                                        <div className={classes.counter}>
-                                            <div className={classes.counterbtn} onClick={() => {
-                                                if(discount>0) {
-                                                    discount = checkFloat(discount - 1)
-                                                    setDiscount(discount)
-                                                }
-                                            }}>–</div>
-                                            <input
-                                                type={isMobileApp?'number':'text'}
-                                                className={classes.counternmbr}
-                                                value={discount}
-                                                onChange={(event) => {
-                                                    if('Продажа'===type) {
-                                                        discount = inputFloat(event.target.value)
-                                                        setDiscount(discount)
-                                                    }
-                                                }}
-                                                onFocus={()=>{
-                                                    if('Продажа'===type) {
-                                                        discount = inputFloat('')
-                                                        setDiscount(discount)
-                                                    }
-                                                }}
-                                            />
-                                            <div className={classes.counterbtn} onClick={() => {
-                                                discount = checkFloat(checkFloat(discount) + 1)
-                                                setDiscount(discount)
-                                            }}>+
-                                            </div>
-                                        </div>
-                                        <div className={classes.typeShow} onClick={()=>{
-                                            discountType = discountType==='%'?'сом':'%'
-                                            setDiscountType(discountType)
-                                        }}>
-                                            {discountType}
-                                        </div>
-                                    </div>
-                                    {
-                                        'Продажа'===type?
-                                            <div className={classes.row}>
-                                                <div className={classes.nameField}>Наценка:&nbsp;&nbsp;</div>
-                                                <div className={classes.counter}>
-                                                    <div className={classes.counterbtn} onClick={() => {
-                                                        if(extra>0) {
-                                                            extra = checkFloat(extra - 1)
-                                                            setExtra(extra)
-                                                        }
-                                                    }}>–</div>
-                                                    <input
-                                                        type={isMobileApp?'number':'text'}
-                                                        className={classes.counternmbr}
-                                                        value={extra}
-                                                        onChange={(event) => {
-                                                            extra = inputFloat(event.target.value)
-                                                            setExtra(extra)
-                                                        }}
-                                                        onFocus={()=>{
-                                                            extra = inputFloat('')
-                                                            setExtra(extra)
-                                                        }}
-                                                    />
-                                                    <div className={classes.counterbtn} onClick={() => {
-                                                        extra = checkFloat(checkFloat(extra) + 1)
-                                                        setExtra(extra)
-                                                    }}>+
-                                                    </div>
-                                                </div>
-                                                <div className={classes.typeShow} onClick={()=>{
-                                                    extraType = extraType==='%'?'сом':'%'
-                                                    setExtraType(extraType)
-                                                }}>
-                                                    {extraType}
-                                                </div>
-                                            </div>
-                                            :
-                                            null
-                                    }
-                                </div>
-                                </>
-                                :
-                                null
-                        }
+                    ['sale', 'refund'].includes(type)?
                         <div className={classes.row}>
-                            <div className={classes.nameField}>Итого:&nbsp;</div>
-                            <div className={classes.value}>{` ${amountEnd} сом`}</div>
+                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>{type==='sale'?'Скидка':'Уценка'}:&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div className={classes.counter}>
+                                <div className={classes.counterbtn} onClick={() => {
+                                    if(discount>0) {
+                                        discount = checkFloat(discount - 1)
+                                        setDiscount(discount)
+                                    }
+                                }}>–</div>
+                                <input
+                                    type={isMobileApp?'number':'text'}
+                                    className={classes.counternmbr}
+                                    value={discount}
+                                    onChange={(event) => {
+                                        discount = inputFloat(event.target.value)
+                                        setDiscount(discount)
+                                    }}
+                                    onFocus={()=>{
+                                        discount = inputFloat('')
+                                        setDiscount(discount)
+                                    }}
+                                />
+                                <div className={classes.counterbtn} onClick={() => {
+                                    discount = checkFloat(checkFloat(discount) + 1)
+                                    setDiscount(discount)
+                                }}>+
+                                </div>
+                            </div>
+                            <div className={classes.typeShow} onClick={()=>{
+                                discountType = discountType==='%'?'сом':'%'
+                                setDiscountType(discountType)
+                            }}>
+                                {discountType}
+                            </div>
+                        </div>
+                        :
+                        null
+                }
+                <div className={classes.row}>
+                    <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>Итого:&nbsp;</div>
+                    <div className={classes.value} style={{fontSize: '1.0625rem'}}>{`${amountEnd} сом`}</div>
+                </div>
+                {
+                    prepaid?
+                        <>
+                        <div className={classes.row}>
+                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>Предоплата:&nbsp;</div>
+                            <div className={classes.value} style={{fontSize: '1.0625rem'}}>{`${prepaid} сом`}</div>
                         </div>
                         <div className={classes.row}>
+                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>К оплате:&nbsp;</div>
+                            <div className={classes.value} style={{fontSize: '1.0625rem'}}>{`${checkFloat(amountEnd-prepaid)} сом`}</div>
+                        </div>
+                        </>
+                        :
+                        null
+                }
+                {
+                    type!=='refund'?
+                        <>
+                        <div className={classes.row}>
                             <center className={classes.input}>
-                                <Button onClick={() => {setTypePayment('Наличными')}} style={{color: typePayment!=='Наличными'?'#A0A0A0':'#10183D'}}>
+                                <Button size='small' onClick={() => {setTypePayment('Наличными')}} style={{color: typePayment!=='Наличными'?'#A0A0A0':'#10183D'}}>
                                     Наличными
                                 </Button>
                             </center>
                             <center className={classes.input}>
-                                <Button onClick={() => {setTypePayment('Безналичный')}} style={{color: typePayment!=='Безналичный'?'#A0A0A0':'#10183D'}}>
+                                <Button size='small' onClick={() => {setTypePayment('Безналичный')}} style={{color: typePayment!=='Безналичный'?'#A0A0A0':'#10183D'}}>
                                     Безналичный
                                 </Button>
                             </center>
                         </div>
                         <div className={classes.row}>
-                            <div className={classes.nameField}>Оплачено:&nbsp;</div>
-                            <div className={classes.counter}>
+                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>Оплата:&nbsp;</div>
+                            <div className={classes.counter} style={{fontSize: '1.0625rem'}}>
                                 <div className={classes.counterbtn} onClick={() => {
                                     paid = checkFloat(paid - 5)
-                                    if(paid<0)
-                                        paid = 0
-                                    change = (checkFloat(paid)+('Продажа'===type?usedPrepayment:0)) - amountEnd
-                                    if(change<0)
-                                        change = Math.ceil(change*-1)*-1
+                                    if(paid>0)
+                                        setPaid(paid)
                                     else
-                                        change = parseInt(change)
-                                    setChange(change)
-                                    setPaid(paid)
+                                        setPaid(0)
                                 }}>–</div>
                                 <input
                                     type={isMobileApp?'number':'text'}
@@ -204,33 +156,15 @@ const BuyBasket =  React.memo(
                                     value={paid}
                                     onChange={(event) => {
                                         paid = inputFloat(event.target.value)
-                                        change = (checkFloat(paid)+('Продажа'===type?usedPrepayment:0)) - amountEnd
-                                        if(change<0)
-                                            change = Math.ceil(change*-1)*-1
-                                        else
-                                            change = parseInt(change)
-                                        setChange(change)
                                         setPaid(paid)
                                     }}
                                     onFocus={()=>{
                                         paid = inputFloat('')
-                                        change = (checkFloat(paid)+('Продажа'===type?usedPrepayment:0)) - amountEnd
-                                        if(change<0)
-                                            change = Math.ceil(change*-1)*-1
-                                        else
-                                            change = parseInt(change)
-                                        setChange(change)
                                         setPaid(paid)
                                     }}
                                 />
                                 <div className={classes.counterbtn} onClick={() => {
                                     paid = checkFloat(checkFloat(paid) + 5)
-                                    change = (checkFloat(paid)+('Продажа'===type?usedPrepayment:0)) - amountEnd
-                                    if(change<0)
-                                        change = Math.ceil(change*-1)*-1
-                                    else
-                                        change = parseInt(change)
-                                    setChange(change)
                                     setPaid(paid)
                                 }}>+
                                 </div>
@@ -239,161 +173,275 @@ const BuyBasket =  React.memo(
                                 сом
                             </div>
                         </div>
-                        {
-                            usedPrepayment&&'Продажа'===type?
-                                <div className={classes.row}>
-                                    <div className={classes.nameField}>Аванс:&nbsp;</div>
-                                    <div className={classes.value}>{` ${usedPrepayment} сом`}</div>
-                                </div>
-                                :
-                                null
-                        }
-                        {
-                            change<0?
-                                <div className={classes.row}>
-                                    <b style={{color: 'red'}}>{['Аванс', 'Погашение кредита', 'Покупка', 'Возврат продажи', 'Возврат покупки', 'Возврат аванса'].includes(type)||!profile.credit?'Сумма слишком мала':`Кредит: ${change*-1} сома`}</b>
-                                </div>
-                                :
-                                <div className={classes.row}>
-                                    <div className={classes.nameField}>Сдача:&nbsp;</div>
-                                    <div className={classes.value}>{` ${change} сом`}</div>
-                                </div>
-                        }
-                        {
-                            commentShow?
-                                <TextField variant='standard'
-                                    label='Комментарий (не обязательно)'
-                                    style={{width}}
-                                    className={classes.textField}
-                                    margin='normal'
-                                    value={comment}
-                                    onChange={(event)=>{setComment(event.target.value)}}
-                                />
-                                :
-                                <Button color='primary' onClick={()=>{setCommentShow(true);}} className={classes.button}>
-                                    Добавить комментарий
+                        </>
+                        :
+                        null
+                }
+                {
+                    (checkFloat(paid)+prepaid)<amountEnd?
+                        <>
+                        <div className={classes.row}>
+                            <center className={classes.input}>
+                                <Button size='small' onClick={() => {setRenew(false)}} style={{color: !renew?'#10183D':'#A0A0A0'}}>
+                                    Новая рассрочка
                                 </Button>
-                        }
-                        <br/>
-                        <div>
-                            <Button variant='contained' color='primary' onClick={async()=>{
-                                if(typePayment==='Наличными'&&['Покупка', 'Возврат аванса', 'Возврат продажи'].includes(type)&&paid>cashbox.cash)
-                                    showSnackBar('Наличных в кассе недостаточно, внесите нужную сумму')
-                                else {
-                                    if(!profile.credit&&change<0) {
-                                        showMiniDialog(false)
-                                        showSnackBar('Кредит не разрешен')
-                                    }
-                                    else {
-                                        if (change<0&&['Аванс', 'Погашение кредита', 'Покупка', 'Возврат продажи', 'Возврат покупки', 'Возврат аванса'].includes(type) || amountEnd<0 || paid<0)
-                                            showSnackBar('Сумма слишком мала')
-                                        else {
-                                            let discountAll = 0, extraAll = 0;
-                                            allNds = 0
-                                            allNsp = 0
-                                            extra = checkFloat(extra)
-                                            if(extra) {
-                                                if (extraType === '%')
-                                                    extra = checkFloat(amountStart / 100 * extra)
-                                                extra = extra / items.length
-                                            }
-                                            discount = checkFloat(discount)
-                                            if(discount) {
-                                                if (discountType === '%')
-                                                    discount = checkFloat(amountStart / 100 * discount)
-                                                discount = discount / items.length
-                                            }
-                                            for (let i = 0; i < items.length; i++) {
-                                                let allPrecent = 100+ndsTypes[items[i].ndsType]+nspTypes[items[i].nspType]
-                                                items[i].amountStart = checkFloat(items[i].count*items[i].price)
-                                                items[i].extra = checkFloat(items[i].extraType==='%'?items[i].amountStart/100*items[i].extra:checkFloat(items[i].extra) + extra)
-                                                items[i].discount = checkFloat(items[i].discountType==='%'?items[i].amountStart/100*items[i].discount:checkFloat(items[i].discount) + discount)
-                                                items[i].amountEnd = checkFloat(items[i].amountStart + items[i].extra - items[i].discount)
-                                                items[i].nds = checkFloat(items[i].amountEnd/allPrecent*ndsTypes[items[i].ndsType])
-                                                items[i].nsp = checkFloat(items[i].amountEnd/allPrecent*nspTypes[items[i].nspType])
-                                                if(typePayment==='Безналичный'&&type==='Продажа'&&nspTypes[items[i].nspType]){
-                                                    items[i].amountEnd = checkFloat(items[i].amountEnd - items[i].nsp)
-                                                    items[i].nsp = 0
-                                                }
-                                                discountAll = checkFloat(discountAll + items[i].discount)
-                                                extraAll = checkFloat(extraAll + items[i].extra)
-                                                allNds += items[i].nds
-                                                allNsp += items[i].nsp
-                                                items[i] = {
-                                                    name: items[i].name,
-                                                    unit: items[i].unit,
-                                                    count: checkFloat(items[i].count),
-                                                    price: checkFloat(items[i].price),
-                                                    discount: items[i].discount,
-                                                    extra: items[i].extra,
-                                                    amountStart: items[i].amountStart,
-                                                    amountEnd: items[i].amountEnd,
-                                                    ndsType: items[i].ndsType,
-                                                    nds: items[i].nds,
-                                                    nspType: items[i].nspType,
-                                                    nsp: items[i].nsp,
-                                                    tnved: items[i].tnved,
-                                                    mark: items[i].mark,
-                                                }
-                                            }
-                                            let res = await addSale({
-                                                ndsPrecent,
-                                                nspPrecent,
-                                                client: client?client._id:client,
-                                                sale: sale?sale._id:sale,
-                                                typePayment,
-                                                type: change<0?'Кредит':type==='Возврат продажи'?'Возврат':type,
-                                                paid: checkFloat(paid),
-                                                change: change<0?0:change,
-                                                extra: extraAll,
-                                                discount: discountAll,
-                                                items,
-                                                amountEnd,
-                                                usedPrepayment: 'Продажа'===type?usedPrepayment:0,
-                                                comment,
-                                                nds: checkFloat(allNds),
-                                                nsp: typePayment === 'Безналичный' ? 0 : checkFloat(allNsp)
-                                            })
-                                            if(res){
-                                                setRes(res)
-                                                if(setItems)
-                                                    setItems([])
-                                                if(setType)
-                                                    setType('Продажа')
-                                                if(setClient)
-                                                    setClient(undefined)
-                                                if(setSale)
-                                                    setSale(undefined)
-                                                if(_setComment)
-                                                    _setComment('')
-                                                if(setAllAmount)
-                                                    setAllAmount('')
-                                            }
-                                            else
-                                                showSnackBar('Ошибка', 'error')
-                                        }
-                                    }
-                                }
-                            }} className={classes.button}>
-                                Оплатить
-                            </Button>
-                            <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
-                                Закрыть
-                            </Button>
+                            </center>
+                            {
+                                installmentsDebt?
+                                    <center className={classes.input}>
+                                        <Button size='small' onClick={() => {setRenew(true)}} style={{color: renew?'#10183D':'#A0A0A0'}}>
+                                            Объединить рассрочки<br/>({installmentsDebt} сом)
+                                        </Button>
+                                    </center>
+                                    :
+                                    null
+                            }
+                        </div>
+                        <div className={classes.row}>
+                            <TextField
+                                id='monthInstallment'
+                                error={!monthInstallment}
+                                variant='standard'
+                                type={isMobileApp?'number':'text'}
+                                label='Месяцы'
+                                value={monthInstallment}
+                                onChange={(event) => setMonthInstallment(inputInt(event.target.value))}
+                                className={classes.input}
+                                style={{marginRight: 10}}
+                            />
+                            <TextField
+                                id='paidInstallment'
+                                error={!paidInstallment}
+                                variant='standard'
+                                label='Месячный платеж'
+                                value={paidInstallment}
+                                className={classes.input}
+                                inputProps={{
+                                    'aria-placeholder': 'description',
+                                    readOnly: true,
+                                }}
+                            />
                         </div>
                         </>
                         :
-                        <div>
-                            <Link href='/sale/[id]' as={`/sale/${res}`}>
-                                <Button variant='contained' color='primary' className={classes.button}>
-                                    Чек
-                                </Button>
-                            </Link>
-                            <Button variant='contained' color='primary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
-                                Касса
-                            </Button>
-                        </div>
+                        null
                 }
+                {
+                    ['reservation', 'sale'].includes(type)?
+                        <TextField
+                            id='date'
+                            error={!date}
+                            type='date'
+                            variant='standard'
+                            label={type==='sale'?'Доставка':'Срок'}
+                            value={date}
+                            onChange={(event) => setDate(event.target.value)}
+                            className={classes.input}
+                        />
+                        :
+                        null
+                }
+                {
+                    type==='sale'?
+                        <>
+                        <TextField
+                            id='address'
+                            error={!address}
+                            variant='standard'
+                            label='Адрес'
+                            value={address}
+                            onChange={(event) => setAddress(event.target.value)}
+                            className={classes.input}
+                        />
+                        <div className={classes.geo} style={{color: geo?'#183B37':'red'}} onClick={()=>{
+                            setFullDialog('Геолокация', <Geo geo={geo} setAddressGeo={setGeo}/>)
+                            showFullDialog(true)
+                        }}>
+                            {
+                                geo?
+                                    'Изменить геолокацию'
+                                    :
+                                    'Задайте геолокацию'
+                            }
+                        </div>
+                        <TextField
+                            id='addressInfo'
+                            variant='standard'
+                            label='Этаж, квартира, лифт, код к подъезду'
+                            value={addressInfo}
+                            onChange={(event) => setAddressInfo(event.target.value)}
+                            className={classes.input}
+                        />
+                        <AutocomplectOnline
+                            element={cpa}
+                            setElement={async (cpa)=>{
+                                if(cpa)
+                                    setPercentCpa(cpa.percent)
+                                else
+                                    setPercentCpa(0)
+                                setCpa(cpa)
+                            }}
+                            getElements={async (search)=>{
+                                return await getCpas({search})
+                            }}
+                            minLength={0}
+                            label={'Партнер'}
+                        />
+                        <TextField
+                            id='percentCpa'
+                            variant='standard'
+                            label='Процент партнера'
+                            value={percentCpa}
+                            onChange={(event) => setPercentCpa(inputFloat(event.target.value))}
+                            className={classes.input}
+                        />
+                        </>
+                        :
+                        null
+                }
+                {
+                    commentShow?
+                        <TextField
+                            id='comment'
+                            variant='standard'
+                            label='Комментарий (не обязательно)'
+                            className={classes.input}
+                            margin='normal'
+                            value={comment}
+                            onChange={(event)=>{setComment(event.target.value)}}
+                        />
+                        :
+                        <center>
+                            <Button color='primary' onClick={()=>{setCommentShow(true);}} className={classes.button}>
+                                Добавить комментарий
+                            </Button>
+                        </center>
+                }
+                <br/>
+                <div>
+                    <Button variant='contained' color='primary' onClick={async()=>{
+                        if(paid>=0) {
+                            if (!['reservation', 'sale'].includes(type) || date) {
+                                showLoad(true)
+                                let res
+                                if (type === 'order')
+                                    res = await addOrder({
+                                        client: client._id,
+                                        itemsOrder: items,
+                                        amount: checkFloat(amountEnd),
+                                        paid: checkFloat(paid),
+                                        typePayment,
+                                        comment,
+                                        currency
+                                    })
+                                else if (type === 'reservation')
+                                    res = await addReservation({
+                                        client: client._id,
+                                        term: date,
+                                        itemsReservation: items,
+                                        amount: checkFloat(amountEnd),
+                                        paid: checkFloat(paid),
+                                        typePayment,
+                                        comment,
+                                        currency
+                                    })
+                                else if (type === 'refund')
+                                    res = await addRefund({
+                                        client: client._id,
+                                        discount: checkFloat(amountStart - amountEnd),
+                                        itemsRefund: items,
+                                        amount: checkFloat(amountEnd),
+                                        comment,
+                                        currency,
+                                        sale
+                                    })
+                                else if (type === 'sale') {
+                                    paidInstallment = checkFloat(paidInstallment)
+                                    monthInstallment = checkFloat(monthInstallment)
+                                    paid = checkFloat(paid)
+                                    amountEnd = checkFloat(amountEnd)
+                                    if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
+                                        res = await addSale({
+                                            geo,
+                                            client: client._id,
+                                            itemsSale: items,
+                                            discount: checkFloat(amountStart - amountEnd),
+                                            cpa: cpa ? cpa._id : null,
+                                            percentCpa: checkFloat(percentCpa),
+                                            amountStart: checkFloat(amountStart),
+                                            amountEnd,
+                                            typePayment,
+                                            address,
+                                            addressInfo,
+                                            comment,
+                                            currency,
+                                            paid: checkFloat(paid),
+                                            prepaid,
+                                            delivery: date,
+                                            orders: orders,
+                                            reservations: reservations
+                                        })
+                                        if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
+                                            const grid = []
+                                            let month = new Date()
+                                            grid.push({
+                                                month: new Date(month),
+                                                amount: paid,
+                                                paid: paid,
+                                                datePaid: month
+                                            })
+                                            month.setMonth(month.getMonth() + 1)
+                                            for (let i = 0; i < monthInstallment; i++) {
+                                                grid.push({
+                                                    month: new Date(month),
+                                                    amount: paidInstallment
+                                                })
+                                                month.setMonth(month.getMonth() + 1)
+                                            }
+
+                                            let _res = await addInstallment({
+                                                renew,
+                                                grid,
+                                                debt: checkFloat((amountEnd + (renew ? installmentsDebt : 0)) - paid - checkFloat(prepaid)),
+                                                client: client._id,
+                                                amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
+                                                paid,
+                                                sale: res,
+                                                datePaid: grid[1].month,
+                                                store: profile.store,
+                                                currency
+                                            })
+                                            if (!_res || _res._id === 'ERROR')
+                                                showSnackBar('Ошибка', 'error')
+                                        }
+                                    }
+                                    else
+                                        showSnackBar('Укажите рассрочку')
+                                }
+                                if (res && res !== 'ERROR') {
+                                    localStorage.basket = JSON.stringify({})
+                                    await endConsultation({})
+                                    showSnackBar('Успешно', 'success')
+                                    Router.push(`/${type}/${res}`)
+                                }
+                                else
+                                    showSnackBar('Ошибка', 'error')
+                                showLoad(false)
+                            }
+                            else
+                                showSnackBar('Укажите дату')
+                        }
+                        else
+                            showSnackBar('Укажите оплату')
+                    }} className={classes.button}>
+                        Оформить
+                    </Button>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -410,6 +458,7 @@ function mapDispatchToProps(dispatch) {
     return {
         mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
         snackbarActions: bindActionCreators(snackbarActions, dispatch),
+        appActions: bindActionCreators(appActions, dispatch),
     }
 }
 

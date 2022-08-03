@@ -4,13 +4,7 @@ export const checkMobile = (ua)=>{
     return regexpUA.exec(ua)!==null
 }
 
-export const openScanner = ({idx, path})=>{
-    let timeout = setTimeout(()=>window.location = 'https://play.google.com/store/apps/details?id=com.salyk.scanner',1000)
-    window.addEventListener('blur',()=>window.clearTimeout(timeout))
-    window.location = `salykscanner://path?idx=${idx}&path=${path}`
-}
-
-export const cloneObject = object => JSON.parse(JSON.stringify(object))
+export const cloneObject = object => object?JSON.parse(JSON.stringify(object)):null
 
 export const getJWT = (cookie)=>{
     let name = 'jwt=';
@@ -29,18 +23,26 @@ export const getJWT = (cookie)=>{
     return undefined;
 }
 
-export const countdown = (date) => {
-    date = new Date(date).getTime()
-    let now = new Date().getTime();
-    let distance = date - now;
-    return {days: Math.floor(distance / (1000 * 60 * 60 * 24)), hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)), seconds: Math.floor((distance % (1000 * 60)) / 1000)}
-}
-
 export const checkInt = (int) => {
     if(int&&int.length>1&&int[0]==='0')
         int = int.substring(1)
     return isNaN(parseInt(int))?0:parseInt(int)
 }
+
+export const months = [
+    'Январь',
+    'Февраль',
+    'Март',
+    'Апрель',
+    'Май',
+    'Июнь',
+    'Июль',
+    'Август',
+    'Сентябрь',
+    'Октябрь',
+    'Ноябрь',
+    'Декабрь'
+]
 
 export const weekDay = [
     'Bоскресенье',
@@ -51,6 +53,24 @@ export const weekDay = [
     'Пятница',
     'Суббота',
 ]
+
+export const inputMinusFloat = (str) => {
+    if(!str.length)
+        return ''
+    let oldStr = str.substring(0, str.length-1)
+    let newChr = str[str.length-1]
+    if(!['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', '-'].includes(newChr))
+        return oldStr
+    if(','===newChr) {
+        str = oldStr+'.'
+        newChr = '.'
+    }
+    if(newChr==='.'&&oldStr.includes('.'))
+        return oldStr
+    if(str.length===2&&str[0]==='0'&&newChr!=='.')
+        return str[1]
+    return str
+}
 
 export const inputFloat = (str) => {
     if(!str.length)
@@ -104,17 +124,22 @@ export const pdDDMMYYYY = (date) =>
     return date
 }
 
+export const pdMonthYYYY = (date) =>
+{
+    date = new Date(date)
+    date = `${months[date.getMonth()]} ${date.getFullYear()}`
+    return date
+}
+
+export const distanceHour = (date) =>
+{
+    return (new Date()-new Date(date))/1000/60/60
+}
+
 export const pdDDMMYY = (date) =>
 {
     date = new Date(date)
     date = `${date.getDate()<10?'0':''}${date.getDate()}.${date.getMonth()<9?'0':''}${date.getMonth()+1}.${date.getYear()-100}`
-    return date
-}
-
-export const pdQRKKM = (date) =>
-{
-    date = new Date(date)
-    date = `${date.getFullYear()}-${date.getMonth()<9?'0':''}${date.getMonth()+1}-${date.getDate()<10?'0':''}${date.getDate()}T${date.getHours()<10?'0':''}${date.getHours()}:${date.getMinutes()<10?'0':''}${date.getMinutes()}:${date.getSeconds()<10?'0':''}${date.getSeconds()}.000+06:00`
     return date
 }
 
@@ -132,6 +157,13 @@ export const pdDatePicker = (date) =>
     return date
 }
 
+export const pdDatePickerMonth = (date) =>
+{
+    date = new Date(date)
+    date = `${date.getFullYear()}-${date.getMonth()<9?'0':''}${date.getMonth()+1}`
+    return date
+}
+
 export const pdtDatePicker = (date) =>
 {
     date = new Date(date)
@@ -143,6 +175,13 @@ export const pdDDMMYYHHMM = (date) =>
 {
     date = new Date(date)
     date = `${date.getDate()<10?'0':''}${date.getDate()}.${date.getMonth()<9?'0':''}${date.getMonth()+1}.${date.getYear()-100} ${date.getHours()<10?'0':''}${date.getHours()}:${date.getMinutes()<10?'0':''}${date.getMinutes()}`
+    return date
+}
+
+export const pdHHMM = (date) =>
+{
+    date = new Date(date)
+    date = `${date.getHours()<10?'0':''}${date.getHours()}:${date.getMinutes()<10?'0':''}${date.getMinutes()}`
     return date
 }
 

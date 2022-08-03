@@ -13,13 +13,17 @@ export const getClient = async({_id}, client)=>{
                             _id
                             createdAt
                             name
-                            legalObject {_id name}
-                            phone
+                            geo
+                            emails
+                            phones
                             address
-                            email
-                            inn 
-                            del
+                            address1
                             info
+                            work
+                            passport
+                            inn
+                            level
+                            birthday
                         }
                     }`,
             })
@@ -29,25 +33,24 @@ export const getClient = async({_id}, client)=>{
     }
 }
 
-export const getClients = async({search, skip, legalObject}, client)=>{
+export const getClients = async({search, skip, level, limit}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client
             .query({
-                variables: {search, skip, legalObject},
+                variables: {search, skip, level, limit},
                 query: gql`
-                    query ($search: String, $skip: Int, $legalObject: ID) {
-                        clients(search: $search, skip: $skip, legalObject: $legalObject) {
+                    query ($search: String, $skip: Int, $level: String, $limit: Int) {
+                        clients(search: $search, skip: $skip, level: $level, limit: $limit) {
                             _id
                             createdAt
                             name
-                            legalObject {_id name}
-                            phone
+                            inn
+                            geo
                             address
-                            email
-                            inn 
-                            del
+                            address1
+                            level
                         }
                     }`,
             })
@@ -57,15 +60,15 @@ export const getClients = async({search, skip, legalObject}, client)=>{
     }
 }
 
-export const getClientsCount = async({search, legalObject}, client)=>{
+export const getClientsCount = async({search, level}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, legalObject},
+                variables: {search, level},
                 query: gql`
-                    query ($search: String, $legalObject: ID) {
-                        clientsCount(search: $search, legalObject: $legalObject)
+                    query ($search: String, $level: String) {
+                        clientsCount(search: $search, level: $level)
                     }`,
             })
         return res.data.clientsCount
@@ -77,50 +80,41 @@ export const getClientsCount = async({search, legalObject}, client)=>{
 export const deleteClient = async(_id)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
+        let res = await client.mutate({
             variables: {_id},
             mutation : gql`
                     mutation ($_id: ID!) {
                         deleteClient(_id: $_id)
                     }`})
+        return res.data.deleteClient
     } catch(err){
         console.error(err)
     }
 }
 
-export const setClient = async(element, client)=>{
+export const setClient = async(variables, client)=>{
     try{
         client = client? client : getClientGql()
-        await client.mutate({
-            variables: element,
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($_id: ID!, $phone: [String], $name: String, $inn: String, $email: [String], $address: String, $info: String) {
-                        setClient(_id: $_id, phone: $phone, inn: $inn, name: $name, email: $email, address: $address, info: $info) 
+                    mutation ($_id: ID!, $name: String, $geo: [Float], $emails: [String], $phones: [String], $address: String, $address1: String, $info: String, $work: String, $passport: String, $inn: String, $level: String, $birthday: Date) {
+                        setClient(_id: $_id, name: $name, geo: $geo, emails: $emails, phones: $phones, address: $address, address1: $address1, info: $info, work: $work, passport: $passport, inn: $inn, level: $level, birthday: $birthday) 
                     }`})
+        return res.data.setClient
     } catch(err){
         console.error(err)
     }
 }
 
-export const addClient = async(element)=>{
+export const addClient = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: element,
+            variables,
             mutation : gql`
-                    mutation ($legalObject: ID!, $phone: [String]!, $name: String!, $inn: String!, $email: [String]!, $address: String!, $info: String!) {
-                        addClient(legalObject: $legalObject, phone: $phone, name: $name, inn: $inn, email: $email, address: $address, info: $info) {
-                            _id
-                            createdAt
-                            name
-                            legalObject {_id name}
-                            phone
-                            address
-                            email
-                            inn 
-                            del
-                            info
-                        }
+                    mutation ($name: String!, $emails: [String]!, $geo: [Float], $phones: [String]!, $address: String!, $address1: String!, $info: String!, $work: String!, $passport: String!, $inn: String!, $level: String!, $birthday: Date!) {
+                        addClient(name: $name, emails: $emails, geo: $geo, phones: $phones, address: $address, address1: $address1, info: $info, work: $work, passport: $passport, inn: $inn, level: $level, birthday: $birthday) 
                     }`})
         return res.data.addClient
     } catch(err){

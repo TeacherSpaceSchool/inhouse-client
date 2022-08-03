@@ -2,80 +2,172 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import { getLegalObjects, getLegalObjectsCount } from '../src/gql/legalObject'
+import {getSales, getSalesCount} from '../src/gql/sale'
+import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
-import CardLegalObject from '../components/CardLegalObject'
 import { urlMain } from '../src/const'
-import LazyLoad from 'react-lazyload';
+import { cloneObject, pdDDMMYYYY } from '../src/lib'
+import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
-import CardLegalObjectPlaceholder from '../components/CardPlaceholder'
 import { getClientGqlSsr } from '../src/apollo'
 import initialApp from '../src/initialApp'
-import Router from 'next/router'
+import * as snackbarActions from '../src/redux/actions/snackbar'
+import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
+import Card from '@mui/material/Card';
+import Link from 'next/link';
 
-const height = 92
+const colors = {
+    'обработка': 'orange',
+    'доставлен': 'green',
+    'отгружен': 'blue',
+    'возврат': 'red',
+    'отмена': 'red'
+}
+const status = ['все', 'обработка', 'доставлен', 'возврат', 'отмена']
 
 const Sales = React.memo((props) => {
     const {classes} = pageListStyle();
+    //props
     const { data } = props;
+    const { search, filter, isMobileApp } = props.app;
+    //настройка
+    const today = useRef();
+    const initialRender = useRef(true);
+    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
-    const { search } = props.app;
-    let searchTimeOut = useRef(null);
-    const initialRender = useRef(true);
     const getList = async ()=>{
-        setList(await getLegalObjects({skip: 0, search}))
-        setCount(await getLegalObjectsCount({search}));
+        setList(cloneObject(await getSales({
+            search, 
+            skip: 0,
+            ...filter.store?{store: filter.store._id}:{},
+            ...filter.user?{manager: filter.user._id}:{},
+            ...filter.client?{client: filter.client._id}:{},
+            ...filter.status?{status: filter.status}:{},
+            ...filter.date?{date: filter.date}:{},
+            ...filter.cpa?{cpa: filter.cpa._id}:{},
+            ...filter.delivery?{delivery: filter.delivery}:{},
+        })));
+        setCount(await getSalesCount({
+            ...filter.store?{store: filter.store._id}:{},
+            ...filter.user?{manager: filter.user._id}:{},
+            ...filter.client?{client: filter.client._id}:{},
+            ...filter.status?{status: filter.status}:{},
+            ...filter.date?{date: filter.date}:{},
+            ...filter.cpa?{cpa: filter.cpa._id}:{},
+            ...filter.delivery?{delivery: filter.delivery}:{},
+            search
+        }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
     }
+    //поиск/фильтр
+    let searchTimeOut = useRef(null);
+    useEffect(()=>{
+        (async()=>{
+            if(!initialRender.current)
+                await getList()
+        })()
+    },[filter])
     useEffect(()=>{
         (async()=>{
             if(initialRender.current) {
+                today.current = new Date()
+                today.current.setHours(0, 0, 0, 0)
                 initialRender.current = false;
-            } else {
+            }
+            else {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
-                searchTimeOut.current = setTimeout(async()=>{
-                    await getList()
-                }, 500)
-
+                searchTimeOut.current = setTimeout(async () => await getList(), 500)
             }
         })()
-    },[ search])
+    },[search])
+    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = await getLegalObjects({skip: list.length, search, })
+            let addedList = cloneObject(await getSales({
+                skip: list.length, 
+                search,
+                ...filter.store?{store: filter.store._id}:{},
+                ...filter.user?{manager: filter.user._id}:{},
+                ...filter.client?{client: filter.client._id}:{},
+                ...filter.status?{status: filter.status}:{},
+                ...filter.date?{date: filter.date}:{},
+                ...filter.cpa?{cpa: filter.cpa._id}:{},
+                ...filter.delivery?{delivery: filter.delivery}:{},
+            }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
         }
     }
+    //render
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Операции'>
+        <App filterShow={{status, user: true, client: true, cpa: true, date: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
-                <title>Операции</title>
-                <meta name='description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
-                <meta property='og:title' content='Операции' />
-                <meta property='og:description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
+                <title>Продажи</title>
+                <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
+                <meta property='og:title' content='Продажи' />
+                <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
                 <meta property='og:url' content={`${urlMain}/sales`} />
                 <link rel='canonical' href={`${urlMain}/sales`}/>
             </Head>
+            <Card className={classes.page}>
+                <div className={classes.table}>
+                    <div className={classes.tableHead}>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                            Статус
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                            Номер
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                            Доставка
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
+                            Менеджер
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
+                            Клиент
+                        </div>
+                    </div>
+                    {list.map((element) =>
+                        <Link href='/sale/[id]' as={`/sale/${element._id}`} key={element._id}>
+                            <div className={classes.tableRow} onClick={()=>{
+                                let appBody = (document.getElementsByClassName('App-body'))[0]
+                                sessionStorage.scrollPositionStore = appBody.scrollTop
+                                sessionStorage.scrollPositionName = 'sale'
+                                sessionStorage.scrollPositionLimit = list.length
+                            }}>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', fontWeight: 'bold', color: colors[element.status]}}>
+                                    {element.status}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                    {element.number}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', color: ['обработка'].includes(element.status)&&new Date(element.delivery)<today.current?'red':'black'}}>
+                                    {pdDDMMYYYY(element.delivery)}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
+                                    {element.manager.name}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
+                                    {element.client.name}
+                                </div>
+                            </div>
+                        </Link>
+                    )}
+                </div>
+            </Card>
             <div className='count'>
                 {`Всего: ${count}`}
-            </div>
-            <div className={classes.page}>
-                {list?list.map((element)=>
-                    <LazyLoad scrollContainer={'.App-body'} key={element._id} height={height} offset={[height, 0]} debounce={0} once={true}  placeholder={<CardLegalObjectPlaceholder height={height}/>}>
-                        <CardLegalObject link='sales' element={element}/>
-                    </LazyLoad>
-                ):null}
             </div>
         </App>
     )
@@ -83,27 +175,56 @@ const Sales = React.memo((props) => {
 
 Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'superadmin'].includes(store.getState().user.profile.role))
+    if(!['admin'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
             })
             ctx.res.end()
-        } else
+        }
+        else {
             Router.push('/')
+        }
+    store.getState().app.filterType = '/sale'
     return {
         data: {
-            list: await getLegalObjects({skip: 0}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
-            count: await getLegalObjectsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            list: cloneObject(await getSales({
+                skip: 0,
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
+                ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
+                ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
+                ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
+                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
+                ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
+                ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
+            },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getSalesCount({
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
+                ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
+                ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
+                ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
+                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
+                ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })
 
 function mapStateToProps (state) {
     return {
-        user: state.user,
         app: state.app,
     }
 }
 
-export default connect(mapStateToProps)(Sales);
+function mapDispatchToProps(dispatch) {
+    return {
+        mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
+        snackbarActions: bindActionCreators(snackbarActions, dispatch),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Sales);

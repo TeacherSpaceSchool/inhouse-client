@@ -37,9 +37,14 @@ const initialApp = async (ctx, store)=>{
         }
     }
     store.getState().app.columns = []
-    store.getState().app.search = ''
     store.getState().app.sort = '-createdAt'
-    store.getState().app.filter = ''
+    if(!ctx.pathname.includes(store.getState().app.filterType)) {
+        store.getState().app.filterType = undefined
+        store.getState().app.filter = {
+            ...store.getState().app.filter.store ? {store: store.getState().app.filter.store} : {}
+        }
+        store.getState().app.search = ''
+    }
     store.getState().app.date = undefined
     store.getState().app.load = false
     store.getState().app.drawer = false

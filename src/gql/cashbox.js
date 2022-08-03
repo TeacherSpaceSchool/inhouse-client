@@ -1,26 +1,20 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getCashboxes = async({search, skip, legalObject, branch, filter, all}, client)=>{
+export const getCashboxes = async({search, skip, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, skip, legalObject, branch, filter, all},
+                variables: {search, skip, store},
                 query: gql`
-                    query ($skip: Int, $search: String, $legalObject: ID, $branch: ID, $filter: String, $all: Boolean) {
-                        cashboxes(skip: $skip, search: $search, legalObject: $legalObject, branch: $branch, filter: $filter, all: $all) {
+                    query ($skip: Int, $search: String, $store: ID) {
+                        cashboxes(skip: $skip, search: $search, store: $store) {
                             _id
                             createdAt
-                            rnmNumber
                             name
-                            legalObject {name _id}
-                            branch {name _id}
-                            presentCashier {name _id role}
-                            cash
-                            endPayment
-                            del
-                            sync
+                            balance {amount currency}
+                            store {_id name}
                         }
                     }`,
             })
@@ -30,15 +24,15 @@ export const getCashboxes = async({search, skip, legalObject, branch, filter, al
     }
 }
 
-export const getCashboxesCount = async({search, legalObject, branch, filter}, client)=>{
+export const getCashboxesCount = async({search, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, legalObject, branch, filter},
+                variables: {search, store},
                 query: gql`
-                    query ($search: String, $legalObject: ID, $branch: ID, $filter: String) {
-                        cashboxesCount(search: $search, legalObject: $legalObject, branch: $branch, filter: $filter)
+                    query ($search: String, $store: ID) {
+                        cashboxesCount(search: $search, store: $store)
                     }`,
             })
         return res.data.cashboxesCount
@@ -47,114 +41,35 @@ export const getCashboxesCount = async({search, legalObject, branch, filter}, cl
     }
 }
 
-export const getCashboxesTrash = async({search, skip}, client)=>{
-    try{
-        client = client? client : getClientGql()
-        let res = await client
-            .query({
-                variables: {search, skip},
-                query: gql`
-                    query ($skip: Int, $search: String) {
-                        cashboxesTrash(skip: $skip, search: $search) {
-                            _id
-                            rnmNumber
-                            createdAt
-                            name
-                            legalObject {name _id}
-                            branch {name _id}
-                            presentCashier {name _id role}
-                            cash
-                            del
-                            sync
-                        }
-                    }`,
-            })
-        return res.data.cashboxesTrash
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const getCashbox = async({_id}, client)=>{
-    try{
-        client = client? client : getClientGql()
-        let res = await client
-            .query({
-                variables: {_id},
-                query: gql`
-                    query ($_id: ID!) {
-                        cashbox(_id: $_id) {
-                            _id
-                            createdAt
-                            rnmNumber
-                            name
-                            legalObject {name _id}
-                            branch {name _id}
-                            presentCashier {name _id role}
-                            endPayment
-                            cash
-                            del
-                            sync
-                            syncMsg
-                        }
-                    }`,
-            })
-        return res.data.cashbox
-    } catch(err){
-        console.error(err)
-    }
-}
-
 export const deleteCashbox = async(_id)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
+        let res = await client.mutate({
             variables: {_id},
             mutation : gql`
                     mutation ($_id: ID!) {
                         deleteCashbox(_id: $_id)
                     }`})
+        return res.data.deleteCashbox
     } catch(err){
         console.error(err)
     }
 }
 
-export const clearCashbox = async(_id)=>{
-    try{
-        const client = getClientGql()
-        await client.mutate({
-            variables: {_id},
-            mutation : gql`
-                    mutation ($_id: ID!) {
-                        clearCashbox(_id: $_id)
-                    }`})
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const restoreCashbox = async(_id)=>{
-    try{
-        const client = getClientGql()
-        await client.mutate({
-            variables: {_id},
-            mutation : gql`
-                    mutation ($_id: ID!) {
-                        restoreCashbox(_id: $_id)
-                    }`})
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const addCashbox = async(element)=>{
+export const addCashbox = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: element,
+            variables,
             mutation : gql`
-                    mutation ($legalObject: ID!, $name: String!, $branch: ID!) {
-                        addCashbox(legalObject: $legalObject, name: $name, branch: $branch)
+                    mutation ($name: String!, $store: ID!) {
+                        addCashbox(store: $store, name: $name) {
+                            _id
+                            createdAt
+                            name
+                            balance {amount currency}
+                            store {_id name}
+                        }
                     }`})
         return res.data.addCashbox
     } catch(err){
@@ -162,15 +77,16 @@ export const addCashbox = async(element)=>{
     }
 }
 
-export const _setCashbox = async(element)=>{
+export const setCashbox = async(variables)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
-            variables: element,
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($_id: ID!, $name: String, $branch: ID) {
-                        setCashbox(_id: $_id, name: $name, branch: $branch)
+                    mutation ($_id: ID!, $name: String, $store: ID) {
+                        setCashbox(_id: $_id, name: $name, store: $store)
                     }`})
+        return res.data.setCashbox
     } catch(err){
         console.error(err)
     }

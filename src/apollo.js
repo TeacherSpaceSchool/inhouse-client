@@ -38,7 +38,9 @@ export const getClientGql = (req) => {
                 }
                 console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
             });
-        if (ctx.networkError) console.log(`[Network error]: ${ctx.networkError}`);
+        if (ctx.networkError) {
+            console.log(`[Network error]: ${ctx.networkError}`);
+        }
     });
     let mainLink;
     if(jwt) {
@@ -71,8 +73,7 @@ export const getClientGql = (req) => {
         mainLink
     ]);
     client = new ApolloClient({
-        ssrMode: true,
-        link: link,
+        link,
         cache: new InMemoryCache(),
         defaultOptions: {
             watchQuery: {
@@ -118,7 +119,7 @@ export const getClientGqlSsr = (req) => {
     ]);
     return new ApolloClient({
         ssrMode: true,
-        link: link,
+        link,
         cache: new InMemoryCache(),
         defaultOptions: {
             watchQuery: {

@@ -5,13 +5,15 @@ const MyError = () => <div style={{
     height: '100vh',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 20,
+    color: 'red'
 }}>
     <Head>
-        <title>Нет подключения к УНО и ОФД</title>
+        <title>Ошибка</title>
     </Head>
     <h1>
-        Нет подключения к УНО и ОФД
+        Приносим извинения, но что-то пошло не так :(
     </h1>
 </div>
 

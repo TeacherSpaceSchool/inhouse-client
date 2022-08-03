@@ -15,7 +15,7 @@ const Geo =  React.memo(
         const {classes} = dialogContentStyle()
         const { showSnackBar } = props.snackbarActions;
         const { showFullDialog } = props.mini_dialogActions;
-        const { geo, setAddressGeo, change } = props;
+        const { geo, setAddressGeo } = props;
         const map = useRef(null);
         const lockMove = useRef(false);
         const marker = useRef(null);
@@ -42,7 +42,7 @@ const Geo =  React.memo(
             })
             marker.current = DG.marker(newGeo).addTo(map.current)
             map.current.on('click', function(e) {
-                if(change) {
+                if(setAddressGeo) {
                     map.current.panTo([e.latlng.lat, e.latlng.lng])
                 }
             });
@@ -52,12 +52,12 @@ const Geo =  React.memo(
                 lockMove.current = setTimeout(()=>{lockMove.current = false}, 500)
             });
             map.current.on('move', function() {
-                if(change){
+                if(setAddressGeo){
                     marker.current.setLatLng([map.current.getCenter().lat, map.current.getCenter().lng])
                 }
             });
             map.current.on('moveend', function() {
-                if(change) {
+                if(setAddressGeo) {
                     setNewGeo([map.current.getCenter().lat, map.current.getCenter().lng])
                     marker.current.setLatLng([map.current.getCenter().lat, map.current.getCenter().lng])
                 }
@@ -73,9 +73,9 @@ const Geo =  React.memo(
                 <div id='map' style={{height: window.innerHeight-128, width: window.innerWidth-48, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <CircularProgress/>
                 </div>
-                <center>
+                <center style={{width: '100%'}}>
                     {
-                        change?
+                        setAddressGeo?
                             <Button variant='contained' color='primary' onClick={async()=>{
                                 await setAddressGeo(newGeo)
                                 showFullDialog(false);
@@ -91,7 +91,7 @@ const Geo =  React.memo(
                 </center>
             </div>
             {
-                change?
+                setAddressGeo?
                     <Fab color='primary' aria-label='Найти геолокацию' className={classes.fabGeo} onClick={getGeo}>
                         <GpsFixed/>
                     </Fab>

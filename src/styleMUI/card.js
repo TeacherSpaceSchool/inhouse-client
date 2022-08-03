@@ -46,8 +46,8 @@ export default makeStyles()(()=>{
             cursor: 'pointer'
         },
         input: {
-            width: '100%',
-            marginBottom: '10px !important'
+            margin: '10px !important',
+            width: 'calc(100% - 20px)',
         },
         halfInput: {
             width: 224,
@@ -73,6 +73,7 @@ export default makeStyles()(()=>{
             fontWeight: '500',
             fontSize: '0.9375rem',
             fontFamily: 'Roboto',
+            whiteSpace: 'pre-wrap',
             wordBreak: 'break-all'
         },
         nameField: {

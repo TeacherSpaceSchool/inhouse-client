@@ -2,7 +2,7 @@ import { makeStyles } from 'tss-react/mui';
 export default makeStyles()(()=>{
     return {
         appBar: {
-            zIndex: 1201,
+            zIndex: 1200,
         },
         root: {
             flexGrow: 1,
@@ -13,7 +13,8 @@ export default makeStyles()(()=>{
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            fontSize: '1.125rem!important'
+            fontSize: '1.125rem!important',
+            cursor: 'pointer'
         },
         searchD: {
             position: 'fixed',

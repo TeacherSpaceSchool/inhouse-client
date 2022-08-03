@@ -14,7 +14,7 @@ html{
 }
 
 .appBar{
-  z-index: 1201 !important;
+  z-index: 1200 !important;
 }
 
 .count{
@@ -41,9 +41,23 @@ html{
   font-family: 'Roboto', sans-serif;
 }
 
+.App-body-f {
+  position: fixed;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  top: $app-bar-height-m;
+  padding-bottom: 80px;
+  height: calc(100vh - #{$app-bar-height-m});
+  width: 100%;
+  @media screen and (min-width: $break-small) {
+    top: $app-bar-height-d;
+    height: calc(100vh - #{$app-bar-height-d});
+   }
+}
+
 .App-body {
   position: fixed;
-  overflow: auto;
+  overflow: auto !important;
   -webkit-overflow-scrolling: touch;
   top: $app-bar-height-m;
   padding-bottom: 80px;
@@ -74,7 +88,8 @@ html{
 
 a {
   text-decoration: none;
-  color: #10183D;
+  color: #183B37;
+  cursor: pointer;
 }
 
 .load {

@@ -1,31 +1,36 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getItems = async({skip, search, category, type, legalObject, limit, quick}, client)=>{
+export const getItems = async({skip, limit, search, category, factory, catalog}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client
             .query({
-                variables: {skip, search, category, type, legalObject, limit, quick},
+                variables: {skip, limit, search, category, factory, catalog},
                 query: gql`
-                    query ($skip: Int, $search: String, $category: ID, $type: String, $legalObject: ID, $limit: Int, $quick: Boolean) {
-                        items(skip: $skip, search: $search, category: $category, type: $type, legalObject: $legalObject, limit: $limit, quick: $quick) {
+                    query ($skip: Int, $search: String, $limit: Int, $category: ID, $factory: ID, $catalog: Boolean) {
+                        items(skip: $skip, search: $search, limit: $limit, category: $category, factory: $factory, catalog: $catalog) {
                             _id
                             createdAt
                             category {_id name}
-                            legalObject {_id name}
-                            price 
-                            editedPrice
-                            quick
-                            unit 
-                            barCode
+                            ID
                             name
-                            type
-                            del
-                            tnved
-                            mark
-                            priority
+                            free
+                            art
+                            images
+                            typeDiscount
+                            priceUSD
+                            primeCostUSD
+                            priceKGS
+                            primeCostKGS
+                            discount
+                            priceAfterDiscountKGS
+                            info
+                            unit
+                            size
+                            characteristics
+                            factory {_id name}
                         }
                     }`,
             })
@@ -35,15 +40,15 @@ export const getItems = async({skip, search, category, type, legalObject, limit,
     }
 }
 
-export const getItemsCount = async({search, category, type, legalObject}, client)=>{
+export const getItemsCount = async({search, category, factory}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, category, type, legalObject},
+                variables: {search, category, factory},
                 query: gql`
-                    query($search: String, $category: ID, $type: String, $legalObject: ID) {
-                        itemsCount(search: $search, category: $category, type: $type, legalObject: $legalObject) 
+                    query ($search: String, $category: ID, $factory: ID) {
+                        itemsCount(search: $search, category: $category, factory: $factory) 
                     }`,
             })
         return res.data.itemsCount
@@ -59,23 +64,27 @@ export const getItem = async({_id}, client)=>{
             .query({
                 variables: {_id: _id},
                 query: gql`
-                    query ($_id: ID!) {
+                    query ($_id: String!) {
                         item(_id: $_id) {
                             _id
                             createdAt
                             category {_id name}
-                            legalObject {_id name}
-                            price 
-                            unit 
-                            editedPrice
-                            barCode
+                            ID
                             name
-                            type
-                            del
-                            tnved
-                            mark
-                            quick
-                            priority
+                            images
+                            typeDiscount
+                            priceUSD
+                            primeCostUSD
+                            art
+                            priceKGS
+                            primeCostKGS
+                            discount
+                            priceAfterDiscountKGS
+                            info
+                            unit
+                            size
+                            characteristics
+                            factory {_id name}
                         }
                     }`,
             })
@@ -88,25 +97,26 @@ export const getItem = async({_id}, client)=>{
 export const deleteItem = async(_id)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
+        let res = await client.mutate({
             variables: {_id},
             mutation : gql`
                     mutation ($_id: ID!) {
                         deleteItem(_id: $_id)
                     }`})
+        return res.data.deleteItem
     } catch(err){
         console.error(err)
     }
 }
 
-export const addItem = async({legalObject, category, price, unit, barCode, name, type, editedPrice, tnved, mark, quick, priority})=>{
+export const addItem = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: {legalObject, category, price, unit, barCode, name, type, editedPrice, tnved, mark, quick, priority},
+            variables,
             mutation : gql`
-                    mutation ($legalObject: ID!, $category: ID, $tnved: String!, $mark: Boolean!, $priority: Int!, $quick: Boolean!, $price: Float!, $editedPrice: Boolean!, $unit: String!, $barCode: String, $name: String!, $type: String!) {
-                        addItem(legalObject: $legalObject, category: $category, tnved: $tnved, mark: $mark, priority: $priority, quick: $quick, price: $price, editedPrice: $editedPrice, unit: $unit, barCode: $barCode, name: $name, type: $type)
+                    mutation ($ID: String!, $art: String!, $typeDiscount: String!, $name: String!, $uploads: [Upload], $priceUSD: Float!, $primeCostUSD: Float!, $priceKGS: Float!, $primeCostKGS: Float!, $discount: Float!, $priceAfterDiscountKGS: Float!, $info: String!, $unit: String!, $size: String!, $characteristics: [[String]]!, $category: ID!, $factory: ID!) {
+                        addItem(ID: $ID, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
                     }`})
         return res.data.addItem
     } catch(err){
@@ -114,15 +124,31 @@ export const addItem = async({legalObject, category, price, unit, barCode, name,
     }
 }
 
-export const setItem = async({_id, category, price, unit, barCode, name, type, editedPrice, tnved, mark, quick, priority})=>{
+export const setItem = async(variables)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
-            variables: {_id, category, price, unit, barCode, name, type, editedPrice, tnved, mark, quick, priority},
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($_id: ID!, $category: ID, $tnved: String, $mark: Boolean, $quick: Boolean, $price: Float, $priority: Int, $editedPrice: Boolean, $unit: String, $barCode: String, $name: String, $type: String) {
-                        setItem(_id: $_id, category: $category, tnved: $tnved, mark: $mark, quick: $quick, priority: $priority, editedPrice: $editedPrice, price: $price, unit: $unit, barCode: $barCode, name: $name, type: $type)
+                    mutation ($_id: ID!, $ID: String, $art: String, $typeDiscount: String, $name: String, $uploads: [Upload], $images: [String], $priceUSD: Float, $primeCostUSD: Float, $priceKGS: Float, $primeCostKGS: Float, $discount: Float, $priceAfterDiscountKGS: Float, $info: String, $unit: String, $size: String, $characteristics: [[String]], $category: ID, $factory: ID) {
+                        setItem(_id: $_id, ID: $ID, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, images: $images, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
                     }`})
+        return res.data.setItem
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const kgsFromUsdItem = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($USD: Float!, $ceil: Boolean!) {
+                        kgsFromUsdItem(USD: $USD, ceil: $ceil)
+                    }`})
+        return res.data.kgsFromUsdItem
     } catch(err){
         console.error(err)
     }

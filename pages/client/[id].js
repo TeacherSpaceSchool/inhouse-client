@@ -1,440 +1,480 @@
 import initialApp from '../../src/initialApp'
 import Head from 'next/head';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import {getClient, setClient, addClient, deleteClient} from '../../src/gql/client'
-import clientStyle from '../../src/styleMUI/list'
+import { getClient, setClient, addClient, deleteClient } from '../../src/gql/client'
+import pageListStyle from '../../src/styleMUI/list'
+import { pdDDMMYYYY } from '../../src/lib'
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Input from '@mui/material/Input';
 import Button from '@mui/material/Button';
+import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Remove from '@mui/icons-material/Remove';
 import { useRouter } from 'next/router'
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Router from 'next/router'
-import * as appActions from '../../src/redux/actions/app'
-import { bindActionCreators } from 'redux'
+import * as userActions from '../../src/redux/actions/user'
 import * as snackbarActions from '../../src/redux/actions/snackbar'
+import * as appActions from '../../src/redux/actions/app'
 import TextField from '@mui/material/TextField';
 import Confirmation from '../../components/dialog/Confirmation'
 import { urlMain } from '../../src/const'
 import { getClientGqlSsr } from '../../src/apollo'
-import { pdDDMMYYHHMM, validPhone1, validMail, inputPhone } from '../../src/lib'
-import Remove from '@mui/icons-material/Remove';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Link from 'next/link';
-import AutocomplectOnline from '../../components/app/AutocomplectOnline'
-import {getLegalObjects} from '../../src/gql/legalObject'
+import { validPhones1, validPhone1, validMail, validMails, cloneObject, inputPhone, pdDatePicker } from '../../src/lib'
+import History from '../../components/dialog/History';
+import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import Link from 'next/link';
+import dynamic from 'next/dynamic'
+const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
+
+const levels = ['Бронза', 'Серебро', 'Золото', 'Платина']
 
 const Client = React.memo((props) => {
-    const { profile } = props.user;
-    const {classes} = clientStyle();
+    const {classes} = pageListStyle();
     const { data } = props;
     const { isMobileApp } = props.app;
     const { showSnackBar } = props.snackbarActions;
-    const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
+    const unsaved = useRef();
     let [name, setName] = useState(data.object?data.object.name:'');
-    let [legalObject, setLegalObject] = useState(data.object?data.object.legalObject:undefined);
-    let [info, setInfo] = useState(data.object?data.object.info:'');
+    let [work, setWork] = useState(data.object?data.object.work:'');
+    let [geo, setGeo] = useState(data.object?cloneObject(data.object.geo):null);
+    let [passport, setPassport] = useState(data.object?data.object.passport:'');
     let [inn, setInn] = useState(data.object?data.object.inn:'');
+    let [level, setLevel] = useState(data.object?data.object.level:'');
+    let handleLevel = (event) => {
+        setLevel(event.target.value)
+    };
+    let [birthday, setBirthday] = useState(data.object&&data.object.birthday?pdDatePicker(data.object.birthday):'');
+    let [info, setInfo] = useState(data.object?data.object.info:'');
     let [address, setAddress] = useState(data.object?data.object.address:'');
-    let [phone, setPhone] = useState(data.object?data.object.phone:[]);
-    let addPhone = ()=>{
-        phone = [...phone, '']
-        setPhone(phone)
+    let [address1, setAddress1] = useState(data.object?data.object.address1:'');
+    let [emails, setEmails] = useState(data.object&&data.object.emails?cloneObject(data.object.emails):[]);
+    let addEmails = ()=>{
+        emails = [...emails, '']
+        setEmails(emails)
     };
-    let editPhone = (event, idx)=>{
-        phone[idx] = inputPhone(event.target.value)
-        setPhone([...phone])
+    let editEmails = (event, idx)=>{
+        emails[idx] = event.target.value
+        setEmails([...emails])
     };
-    let deletePhone = (idx)=>{
-        phone.splice(idx, 1);
-        setPhone([...phone])
+    let deleteEmails = (idx)=>{
+        emails.splice(idx, 1);
+        setEmails([...emails])
     };
-    let [email, setEmail] = useState(data.object?data.object.email:[]);
-    let addEmail = ()=>{
-        email = [...email, '']
-        setEmail(email)
+    let [phones, setPhones] = useState(data.object&&data.object.phones?cloneObject(data.object.phones):[]);
+    let addPhones = ()=>{
+        phones = [...phones, '']
+        setPhones(phones)
     };
-    let editEmail = (event, idx)=>{
-        email[idx] = event.target.value
-        setEmail([...email])
+    let editPhones = (event, idx)=>{
+        phones[idx] = inputPhone(event.target.value)
+        setPhones([...phones])
     };
-    let deleteEmail = (idx)=>{
-        email.splice(idx, 1);
-        setEmail([...email])
+    let deletePhones = (idx)=>{
+        phones.splice(idx, 1);
+        setPhones([...phones])
     };
+    const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const router = useRouter()
-    const [anchorElQuick, setAnchorElQuick] = useState(null);
-    const openQuick = Boolean(anchorElQuick);
-    let handleMenuQuick = (event) => {
-        setAnchorElQuick(event.currentTarget);
-    }
-    let handleCloseQuick = () => {
-        setAnchorElQuick(null);
-    }
+    useEffect(()=>{
+        if(!unsaved.current)
+            unsaved.current = {}
+        else
+            unsaved.current[router.query.id] = true
+    },[name, work, geo, passport, inn, level, birthday, info, address, address1, emails, phones])
+
     return (
-        <App pageName={data.object!==null?router.query.id==='new'?'Добавить':data.object.name:'Ничего не найдено'}>
+        <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':data.object.name:'Ничего не найдено'}>
             <Head>
                 <title>{data.object!==null?router.query.id==='new'?'Добавить':data.object.name:'Ничего не найдено'}</title>
-                <meta name='description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
+                <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:title' content={data.object!==null?router.query.id==='new'?'Добавить':data.object.name:'Ничего не найдено'} />
-                <meta property='og:description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
-                <meta property='og:type' content='website' />
+                <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
+                <meta property='og:type' content='website'/>
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
                 <meta property='og:url' content={`${urlMain}/client/${router.query.id}`} />
                 <link rel='canonical' href={`${urlMain}/client/${router.query.id}`}/>
             </Head>
             <Card className={classes.page}>
-                {
-                    router.query.id!=='new'?
-                        <div className={classes.status}>
-                            <Menu
-                                key='Quick'
-                                id='menu-appbar'
-                                anchorEl={anchorElQuick}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                open={openQuick}
-                                onClose={handleCloseQuick}
-                            >
-                                <Link href='/sales/[id]' as={`/sales/${data.object.legalObject._id}`}>
-                                    <MenuItem onClick={()=>{props.appActions.setClient({_id: router.query.id, name})}}>
-                                        Операции
-                                    </MenuItem>
-                                </Link>
-                            </Menu>
-                            <Button onClick={handleMenuQuick} color='primary'>
-                                Переходы
-                            </Button>
-                        </div>
-                        :
-                        null
-                }
-                <CardContent className={classes.column} style={isMobileApp?{}:{justifyContent: 'start', alignItems: 'flex-start'}}>
-                    <br/>
+                <div className={classes.status}>
                     {
-                        data.object!==null?
-                            !profile.add?
-                                <>
-                                <div className={classes.row}>
-                                    <div className={classes.nameField}>
-                                        Регистрация:&nbsp;
-                                    </div>
-                                    <div className={classes.value}>
-                                        {pdDDMMYYHHMM(data.object.createdAt)}
-                                    </div>
-                                </div>
-                                {
-                                    ['admin', 'superadmin'].includes(profile.role)?
-                                        <Link href='/legalobject/[id]' as={`/legalobject/${data.object.legalObject._id}`}>
-                                            <a>
-                                                <div className={classes.row}>
-                                                    <div className={classes.nameField}>
-                                                        Налогоплательщик:&nbsp;
-                                                    </div>
-                                                    <div className={classes.value}>
-                                                        {data.object.legalObject.name}
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </Link>
-                                        :
-                                        null
-                                }
-                                <div className={classes.row}>
-                                    <div className={classes.nameField}>
-                                        Имя:&nbsp;
-                                    </div>
-                                    <div className={classes.value}>
-                                        {name}
-                                    </div>
-                                </div>
-                                {
-                                    inn.length?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                ИНН:&nbsp;
-                                            </div>
-                                            <div className={classes.value}>
-                                                {inn}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    address.length?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Адрес:&nbsp;
-                                            </div>
-                                            <div className={classes.value}>
-                                                {address}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    phone.length?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Телефон:&nbsp;
-                                            </div>
-                                            <div>
-                                                {phone.map((phone, idx)=><div key={`phone${idx}`} className={classes.value}>{phone}</div>)}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    email.length?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Email:&nbsp;
-                                            </div>
-                                            <div>
-                                                {email.map((email, idx)=>
-                                                    idx<4?
-                                                        <div key={`email${idx}`} className={classes.value}>
-                                                            {email}
-                                                        </div>
-                                                        :
-                                                        idx===4?
-                                                            '...'
-                                                            :
-                                                            null
-                                                )}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    info.length?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Информация:&nbsp;
-                                            </div>
-                                            <div className={classes.value}>
-                                                {info}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
-                                    <Menu
-                                        key='Quick'
-                                        id='menu-appbar'
-                                        anchorEl={anchorElQuick}
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'right',
-                                        }}
-                                        transformOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'right',
-                                        }}
-                                        open={openQuick}
-                                        onClose={handleCloseQuick}
-                                    >
-                                        <Link href='/sales/[id]' as={`/sales/${data.object.legalObject._id}`}>
-                                            <MenuItem onClick={()=>{props.appActions.setClient({_id: router.query.id, name})}}>
-                                                Операции
-                                            </MenuItem>
-                                        </Link>
-                                    </Menu>
-                                    <Button onClick={handleMenuQuick} color='primary'>
-                                        Переходы
-                                    </Button>
-                                </div>
-                                </>
-                                :
-                                <>
-                                {
-                                    router.query.id!=='new'?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Регистрация:&nbsp;
-                                            </div>
-                                            <div className={classes.value}>
-                                                {pdDDMMYYHHMM(data.object.createdAt)}
-                                            </div>
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    ['admin', 'superadmin'].includes(profile.role)?router.query.id==='new'?
-                                        <AutocomplectOnline
-                                            error={!legalObject||!legalObject._id}
-                                            setElement={setLegalObject}
-                                            getElements={async (search)=>{return await getLegalObjects({search})}}
-                                            label={'налогоплательщика'}
-                                        />
-                                        :
-                                        <Link href='/legalobject/[id]' as={`/legalobject/${legalObject._id}`}>
-                                            <a>
-                                                <div className={classes.row}>
-                                                    <div className={classes.nameField}>
-                                                        Налогоплательщик:&nbsp;
-                                                    </div>
-                                                    <div className={classes.value}>
-                                                        {data.object.legalObject.name}
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </Link>
-                                        :
-                                        null
-                                }
-                                <TextField variant='standard'
-                                    className={classes.input}
-                                    label='Имя'
-                                    margin='normal'
-                                    value={name}
-                                    onChange={(event)=>{setName(event.target.value)}}
-                                />
-                                <TextField variant='standard'
-                                    className={classes.input}
-                                    label='ИНН'
-                                    margin='normal'
-                                    value={inn}
-                                    onChange={(event)=>{setInn(event.target.value)}}
-                                />
-                                <TextField variant='standard'
-                                    label='Адрес'
-                                    className={classes.input}
-                                    margin='normal'
-                                    value={address}
-                                    onChange={(event)=>{setAddress(event.target.value)}}
-                                />
-                                {phone?phone.map((element, idx)=>
-                                    <FormControl key={`phone${idx}`} className={classes.input}>
-                                        <InputLabel error={!validPhone1(element)}>Телефон. Формат: +996556899871</InputLabel>
-                                        <Input
-                                            startAdornment={<InputAdornment position='start'>+996</InputAdornment>}
-                                            error={!validPhone1(element)}
-                                            placeholder='Телефон. Формат: +996556899871'
-                                            value={element}
-                                            className={classes.input}
-                                            onChange={(event)=>{editPhone(event, idx)}}
-                                            endAdornment={
-                                                <InputAdornment position='end'>
-                                                    <IconButton
-                                                        onClick={()=>{
-                                                            deletePhone(idx)
-                                                        }}
-                                                        aria-label='toggle password visibility'
-                                                    >
-                                                        <Remove/>
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            }
-                                        />
+                        data.edit&&data.object&&data.object._id?
+                            <HistoryIcon onClick={async()=>{
+                                setMiniDialog('История', <History where={data.object._id}/>)
+                                showMiniDialog(true)
+                            }} style={{ color: '#10183D'}}/>
+                            :
+                            null
+                    }
+                </div>
+                <CardContent className={classes.column} style={isMobileApp?{}:{justifyContent: 'start', alignItems: 'flex-start'}}>
+                    {
+                        data.object?
+                            <>
+                            {
+                                data.edit||data.add?
+                                    <>
+                                    <FormControl className={classes.input}>
+                                        <InputLabel error={!level}>Уровень</InputLabel>
+                                        <Select variant='standard' value={level} onChange={handleLevel} error={!level}>
+                                            {levels.map((element)=>
+                                                <MenuItem key={element} value={element}>{element}</MenuItem>
+                                            )}
+                                        </Select>
                                     </FormControl>
-                                ): null}
-                                <Button onClick={async()=>{
-                                    addPhone()
-                                }} color='primary'>
-                                    Добавить телефон
-                                </Button>
-                                {email?email.map((element, idx)=>
-                                    <FormControl key={`email${idx}`} className={classes.input}>
-                                        <InputLabel error={!validMail(element)}>Email</InputLabel>
-                                        <Input
-                                            error={!validMail(element)}
-                                            placeholder='Email'
-                                            value={element}
-                                            className={classes.input}
-                                            onChange={(event)=>{editEmail(event, idx)}}
-                                            endAdornment={
-                                                <InputAdornment position='end'>
-                                                    <IconButton
-                                                        onClick={()=>{
-                                                            deleteEmail(idx)
-                                                        }}
-                                                        aria-label='toggle password visibility'
-                                                    >
-                                                        <Remove/>
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            }
-                                        />
-                                    </FormControl>
-                                ): null}
-                                <Button onClick={async()=>{
-                                    addEmail()
-                                }} color='primary'>
-                                    Добавить email
-                                </Button>
-                                <TextField variant='standard'
-                                    multiline={true}
-                                    label='Информация'
-                                    value={info}
-                                    className={classes.input}
-                                    onChange={(event)=>{setInfo(event.target.value)}}
-                                />
-                                <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
-                                    <Button color='primary' onClick={()=>{
-                                        if (name.length&&legalObject) {
-                                            const action = async() => {
-                                                if(router.query.id==='new') {
-                                                    let res = await addClient({legalObject: legalObject._id, phone, name, inn, email, address, info})
-                                                    Router.push(`/client/${res._id}`)
-                                                    showSnackBar('Успешно', 'success')
-                                                }
-                                                else {
-                                                    let element = {_id: router.query.id, }
-                                                    if (name!==data.object.name) element.name = name
-                                                    if (inn!==data.object.inn) element.inn = inn
-                                                    if (address!==data.object.address) element.address = address
-                                                    if (info!==data.object.info) element.info = info
-                                                    if (JSON.stringify(phone)!==JSON.stringify(data.object.phone)) element.phone = phone
-                                                    if (JSON.stringify(email)!==JSON.stringify(data.object.email)) element.email = email
-                                                    await setClient(element)
-                                                    Router.reload()
-                                                }
-                                            }
-                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                            showMiniDialog(true)
-                                        } else
-                                            showSnackBar('Заполните все поля')
+                                    <TextField variant='standard'
+                                               id='name'
+                                               error={!name}
+                                               label='ФИО'
+                                               value={name}
+                                               onChange={(event) => setName(event.target.value)}
+                                               className={classes.input}
+                                    />
+                                    <TextField variant='standard'
+                                               id='inn'
+                                               error={!inn}
+                                               label='ИНН'
+                                               value={inn}
+                                               onChange={(event) => setInn(event.target.value)}
+                                               className={classes.input}
+                                    />
+                                    <TextField variant='standard'
+                                               id='passport'
+                                               error={!passport}
+                                               label='Паспорт'
+                                               value={passport}
+                                               onChange={(event) => setPassport(event.target.value)}
+                                               className={classes.input}
+                                    />
+                                    <TextField variant='standard'
+                                               id='work'
+                                               error={!work}
+                                               label='Работа'
+                                               value={work}
+                                               onChange={(event) => setWork(event.target.value)}
+                                               className={classes.input}
+                                    />
+                                    <TextField variant='standard'
+                                               id='address'
+                                               error={!address}
+                                               label='Адрес проживания'
+                                               onChange={(event) => setAddress(event.target.value)}
+                                               value={address}
+                                               className={classes.input}
+                                    />
+                                    <div className={classes.geo} style={{color: geo?'#183B37':'red'}} onClick={()=>{
+                                        setFullDialog('Геолокация', <Geo geo={geo} setAddressGeo={setGeo}/>)
+                                        showFullDialog(true)
                                     }}>
-                                        Сохранить
-                                    </Button>
-                                    {
-                                        router.query.id!=='new'?
-                                            <Button color='secondary' onClick={()=>{
-                                                const action = async() => {
-                                                    await deleteClient(router.query.id)
-                                                    Router.push(`/clients/${data.object.legalObject._id}`)
+                                        {
+                                            geo?
+                                                'Изменить геолокацию'
+                                                :
+                                                'Задайте геолокацию'
+                                        }
+                                    </div>
+                                    <TextField variant='standard'
+                                               id='address'
+                                               error={!address1}
+                                               label='Адрес прописки'
+                                               onChange={(event) => setAddress1(event.target.value)}
+                                               value={address1}
+                                               className={classes.input}
+                                    />
+                                    <TextField variant='standard'
+                                               id='date'
+                                               type='date'
+                                               error={!birthday}
+                                               label='День рождения'
+                                               onChange={(event) => setBirthday(event.target.value)}
+                                               value={birthday}
+                                               className={classes.input}
+                                    />
+                                    <br/>
+                                    {phones?phones.map((element, idx)=>
+                                        <FormControl key={`phones${idx}`} className={classes.input}>
+                                            <InputLabel error={!validPhone1(element)}>Телефон</InputLabel>
+                                            <Input
+                                                error={!validPhone1(element)}
+                                                placeholder='Телефон'
+                                                type={isMobileApp?'number':'text'}
+                                                value={element}
+                                                className={classes.input}
+                                                onChange={(event)=>{editPhones(event, idx)}}
+                                                endAdornment={
+                                                    <InputAdornment position='end'>
+                                                        <IconButton
+                                                            onClick={()=>{
+                                                                deletePhones(idx)
+                                                            }}
+                                                            aria-label='toggle password visibility'
+                                                        >
+                                                            <Remove/>
+                                                        </IconButton>
+                                                    </InputAdornment>
                                                 }
-                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                                showMiniDialog(true)
+                                                startAdornment={<InputAdornment position='start'>+996</InputAdornment>}
+                                            />
+                                        </FormControl>
+                                    ): null}
+                                    <Button onClick={async()=>{
+                                        addPhones()
+                                    }} size='small'  color={phones.length?'primary':'secondary'}>
+                                        Добавить телефон
+                                    </Button>
+                                    <br/>
+                                    {emails?emails.map((element, idx)=>
+                                        <FormControl key={`emails${idx}`} className={classes.input}>
+                                            <InputLabel error={!validMail(element)}>Emails</InputLabel>
+                                            <Input
+                                                error={!validMail(element)}
+                                                placeholder='Emails'
+                                                value={element}
+                                                className={classes.input}
+                                                onChange={(event)=>{editEmails(event, idx)}}
+                                                endAdornment={
+                                                    <InputAdornment position='end'>
+                                                        <IconButton
+                                                            onClick={()=>{
+                                                                deleteEmails(idx)
+                                                            }}
+                                                            aria-label='toggle password visibility'
+                                                        >
+                                                            <Remove/>
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                }
+                                            />
+                                        </FormControl>
+                                    ): null}
+                                    <Button size='small' onClick={async()=>{
+                                        addEmails()
+                                    }} color='primary'>
+                                        Добавить email
+                                    </Button>
+                                    <TextField
+                                        id='info'
+                                        variant='standard'
+                                        onChange={(event) => setInfo(event.target.value)}
+                                        label='Информация'
+                                        multiline={true}
+                                        maxRows='5'
+                                        value={info}
+                                        className={classes.input}
+                                    />
+                                    </>
+                                    :
+                                    <>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Уровень:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {level}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            ФИО:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {name}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            ИНН:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {inn}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Паспорт:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {passport}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Работа:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {work}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            День рождения:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {pdDDMMYYYY(birthday)}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Адрес проживания:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {address}
+                                        </div>
+                                    </div>
+                                    {
+                                        geo?
+                                            <div className={classes.geo} onClick={()=>{
+                                                setFullDialog('Геолокация', <Geo geo={geo}/>)
+                                                showFullDialog(true)
                                             }}>
-                                                Удалить
-                                            </Button>
+                                                Посмотреть геолокацию
+                                            </div>
                                             :
                                             null
                                     }
-                                </div>
-                                </>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Адрес прописки:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {address1}
+                                        </div>
+                                    </div>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Телефон:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
+                                        </div>
+                                    </div>
+                                    {
+                                        emails.length?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Emails:&nbsp;
+                                                </div>
+                                                <div>
+                                                    {emails.map((element, idx)=><div className={classes.value} key={`Emails${idx}`}>{element}</div>)}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Информация:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {info}
+                                        </div>
+                                    </div>
+                                    </>
+                            }
+                            <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
+                                {
+                                    data.edit||data.add?
+                                        <>
+                                        {
+                                            router.query.id!=='new'?
+                                                <Link
+                                                    href={{
+                                                        pathname: '/balanceclients',
+                                                        query: {client: router.query.id}
+                                                    }}
+                                                    as={
+                                                        `/balanceclients?client=${router.query.id}`
+                                                    }>
+                                                    <Button color='primary'>
+                                                        Баланс
+                                                    </Button>
+                                                </Link>
+                                                :
+                                                null
+                                        }
+                                        <Button color='primary' onClick={()=>{
+                                            let checkPhones = phones.length&&validPhones1(phones)
+                                            let checkMail = !emails.length||validMails(emails)
+                                            let res
+                                            if (name&&checkPhones&&checkMail&&address&&work&&passport&&inn&&level&&birthday) {
+                                                const action = async() => {
+                                                    if(router.query.id==='new') {
+                                                        res = await addClient({name, geo, emails, phones, address, address1, info, work, passport, inn, level, birthday})
+                                                        if(res!=='ERROR'&&res) {
+                                                            unsaved.current = {}
+                                                            showSnackBar('Успешно', 'success')
+                                                            Router.push(`/client/${res}`)
+                                                        }
+                                                        else
+                                                            showSnackBar('Ошибка', 'error')
+                                                    }
+                                                    else {
+                                                        let element = {_id: router.query.id}
+                                                        if (name!==data.object.name) element.name = name
+                                                        if (address!==data.object.address) element.address = address
+                                                        if (address1!==data.object.address1) element.address1 = address1
+                                                        if (info!==data.object.info) element.info = info
+                                                        if (work!==data.object.work) element.work = work
+                                                        if (passport!==data.object.passport) element.passport = passport
+                                                        if (inn!==data.object.inn) element.inn = inn
+                                                        if (level!==data.object.level) element.level = level
+                                                        if (pdDDMMYYYY(birthday)!==pdDDMMYYYY(data.object.birthday)) element.birthday = birthday
+                                                        if (JSON.stringify(geo)!==JSON.stringify(data.object.geo)) element.geo = geo
+                                                        if (JSON.stringify(phones)!==JSON.stringify(data.object.phones)) element.phones = phones
+                                                        if (JSON.stringify(emails)!==JSON.stringify(data.object.emails)) element.emails = emails
+                                                        res = await setClient(element)
+                                                        if(res&&res!=='ERROR') {
+                                                            showSnackBar('Успешно', 'success')
+                                                            Router.reload()
+                                                        }
+                                                        else
+                                                            showSnackBar('Ошибка', 'error')
+                                                    }
+                                                }
+                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                showMiniDialog(true)
+                                            } else
+                                                showSnackBar('Заполните все поля')
+                                        }}>
+                                            Сохранить
+                                        </Button>
+                                        {
+                                            router.query.id!=='new'&&data.deleted?
+                                                <Button color='secondary' onClick={()=>{
+                                                    const action = async() => {
+                                                        let res = await deleteClient(router.query.id)
+                                                        if(res==='OK') {
+                                                            showSnackBar('Успешно', 'success')
+                                                            Router.push(`/clients`)
+                                                        }
+                                                        else if(res==='USED')
+                                                            showSnackBar('Объект используется')
+                                                        else
+                                                            showSnackBar('Ошибка', 'error')
+                                                    }
+                                                    setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                    showMiniDialog(true)
+                                                }}>
+                                                    Удалить
+                                                </Button>
+                                                :
+                                                null
+                                        }
+                                        </>
+                                        :
+                                        null
+                                }
+                            </div>
+                            </>
                             :
                             'Ничего не найдено'
                     }
@@ -446,7 +486,7 @@ const Client = React.memo((props) => {
 
 Client.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'superadmin', 'управляющий', 'кассир', 'супервайзер'].includes(store.getState().user.profile.role))
+    if(!['admin'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -456,15 +496,26 @@ Client.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             Router.push('/')
     return {
         data: {
-            object: ctx.query.id!=='new'?await getClient({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined):{
-                legalObject: store.getState().user.profile.legalObject?{_id: store.getState().user.profile.legalObject}:null,
-                name: '',
-                phone: [],
-                address: '',
-                email: [],
-                info: '',
-                inn: ''
-            }
+            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            object:ctx.query.id!=='new'?
+                await getClient({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+                :
+                {
+                    name: '',
+                    emails: [],
+                    phones: [],
+                    address: '',
+                    address1: '',
+                    info: '',
+                    work: '',
+                    passport: '',
+                    inn: '',
+                    level: '',
+                    birthday: '',
+                    geo: null
+                }
         }
     };
 })
@@ -480,6 +531,7 @@ function mapDispatchToProps(dispatch) {
     return {
         mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
         snackbarActions: bindActionCreators(snackbarActions, dispatch),
+        userActions: bindActionCreators(userActions, dispatch),
         appActions: bindActionCreators(appActions, dispatch),
     }
 }

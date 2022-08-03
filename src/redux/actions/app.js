@@ -1,4 +1,4 @@
-import { SET_PRINTER, SET_SHOW_LIGHTBOX, SET_COLUMNS, SET_IMAGES_LIGHTBOX, SET_INDEX_LIGHTBOX, SET_LEGALOBJECT, SET_WORK_SHIFT, SET_BRANCH, SET_CASHBOX, SET_CLIENT, SET_CASHIER, SHOW_APPBAR, SHOW_DRAWER, SET_SEARCH, SET_FILTER, SET_SORT, SET_IS_MOBILE_APP, SHOW_LOAD, SET_DATE } from '../constants/app'
+import { SET_SHOW_LIGHTBOX, SET_COLUMNS, SET_IMAGES_LIGHTBOX, SET_INDEX_LIGHTBOX, SHOW_APPBAR, SHOW_DRAWER, SET_SEARCH, SET_FILTER, SET_SORT, SET_IS_MOBILE_APP, SHOW_LOAD, SET_DATE } from '../constants/app'
 
 export function setColumns(data) {
     return {
@@ -14,13 +14,6 @@ export function setShowLightbox(data) {
     }
 }
 
-export function setPrinter(data) {
-    return {
-        type: SET_PRINTER,
-        payload: data
-    }
-}
-
 export function setImagesLightbox(data) {
     return {
         type: SET_IMAGES_LIGHTBOX,
@@ -31,48 +24,6 @@ export function setImagesLightbox(data) {
 export function setIndexLightbox(data) {
     return {
         type: SET_INDEX_LIGHTBOX,
-        payload: data
-    }
-}
-
-export function setLegalObject(data) {
-    return {
-        type: SET_LEGALOBJECT,
-        payload: data
-    }
-}
-
-export function setWorkShift(data) {
-    return {
-        type: SET_WORK_SHIFT,
-        payload: data
-    }
-}
-
-export function setBranch(data) {
-    return {
-        type: SET_BRANCH,
-        payload: data
-    }
-}
-
-export function setCashbox(data) {
-    return {
-        type: SET_CASHBOX,
-        payload: data
-    }
-}
-
-export function setClient(data) {
-    return {
-        type: SET_CLIENT,
-        payload: data
-    }
-}
-
-export function setCashier(data) {
-    return {
-        type: SET_CASHIER,
         payload: data
     }
 }

@@ -1,87 +1,134 @@
-import  Head from 'next/head';
+import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import { getLegalObjects, getLegalObjectsCount } from '../src/gql/legalObject'
+import {getItems, getItemsCount} from '../src/gql/item'
+import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
-import CardLegalObject from '../components/CardLegalObject'
 import { urlMain } from '../src/const'
-import LazyLoad from 'react-lazyload';
+import { cloneObject } from '../src/lib'
+import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
-import CardLegalObjectPlaceholder from '../components/CardPlaceholder'
 import { getClientGqlSsr } from '../src/apollo'
 import initialApp from '../src/initialApp'
-import Router from 'next/router'
-import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
-import Link from 'next/link';
+import * as snackbarActions from '../src/redux/actions/snackbar'
+import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
-const height = 92
+import Card from '@mui/material/Card';
+import AddIcon from '@mui/icons-material/Add';
+import Calculate from '@mui/icons-material/Calculate';
+import Link from 'next/link';
+import Fab from '@mui/material/Fab';
+import UsdToKgs from '../components/dialog/UsdToKgs'
 
 const Items = React.memo((props) => {
     const {classes} = pageListStyle();
+    //props
     const { data } = props;
+    const { search, filter, isMobileApp } = props.app;
+    const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
+    //настройка
+    const initialRender = useRef(true);
+    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
-    const { search } = props.app;
-    const { profile } = props.user;
-    let searchTimeOut = useRef(null);
-    const initialRender = useRef(true);
     const getList = async ()=>{
-        setList(await getLegalObjects({skip: 0, search}))
-        setCount(await getLegalObjectsCount({search}));
+        setList(cloneObject(await getItems({search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}, skip: 0})));
+        setCount(await getItemsCount({search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}}));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
     }
+    //поиск/фильтр
+    let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current) {
+            if(!initialRender.current) await getList()
+        })()
+    },[filter])
+    useEffect(()=>{
+        (async()=>{
+            if(initialRender.current)
                 initialRender.current = false;
-            } else {
+            else {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
-                searchTimeOut.current = setTimeout(async()=>{
-                    await getList()
-                }, 500)
-
+                searchTimeOut.current = setTimeout(async () => await getList(), 500)
             }
         })()
-    },[ search])
+    },[search])
+    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = await getLegalObjects({skip: list.length, search, })
+            let addedList = cloneObject(await getItems({skip: list.length, search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}}))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
         }
     }
+    //render
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Товары'>
+        <App filterShow={{factory: true, category: true}} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
             <Head>
-                <title>Товары</title>
-                <meta name='description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
-                <meta property='og:title' content='Товары' />
-                <meta property='og:description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
+                <title>Модели</title>
+                <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
+                <meta property='og:title' content='Модели' />
+                <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
-                <meta property='og:url' content={`${urlMain}/itemes`} />
-                <link rel='canonical' href={`${urlMain}/itemes`}/>
+                <meta property='og:url' content={`${urlMain}/items`} />
+                <link rel='canonical' href={`${urlMain}/items`}/>
             </Head>
-            <div className='count'>
-                {`Всего: ${count}`}
-            </div>
-            <div className={classes.page}>
-                {list?list.map((element)=>
-                    <LazyLoad scrollContainer={'.App-body'} key={element._id} height={height} offset={[height, 0]} debounce={0} once={true}  placeholder={<CardLegalObjectPlaceholder height={height}/>}>
-                        <CardLegalObject link='items' element={element}/>
-                    </LazyLoad>
-                ):null}
-            </div>
+            <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
+                <div className={classes.table}>
+                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                        <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 3)', justifyContent: 'start'}}>
+                            Название
+                        </div>
+                        <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 3)', justifyContent: 'start'}}>
+                            Цена(сом)
+                        </div>
+                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 3)', justifyContent: 'start'}}>
+                            Категория
+                        </div>
+                    </div>
+                    {list.map((element) =>
+                        <Link href='/item/[id]' as={`/item/${element._id}`} key={element._id}>
+                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}} onClick={()=>{
+                                let appBody = (document.getElementsByClassName('App-body'))[0]
+                                sessionStorage.scrollPositionStore = appBody.scrollTop
+                                sessionStorage.scrollPositionName = 'item'
+                                sessionStorage.scrollPositionLimit = list.length
+                            }}>
+                                <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 3)'}}>
+                                    {element.name}
+                                </div>
+                                <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 3)'}}>
+                                    {element.priceAfterDiscountKGS}
+                                </div>
+                                <div className={classes.tableCell} style={{maxHeight: 100, overflow: 'auto', width: isMobileApp?150:'calc(100% / 3)'}}>
+                                    {element.category.name}
+                                </div>
+                            </div>
+                        </Link>
+                    )}
+                </div>
+            </Card>
             {
-                profile.add?
+                data.edit?
+                    <Fab color='primary' aria-label='add' className={classes.fab2} onClick={()=>{
+                        setMiniDialog('Рассчитать по курсу', <UsdToKgs getList={getList}/>)
+                        showMiniDialog(true)
+                    }}>
+                        <Calculate/>
+                    </Fab>
+                    :
+                    null
+            }
+            {
+                data.add?
                     <Link href='/item/[id]' as={`/item/new`}>
                         <Fab color='primary' aria-label='add' className={classes.fab}>
                             <AddIcon />
@@ -90,33 +137,57 @@ const Items = React.memo((props) => {
                     :
                     null
             }
+            <div className='count'>
+                {`Всего: ${count}`}
+            </div>
         </App>
     )
 })
 
 Items.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'superadmin'].includes(store.getState().user.profile.role))
+    if(!['admin'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
             })
             ctx.res.end()
-        } else
+        }
+        else {
             Router.push('/')
+        }
+    store.getState().app.filterType = '/item'
     return {
         data: {
-            list: await getLegalObjects({skip: 0}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
-            count: await getLegalObjectsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            list: cloneObject(await getItems({
+                skip: 0,
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.factory?{factory: store.getState().app.filter.factory._id}:{},
+                ...store.getState().app.filter.category?{category: store.getState().app.filter.category._id}:{},
+                ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
+            },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getItemsCount({
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.factory?{factory: store.getState().app.filter.factory._id}:{},
+                ...store.getState().app.filter.category?{category: store.getState().app.filter.category._id}:{},
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })
 
 function mapStateToProps (state) {
     return {
-        user: state.user,
         app: state.app,
     }
 }
 
-export default connect(mapStateToProps)(Items);
+function mapDispatchToProps(dispatch) {
+    return {
+        mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
+        snackbarActions: bindActionCreators(snackbarActions, dispatch),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Items);

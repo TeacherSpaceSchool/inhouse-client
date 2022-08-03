@@ -7,6 +7,21 @@ export default makeStyles()((theme)=>{
             alignItems: 'center',
             flexDirection: 'column'
         },
+        inputHalf: {
+            fontSize: '0.875rem',
+            margin: '10px !important',
+            width: 'calc(50% - 20px)'
+        },
+        fullDialogBody:{
+            height: 'calc(100vh - 155px)',
+            width: '100%',
+            overflow: 'auto',
+            marginBottom: 10
+        },
+        miniDialogBody:{
+            width: '100%',
+            marginBottom: 10
+        },
         noteImageDiv: {
             position: 'relative'
         },
@@ -42,7 +57,7 @@ export default makeStyles()((theme)=>{
             fontFamily: 'Roboto',
             whiteSpace: 'pre-wrap',
             cursor: 'pointer',
-            borderBottom: '1px dashed #E67124',
+            borderBottom: '1px dashed #183B37',
             userSelect: 'none',
         },
         input: {
@@ -104,6 +119,7 @@ export default makeStyles()((theme)=>{
             fontWeight: '500',
             fontSize: '0.9375rem',
             fontFamily: 'Roboto',
+            whiteSpace: 'pre-wrap',
             wordBreak: 'break-all'
         },
         row: {
@@ -111,6 +127,12 @@ export default makeStyles()((theme)=>{
             alignItems: 'baseline',
             display: 'flex',
             flexDirection: 'row',
+        },
+        column: {
+            width: '100%',
+            alignItems: 'baseline',
+            display: 'flex',
+            flexDirection: 'column',
         },
         fabGeo: {
             position: 'fixed',
@@ -127,7 +149,7 @@ export default makeStyles()((theme)=>{
             whiteSpace: 'pre-wrap',
             cursor: 'pointer',
             userSelect: 'none',
-            borderBottom: '1px dashed #E67124'
+            borderBottom: '1px dashed #183B37'
         },
         minibtn: {
             marginRight: 20,
@@ -150,7 +172,7 @@ export default makeStyles()((theme)=>{
             cursor: 'pointer',
         },
         counternmbr: {
-            width: 60,
+            width: 80,
             height: 20,
             outline: 'none',
             border: 'none',

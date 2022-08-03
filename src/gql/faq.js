@@ -14,8 +14,8 @@ export const getFaqs = async({search, skip}, client)=>{
                             url
                             name
                             video
+                            text
                             createdAt
-                            roles
                         }
                     }`,
             })
@@ -25,34 +25,52 @@ export const getFaqs = async({search, skip}, client)=>{
     }
 }
 
-export const deleteFaq = async(_id)=>{
+export const getFaqsCount = async({search}, client)=>{
     try{
-        const client = getClientGql()
-        await client.mutate({
-            variables: {_id},
-            mutation : gql`
-                    mutation ($_id: ID!) {
-                        deleteFaq(_id: $_id)
-                    }`})
+        client = client? client : getClientGql()
+        let res = await client
+            .query({
+                variables: {search},
+                query: gql`
+                    query ($search: String) {
+                        faqsCount(search: $search) 
+                    }`,
+            })
+        return res.data.faqsCount
     } catch(err){
         console.error(err)
     }
 }
 
-export const addFaq = async(element)=>{
+export const deleteFaq = async(_id)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: element,
+            variables: {_id},
             mutation : gql`
-                    mutation ($file: Upload, $name: String!, $video: String, $roles: [String]!) {
-                        addFaq(file: $file, name: $name, video: $video, roles: $roles) {
+                    mutation ($_id: ID!) {
+                        deleteFaq(_id: $_id)
+                    }`})
+        return res.data.deleteFaq
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const addFaq = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($file: Upload, $name: String!, $text: String!, $video: String) {
+                        addFaq(file: $file, name: $name, text: $text, video: $video) {
                             _id
                             url
                             name
                             video
                             createdAt
-                            roles
+                            text
                         }
                     }`})
         return res.data.addFaq
@@ -61,15 +79,19 @@ export const addFaq = async(element)=>{
     }
 }
 
-export const setFaq = async(element)=>{
+export const setFaq = async(variables)=>{
     try{
         const client = getClientGql()
-        await client.mutate({
-            variables: element,
+        let res = await client.mutate({
+            variables,
             mutation : gql`
-                    mutation ($_id: ID!, $file: Upload, $name: String, $video: String, $roles: [String]) {
-                        setFaq(_id: $_id, file: $file, name: $name, video: $video, roles: $roles)
+                    mutation ($_id: ID!, $file: Upload, $name: String, $text: String, $video: String, $delFile: Boolean) {
+                        setFaq(_id: $_id, file: $file, name: $name, video: $video, text: $text, delFile: $delFile) {
+                            _id
+                            url
+                        }
                     }`})
+        return res.data.setFaq
     } catch(err){
         console.error(err)
     }

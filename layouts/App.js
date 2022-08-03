@@ -15,20 +15,21 @@ import { subscriptionData } from '../src/gql/data';
 import { useSubscription } from '@apollo/client';
 import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import * as snackbarActions from '../src/redux/actions/snackbar'
-import { start } from '../src/service/idb'
 import Lightbox from 'react-awesome-lightbox';
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
+import TableMenu from '../components/app/TableMenu'
 
 export const mainWindow = React.createRef();
 export const alert = React.createRef();
 export let containerRef;
 
 const App = React.memo(props => {
+    let { checkPagination, sorts, pageName, searchShow, setList, list, filterShow, menuItems, anchorElQuick, setAnchorElQuick, unsaved, full } = props;
+
     const { setProfile, logout } = props.userActions;
     const { setIsMobileApp, setShowAppBar, setShowLightbox } = props.appActions;
     const { profile, authenticated } = props.user;
     const { load, search, showAppBar, filter, showLightbox, imagesLightbox, indexLightbox } = props.app;
-    let { checkPagination, sorts, filters, pageName, dates, searchShow, setList, list, defaultOpenSearch, filterShow } = props;
     const [unread, setUnread] = useState({});
     const { showMiniDialog, showFullDialog } = props.mini_dialogActions;
     const [reloadPage, setReloadPage] = useState(false);
@@ -48,39 +49,75 @@ const App = React.memo(props => {
 
     useEffect( ()=>{
         if(process.browser) {
-            start()
-            window.addEventListener('offline', ()=>{showSnackBar('Нет подключения к УНО и ОФД', 'error')})
+            window.addEventListener('offline', ()=>{showSnackBar('Нет подключения к интернету', 'error')})
+            window.addEventListener('unload', ()=>{
+                sessionStorage.scrollPositionStore = undefined
+                sessionStorage.scrollPositionName = undefined
+                sessionStorage.scrollPositionLimit = undefined
+            })
         }
     },[process.browser])
-
     useEffect( ()=>{
         const routeChangeStart = (url)=>{
             setReloadPage(true)
-            if (sessionStorage.scrollPostionName&&!(
-                    url.includes('item')&&sessionStorage.scrollPostionName.includes('item')
+            if(sessionStorage.scrollPositionName&&
+                !(
+                    url.includes('client')&&sessionStorage.scrollPositionName==='client'
                     ||
-                    url.includes('sale')&&sessionStorage.scrollPostionName.includes('sale')
-                )) {
-                sessionStorage.removeItem('scrollPostionStore')
-                sessionStorage.removeItem('scrollPostionName')
-                sessionStorage.removeItem('scrollPostionLimit')
+                    url.includes('cpa')&&sessionStorage.scrollPositionName==='cpa'
+                    ||
+                    url.includes('item')&&sessionStorage.scrollPositionName==='item'
+                    ||
+                    url.includes('task')&&sessionStorage.scrollPositionName==='task'
+                    ||
+                    url.includes('user')&&sessionStorage.scrollPositionName==='user'
+                    ||
+                    url.includes('order')&&sessionStorage.scrollPositionName==='order'
+                    ||
+                    url.includes('sale')&&sessionStorage.scrollPositionName==='sale'
+                    ||
+                    url.includes('reservation')&&sessionStorage.scrollPositionName==='reservation'
+                    ||
+                    url.includes('refund')&&sessionStorage.scrollPositionName==='refund'
+                ))
+            {
+                sessionStorage.scrollPositionStore = undefined
+                sessionStorage.scrollPositionName = undefined
+                sessionStorage.scrollPositionLimit = undefined
             }
         }
         const routeChangeComplete = (url) => {
-            setReloadPage(false)
-            if(!url.includes('item')&&sessionStorage.history)
-                sessionStorage.removeItem('history')
-            if(sessionStorage.scrollPostionName&&sessionStorage.scrollPostionName === url) {
+            if(sessionStorage.scrollPositionName&&(
+                    url.includes('/clients')&&sessionStorage.scrollPositionName==='client'
+                    ||
+                    url.includes('/cpas')&&sessionStorage.scrollPositionName==='cpa'
+                    ||
+                    url.includes('/items')&&sessionStorage.scrollPositionName==='item'
+                    ||
+                    url.includes('/tasks')&&sessionStorage.scrollPositionName==='task'
+                    ||
+                    url.includes('/users')&&sessionStorage.scrollPositionName==='user'
+                    ||
+                    url.includes('/orders')&&sessionStorage.scrollPositionName==='order'
+                    ||
+                    url.includes('/sales')&&sessionStorage.scrollPositionName==='sale'
+                    ||
+                    url.includes('/reservations')&&sessionStorage.scrollPositionName==='reservation'
+                    ||
+                    url.includes('/refunds')&&sessionStorage.scrollPositionName==='refund'
+                ))
+            {
                 let appBody = (document.getElementsByClassName('App-body'))[0]
                 appBody.scroll({
-                    top: parseInt(sessionStorage.scrollPostionStore),
+                    top: parseInt(sessionStorage.scrollPositionStore),
                     left: 0,
                     behavior: 'instant'
                 });
-                sessionStorage.removeItem('scrollPostionStore')
-                sessionStorage.removeItem('scrollPostionName')
-                sessionStorage.removeItem('scrollPostionLimit')
+                sessionStorage.scrollPositionStore = undefined
+                sessionStorage.scrollPositionName = undefined
+                sessionStorage.scrollPositionLimit = undefined
             }
+            setReloadPage(false)
         }
         Router.events.on('routeChangeStart', routeChangeStart)
         Router.events.on('routeChangeComplete', routeChangeComplete);
@@ -136,13 +173,13 @@ const App = React.memo(props => {
             {
                 showAppBar?
                     <>
-                    <Drawer unread={unread} setUnread={setUnread}/>
-                    <AppBar filterShow={filterShow} unread={unread} defaultOpenSearch={defaultOpenSearch} searchShow={searchShow} dates={dates} pageName={pageName} sorts={sorts} filters={filters}/>
+                    <Drawer full={full} unsaved={unsaved} unread={unread} setUnread={setUnread}/>
+                    <AppBar filterShow={filterShow} unread={unread} searchShow={searchShow} pageName={pageName} sorts={sorts}/>
                     </>
                     :
                     null
             }
-            <div ref={containerRef} className='App-body'>
+            <div ref={containerRef} className={full?'App-body-f':'App-body'} style={['/catalog', '/refund/new'].includes(router.pathname)?{paddingBottom: 0}:{}}>
                 {props.children}
             </div>
             <FullDialog/>
@@ -166,6 +203,7 @@ const App = React.memo(props => {
                 null
             }
             <audio src='/alert.mp3' ref={alert}/>
+            <TableMenu menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}/>
         </div>
     )
 });

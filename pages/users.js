@@ -2,92 +2,133 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import { getLegalObjects, getLegalObjectsCount } from '../src/gql/legalObject'
+import {getUsers, getUsersCount} from '../src/gql/user'
+import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
-import CardLegalObject from '../components/CardLegalObject'
-import Fab from '@mui/material/Fab';
-import AddIcon from '@mui/icons-material/Add';
-import Link from 'next/link';
 import { urlMain } from '../src/const'
-import LazyLoad from 'react-lazyload';
+import { cloneObject } from '../src/lib'
+import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
-import CardLegalObjectPlaceholder from '../components/CardPlaceholder'
 import { getClientGqlSsr } from '../src/apollo'
 import initialApp from '../src/initialApp'
-import Router from 'next/router'
+import * as snackbarActions from '../src/redux/actions/snackbar'
+import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
-const height = 92
+import Card from '@mui/material/Card';
+import AddIcon from '@mui/icons-material/Add';
+import Link from 'next/link';
+import Fab from '@mui/material/Fab';
 
 const Users = React.memo((props) => {
     const {classes} = pageListStyle();
+    //props
     const { data } = props;
+    const { search, filter } = props.app;
+    //настройка
+    const initialRender = useRef(true);
+    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
-    const { search } = props.app;
-    const { profile } = props.user;
-    let searchTimeOut = useRef(null);
-    const initialRender = useRef(true);
     const getList = async ()=>{
-        setList(await getLegalObjects({skip: 0, search}))
-        setCount(await getLegalObjectsCount({search}));
+        setList(cloneObject(await getUsers({
+            search,
+            ...filter.store?{store: filter.store._id}:{},
+            ...filter.role?{role: filter.role}:{},
+            ...filter.department?{department: filter.department.name}:{},
+            ...filter.position?{position: filter.position.name}:{},
+            skip: 0
+        })));
+        setCount(await getUsersCount({
+            search,
+            ...filter.store?{store: filter.store._id}:{},
+            ...filter.role?{role: filter.role}:{},
+            ...filter.department?{department: filter.department.name}:{},
+            ...filter.position?{position: filter.position.name}:{}
+        }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
     }
+    //поиск/фильтр
+    let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current) {
+            if(!initialRender.current) await getList()
+        })()
+    },[filter])
+    useEffect(()=>{
+        (async()=>{
+            if(initialRender.current)
                 initialRender.current = false;
-            } else {
+            else {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
-                searchTimeOut.current = setTimeout(async()=>{
-                    await getList()
-                }, 500)
-
+                searchTimeOut.current = setTimeout(async () => await getList(), 500)
             }
         })()
-    },[ search])
+    },[search])
+    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = await getLegalObjects({skip: list.length, search, })
+            let addedList = cloneObject(await getUsers({
+                skip: list.length,
+                search,
+                ...filter.store?{store: filter.store._id}:{},
+                ...filter.role?{role: filter.role}:{},
+                ...filter.department?{department: filter.department.name}:{},
+                ...filter.position?{position: filter.position.name}:{}
+            }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
         }
     }
+    //render
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Пользователи'>
+        <App filterShow={{store: true, role: true, department: true, position: true}} checkPagination={checkPagination} searchShow={true} pageName='Пользователи'>
             <Head>
                 <title>Пользователи</title>
-                <meta name='description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
+                <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:title' content='Пользователи' />
-                <meta property='og:description' content='SALYK.STORE(Онлайн ККМ) - это кроссплатформенный виртуальный кассовый аппарат, который представляет собой программное обеспечение скачиваемое в PlayMarket и Appstore и возможностью входа через сайт с браузера (персональный/переносной компьютер, мобильный телефон и другие аналогичные аппараты), принадлежащие субъекту предпринимательства, с помощью которого будут проводится кассовые операции.' />
+                <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
                 <meta property='og:url' content={`${urlMain}/users`} />
                 <link rel='canonical' href={`${urlMain}/users`}/>
             </Head>
-            <div className='count'>
-                {`Всего: ${count}`}
-            </div>
-            <div className={classes.page}>
-                {
-                    ['admin', 'superadmin'].includes(profile.role)?
-                        <CardLegalObject link='users' element={{name: 'SALYK.STORE', _id: 'super'}}/>
-                        :
-                        null
-                }
-                {list?list.map((element)=>
-                    <LazyLoad scrollContainer={'.App-body'} key={element._id} height={height} offset={[height, 0]} debounce={0} once={true}  placeholder={<CardLegalObjectPlaceholder height={height}/>}>
-                        <CardLegalObject link='users' element={element}/>
-                    </LazyLoad>
-                ):null}
-            </div>
+            <Card className={classes.page}>
+                <div className={classes.table}>
+                    <div className={classes.tableHead}>
+                        <div className={classes.tableCell} style={{width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                            ФИО
+                        </div>
+                        <div className={classes.tableCell} style={{width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                            Роль
+                        </div>
+                    </div>
+                    {list.map((element) =>
+                        <Link href='/user/[id]' as={`/user/${element._id}`} key={element._id}>
+                            <div className={classes.tableRow} onClick={()=>{
+                                let appBody = (document.getElementsByClassName('App-body'))[0]
+                                sessionStorage.scrollPositionStore = appBody.scrollTop
+                                sessionStorage.scrollPositionName = 'user'
+                                sessionStorage.scrollPositionLimit = list.length
+                            }}>
+                                <div className={classes.tableCell} style={{width: 'calc(100% / 2)'}}>
+                                    {element.name}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 'calc(100% / 2)'}}>
+                                    {element.role}
+                                </div>
+                            </div>
+                        </Link>
+                    )}
+                </div>
+            </Card>
             {
-                ['admin', 'superadmin', 'оператор'].includes(profile.role)&&profile.add?
+                data.add?
                     <Link href='/user/[id]' as={`/user/new`}>
                         <Fab color='primary' aria-label='add' className={classes.fab}>
                             <AddIcon />
@@ -96,33 +137,60 @@ const Users = React.memo((props) => {
                     :
                     null
             }
+            <div className='count'>
+                {`Всего: ${count}`}
+            </div>
         </App>
     )
 })
 
 Users.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'superadmin', 'оператор'].includes(store.getState().user.profile.role))
+    if(!['admin'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
             })
             ctx.res.end()
-        } else
+        }
+        else {
             Router.push('/')
+        }
+    store.getState().app.filterType = '/user'
     return {
         data: {
-            list: await getLegalObjects({skip: 0}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
-            count: await getLegalObjectsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            list: cloneObject(await getUsers({
+                skip: 0,
+                ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{},
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
+                ...store.getState().app.filter.role?{role: store.getState().app.filter.role}:{},
+                ...store.getState().app.filter.department?{department: store.getState().app.filter.department.name}:{},
+                ...store.getState().app.filter.position?{position: store.getState().app.filter.position.name}:{}
+            },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getUsersCount({
+                ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
+                ...store.getState().app.filter.role?{role: store.getState().app.filter.role}:{},
+                ...store.getState().app.filter.department?{department: store.getState().app.filter.department.name}:{},
+                ...store.getState().app.filter.position?{position: store.getState().app.filter.position.name}:{}
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })
 
 function mapStateToProps (state) {
     return {
-        user: state.user,
         app: state.app,
     }
 }
 
-export default connect(mapStateToProps)(Users);
+function mapDispatchToProps(dispatch) {
+    return {
+        mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
+        snackbarActions: bindActionCreators(snackbarActions, dispatch),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Users);
