@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBalanceClients, getBalanceClientsCount} from '../src/gql/balanceClient'
+import {getBalanceClients, getBalanceClientsCount, getUnloadBalanceClients} from '../src/gql/balanceClient'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
 import { cloneObject } from '../src/lib'
@@ -12,6 +12,8 @@ import { getClientGqlSsr } from '../src/apollo'
 import initialApp from '../src/initialApp'
 import { wrapper } from '../src/redux/configureStore'
 import Card from '@mui/material/Card';
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const BalanceClients = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -86,7 +88,11 @@ const BalanceClients = React.memo((props) => {
                     {list.map((element) =>
                         <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
-                                {element.client.name}
+                                <Link href='/client/[id]' as={`/client/${element.client._id}`}>
+                                    <a>
+                                        {element.client.name}
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{flexDirection: 'column', ...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}}}>
                                 {
@@ -109,13 +115,14 @@ const BalanceClients = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            <UnloadUpload unload={()=>getUnloadBalanceClients({search, ...data.client?{client: data.client}:{}, debtor: filter.debtor})}/>
         </App>
     )
 })
 
 BalanceClients.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'кассир', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

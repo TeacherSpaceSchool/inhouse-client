@@ -1,13 +1,45 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadStores = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadStores(search: $search)
+                    }`,
+        })
+        return res.data.unloadStores
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadStore = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadStore(document: $document) 
+                    }`})
+        return res.data.uploadStore
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getStores = async({search, skip}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-                variables: {search, skip},
-                query: gql`
+            variables: {search, skip},
+            query: gql`
                     query ($search: String, $skip: Int) {
                         stores(search: $search, skip: $skip) {
                             _id
@@ -15,7 +47,7 @@ export const getStores = async({search, skip}, client)=>{
                             name
                         }
                     }`,
-            })
+        })
         return res.data.stores
     } catch(err){
         console.error(err)

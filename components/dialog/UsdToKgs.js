@@ -36,9 +36,11 @@ const UsdToKgs =  React.memo(
                     <Button variant='contained' color='primary' onClick={async()=>{
                         if(usdToKgs) {
                             usdToKgs = checkFloat(usdToKgs)
-                            if (usdToKgs && primeCostUSD) {
-                                setPriceKGS(checkFloat(priceUSD * usdToKgs))
-                                setPrimeCostKGS(checkFloat(primeCostUSD * usdToKgs))
+                            if (usdToKgs!=undefined && primeCostUSD!=undefined) {
+                                let priceKGS = checkFloat(priceUSD * usdToKgs)
+                                setPriceKGS(priceKGS?priceKGS:'')
+                                let primeCostKGS = checkFloat(primeCostUSD * usdToKgs)
+                                setPrimeCostKGS(primeCostKGS?primeCostKGS:'')
                                 showMiniDialog(false)
                             }
                             else {

@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getMoneyFlowsCount = async({store, order, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date}, _client)=>{
+export const getMoneyFlowsCount = async({search, store, installment, order, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date}, _client)=>{
     try{
         _client = _client? _client : getClientGql()
         let res = await _client
             .query({
-                variables: {store, order, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date},
+                variables: {search, store, order, installment, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date},
                 query: gql`
-                    query ($store: ID, $order: ID, $sale: ID, $reservation: ID, $refund: ID, $cashbox: ID, $client: ID, $employment: ID, $moneyRecipient: ID, $moneyArticle: ID, $operation: String, $currency: String, $date: Date) {
-                        moneyFlowsCount(store: $store, order: $order, sale: $sale, reservation: $reservation, refund: $refund, cashbox: $cashbox, client: $client, employment: $employment, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, currency: $currency, date: $date)
+                    query ($search: String, $store: ID, $order: ID, $installment: ID, $sale: ID, $reservation: ID, $refund: ID, $cashbox: ID, $client: ID, $employment: ID, $moneyRecipient: ID, $moneyArticle: ID, $operation: String, $currency: String, $date: Date) {
+                        moneyFlowsCount(search: $search, store: $store, installment: $installment, order: $order, sale: $sale, reservation: $reservation, refund: $refund, cashbox: $cashbox, client: $client, employment: $employment, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, currency: $currency, date: $date)
                     }`,
             })
         return res.data.moneyFlowsCount
@@ -52,15 +52,15 @@ export const getRKO = async(_id, _client)=>{
     }
 }
 
-export const getMoneyFlows = async({store, order, sale, reservation, refund, skip, cashbox, client, employment, moneyRecipient, moneyArticle, operation, currency, date}, _client)=>{
+export const getMoneyFlows = async({search, store, order, sale, installment, reservation, refund, skip, cashbox, client, employment, moneyRecipient, moneyArticle, operation, currency, date}, _client)=>{
     try{
         _client = _client? _client : getClientGql()
         let res = await _client
             .query({
-                variables: {store, order, sale, reservation, refund, skip, cashbox, client, employment, moneyRecipient, moneyArticle, operation, currency, date},
+                variables: {search, store, order, sale, reservation, installment, refund, skip, cashbox, client, employment, moneyRecipient, moneyArticle, operation, currency, date},
                 query: gql`
-                    query ($store: ID, $order: ID, $sale: ID, $reservation: ID, $refund: ID, $cashbox: ID, $client: ID, $employment: ID, $moneyRecipient: ID, $moneyArticle: ID, $operation: String, $currency: String, $date: Date, $skip: Int) {
-                        moneyFlows(store: $store, order: $order, sale: $sale, reservation: $reservation, refund: $refund, skip: $skip, cashbox: $cashbox, client: $client, employment: $employment, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, currency: $currency, date: $date) {
+                    query ($search: String, $store: ID, $order: ID, $sale: ID, $installment: ID, $reservation: ID, $refund: ID, $cashbox: ID, $client: ID, $employment: ID, $moneyRecipient: ID, $moneyArticle: ID, $operation: String, $currency: String, $date: Date, $skip: Int) {
+                        moneyFlows(search: $search, store: $store, order: $order, installment: $installment, sale: $sale, reservation: $reservation, refund: $refund, skip: $skip, cashbox: $cashbox, client: $client, employment: $employment, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, currency: $currency, date: $date) {
                             _id
                             createdAt
                             client {_id name}
@@ -79,6 +79,8 @@ export const getMoneyFlows = async({store, order, sale, reservation, refund, ski
                             sale {_id number}
                             reservation {_id number}
                             refund {_id number}
+                            installment {_id number}
+                            installmentMonth
                         }
                     }`,
             })
@@ -109,8 +111,8 @@ export const addMoneyFlow = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($order: ID, $sale: ID, $reservation: ID, $refund: ID, $client: ID, $employment: ID, $cashboxRecipient: ID, $cashbox: ID!, $moneyRecipient: ID, $moneyArticle: ID!, $operation: String!, $info: String!, $amount: Float!, $currency: String!, $date: Date!) {
-                        addMoneyFlow(order: $order, sale: $sale, reservation: $reservation, refund: $refund, client: $client, employment: $employment, cashboxRecipient: $cashboxRecipient, cashbox: $cashbox, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, info: $info, amount: $amount, currency: $currency, date: $date) {
+                    mutation ($order: ID, $installment: ID, $installmentMonth: Date, $sale: ID, $reservation: ID, $refund: ID, $client: ID, $employment: ID, $cashboxRecipient: ID, $cashbox: ID!, $moneyRecipient: ID, $moneyArticle: ID!, $operation: String!, $info: String!, $amount: Float!, $currency: String!, $date: Date!) {
+                        addMoneyFlow(order: $order, installment: $installment, installmentMonth: $installmentMonth, sale: $sale, reservation: $reservation, refund: $refund, client: $client, employment: $employment, cashboxRecipient: $cashboxRecipient, cashbox: $cashbox, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, info: $info, amount: $amount, currency: $currency, date: $date) {
                             _id
                             createdAt
                             client {_id name}
@@ -129,6 +131,8 @@ export const addMoneyFlow = async(variables)=>{
                             sale {_id number}
                             reservation {_id number}
                             refund {_id number}
+                            installment {_id number}
+                            installmentMonth
                         }
                     }`})
         return res.data.addMoneyFlow
@@ -147,6 +151,38 @@ export const setMoneyFlow = async(variables)=>{
                         setMoneyFlow(_id: $_id, info: $info, amount: $amount)
                     }`})
         return res.data.setMoneyFlow
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadMoneyFlows = async({search, store, installment, order, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {search, store, installment, order, sale, reservation, refund, client, cashbox, employment, moneyRecipient, moneyArticle, operation, currency, date},
+            query: gql`
+                    query ($search: String, $store: ID, $order: ID, $installment: ID, $sale: ID, $reservation: ID, $refund: ID, $cashbox: ID, $client: ID, $employment: ID, $moneyRecipient: ID, $moneyArticle: ID, $operation: String, $currency: String, $date: Date) {
+                        unloadMoneyFlows(search: $search, store: $store, installment: $installment, order: $order, sale: $sale, reservation: $reservation, refund: $refund, cashbox: $cashbox, client: $client, employment: $employment, moneyRecipient: $moneyRecipient, moneyArticle: $moneyArticle, operation: $operation, currency: $currency, date: $date)
+                    }`,
+        })
+        return res.data.unloadMoneyFlows
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadMoneyFlow = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadMoneyFlow(document: $document) 
+                    }`})
+        return res.data.uploadMoneyFlow
     } catch(err){
         console.error(err)
     }

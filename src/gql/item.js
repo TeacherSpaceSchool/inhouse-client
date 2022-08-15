@@ -1,16 +1,16 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getItems = async({skip, limit, search, category, factory, catalog}, client)=>{
+export const getItems = async({skip, limit, store, search, category, factory, catalog}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client
             .query({
-                variables: {skip, limit, search, category, factory, catalog},
+                variables: {skip, limit, search, store, category, factory, catalog},
                 query: gql`
-                    query ($skip: Int, $search: String, $limit: Int, $category: ID, $factory: ID, $catalog: Boolean) {
-                        items(skip: $skip, search: $search, limit: $limit, category: $category, factory: $factory, catalog: $catalog) {
+                    query ($skip: Int, $store: ID, $search: String, $limit: Int, $category: ID, $factory: ID, $catalog: Boolean) {
+                        items(skip: $skip, store: $store, search: $search, limit: $limit, category: $category, factory: $factory, catalog: $catalog) {
                             _id
                             createdAt
                             category {_id name}
@@ -149,6 +149,38 @@ export const kgsFromUsdItem = async(variables)=>{
                         kgsFromUsdItem(USD: $USD, ceil: $ceil)
                     }`})
         return res.data.kgsFromUsdItem
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadItems = async({search, category, factory}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search, category, factory},
+            query: gql`
+                    query ($search: String, $category: ID, $factory: ID) {
+                        unloadItems(search: $search, category: $category, factory: $factory)
+                    }`,
+        })
+        return res.data.unloadItems
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadItem = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadItem(document: $document) 
+                    }`})
+        return res.data.uploadItem
     } catch(err){
         console.error(err)
     }

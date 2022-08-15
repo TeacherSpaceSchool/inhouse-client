@@ -65,7 +65,7 @@ const Sale = React.memo((props) => {
     const { showSnackBar } = props.snackbarActions;
     const { showLoad } = props.appActions;
     const { profile } = props.user;
-    const today = useRef();
+    let [today, setToday] = useState();
     const unsaved = useRef();
     let [edit, setEdit] = useState(false);
     let [discount, setDiscount] = useState(data.object.discount);
@@ -83,9 +83,10 @@ const Sale = React.memo((props) => {
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const router = useRouter()
     useEffect(()=>{
-        if(!today.current) {
-            today.current = new Date()
-            today.current.setHours(0, 0, 0, 0)
+        if(!today) {
+            today = new Date()
+            today.setHours(0, 0, 0, 0)
+            setToday(today)
         }
         amountStart = 0
         for (let i = 0; i < itemsSale.length; i++) {
@@ -287,7 +288,7 @@ const Sale = React.memo((props) => {
                                         <div className={classes.nameField}>
                                             Доставка:
                                         </div>
-                                        <div className={classes.value} style={{ color: ['обработка'].includes(data.object.status)&&new Date(delivery)<today.current?'red':'black'}}>
+                                        <div className={classes.value} style={{ color: ['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
                                             {pdDDMMYY(data.object.delivery)}
                                         </div>
                                     </div>
@@ -344,7 +345,7 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
                                         <Input
@@ -508,7 +509,7 @@ const Sale = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsSale.length}):</div>
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     itemsSale.map((itemSale, idx)=>
                                         <div className={classes.column} key={`itemsSale${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -570,11 +571,11 @@ const Sale = React.memo((props) => {
                                     :
                                     data.object.itemsSale.map((itemSale, idx)=>
                                         <div className={classes.column} key={`itemsSale${idx}`}>
-                                            <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
-                                                <Link href='/item/[id]' as={`/item/${itemSale.item}`} >
-                                                    {`${idx+1}) ${itemSale.name}`}
-                                                </Link>
-                                            </div>
+                                            <Link href='/item/[id]' as={`/item/${itemSale.item}`} >
+                                                <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
+                                                    {idx+1}) {itemSale.name}
+                                                </div>
+                                            </Link>
                                             <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemSale.characteristics.length?5:10}}>
                                                 {itemSale.price} сом * {itemSale.count} {itemSale.unit} = {itemSale.amount} сом
                                             </div>
@@ -590,7 +591,7 @@ const Sale = React.memo((props) => {
                                     )
                             }
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
@@ -629,9 +630,8 @@ const Sale = React.memo((props) => {
                                             element={newItem}
                                             setElement={(item)=>setNewItem(item)}
                                             getElements={async (search)=>{
-                                                return await getItems({search})
+                                                return await getItems({search, catalog: true, store: data.object.store._id})
                                             }}
-                                            minLength={0}
                                             label={'Добавить позицию'}
                                         />
                                     </div>
@@ -640,7 +640,7 @@ const Sale = React.memo((props) => {
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                 {
-                                    ['admin', 'менеджер'].includes(profile.role)?
+                                    ['admin', 'менеджер', 'менеджер/завсклад', 'завсклад', 'доставщик'].includes(profile.role)?
                                         edit&&data.object.status==='обработка'?
                                             <>
                                             <Button color='primary' onClick={()=>{
@@ -714,7 +714,7 @@ const Sale = React.memo((props) => {
                                             :
                                             <>
                                             {
-                                                ['admin', 'менеджер'].includes(profile.role)&&data.object.status==='обработка'?
+                                                ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&data.object.status==='обработка'?
                                                     <Button color='primary' onClick={()=>{
                                                         setEdit(true)
                                                     }}>
@@ -724,7 +724,7 @@ const Sale = React.memo((props) => {
                                                     null
                                             }
                                             {
-                                                ['admin', 'менеджер'].includes(profile.role)&&data.object.status==='обработка'?
+                                                ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)&&data.object.status==='обработка'?
                                                     <Button color='primary' onClick={async()=>{
                                                         let items = cloneObject(data.object.itemsSale), shipment = {}
                                                         for(let i = 0; i <items.length; i++) {
@@ -741,7 +741,7 @@ const Sale = React.memo((props) => {
                                                     null
                                             }
                                             {
-                                                ['admin', 'менеджер'].includes(profile.role)&&data.object.status==='отгружен'?
+                                                ['admin', 'доставщик'].includes(profile.role)&&data.object.status==='отгружен'?
                                                     <Button color='primary' onClick={async()=>{
                                                         const action = async() => {
                                                             let element = {_id: router.query.id, status: 'доставлен'}
@@ -762,7 +762,7 @@ const Sale = React.memo((props) => {
                                                     null
                                             }
                                             {
-                                                ['admin', 'менеджер'].includes(profile.role)&&data.object.status==='обработка'?
+                                                ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&data.object.status==='обработка'?
                                                     <Button color='secondary' onClick={()=>{
                                                         const action = async() => {
                                                             let element = {_id: router.query.id, status: 'отмена'}
@@ -799,7 +799,7 @@ const Sale = React.memo((props) => {
 
 Sale.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'менеджер'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад', 'доставщик', 'завсклад', 'юрист'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -809,6 +809,7 @@ Sale.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             Router.push('/')
     let object = await getSale({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
     let _storeBalanceItems = await getStoreBalanceItems({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+    _storeBalanceItems = _storeBalanceItems?_storeBalanceItems:[]
     let storeBalanceItems = {}
     for(let i = 0; i <_storeBalanceItems.length; i++)
         storeBalanceItems[_storeBalanceItems[i].item._id] = _storeBalanceItems[i].free

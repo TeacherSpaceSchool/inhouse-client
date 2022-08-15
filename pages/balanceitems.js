@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBalanceItems, getBalanceItemsCount, setBalanceItem, addBalanceItem, getItemsForBalanceItem} from '../src/gql/balanceItem'
+import {getBalanceItems, getBalanceItemsCount, setBalanceItem, addBalanceItem, getItemsForBalanceItem, uploadBalanceItem, getUnloadBalanceItems} from '../src/gql/balanceItem'
 import {getWarehouses} from '../src/gql/warehouse'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
@@ -28,7 +28,10 @@ import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import { inputFloat, checkFloat } from '../src/lib'
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
+const uploadText = 'Формат xlsx:\n_id модели (если требуется обновить);\n_id склада;\nостаток.'
 const sorts = [
     {
         name: 'Остаток',
@@ -280,9 +283,13 @@ const BalanceItems = React.memo((props) => {
                                     null
                             }
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
-                               {
-                                   element.item.name
-                                }
+                                <Link href='/item/[id]' as={`/item/${element.item._id}`}>
+                                    <a>
+                                        {
+                                           element.item.name
+                                        }
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
                                 {
@@ -318,6 +325,12 @@ const BalanceItems = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadBalanceItem} uploadText={uploadText} unload={()=>getUnloadBalanceItems({search, ...filter.item?{item: filter.item._id}:{}, ...filter.warehouse?{warehouse: filter.warehouse._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -327,7 +340,7 @@ const BalanceItems = React.memo((props) => {
 
 BalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -337,11 +350,11 @@ BalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
         else {
             Router.push('/')
         }
-    store.getState().app.sort = 'amount'
+    store.getState().app.sort = '-amount'
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getBalanceItems({skip: 0, ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getBalanceItemsCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

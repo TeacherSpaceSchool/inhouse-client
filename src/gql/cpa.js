@@ -109,3 +109,35 @@ export const addCpa = async(variables)=>{
         console.error(err)
     }
 }
+
+export const getUnloadCpas = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadCpas(search: $search)
+                    }`,
+        })
+        return res.data.unloadCpas
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadCpa = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadCpa(document: $document) 
+                    }`})
+        return res.data.uploadCpa
+    } catch(err){
+        console.error(err)
+    }
+}

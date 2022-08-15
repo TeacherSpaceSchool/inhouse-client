@@ -3,6 +3,10 @@ import { pdDDMMYYYY } from '../../src/lib'
 import numberToWord from '../../src/numberToWord'
 
 export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
+    let items = ''
+    for(let i=0; i<itemsSale.length; i++) {
+        items += `${itemsSale[i].name} - ${itemsSale[i].count} ${itemsSale[i].unit}; `
+    }
     const precentPaid = parseInt(sale.paid*100/sale.amountEnd)
     const blob = await htmlDocx.asBlob(`
     <p style="text-align:center;font-size:12pt">
@@ -22,7 +26,7 @@ export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
     <p style="text-align:center;font-size:10pt">
       <strong>1. ПРЕДМЕТ ДОГОВОРА</strong>
     </p>
-    <span style="text-align:justify;font-size:10pt">1.1 Продавец обязуется поставить товар, а именно: ${itemsSale.map((itemSale) => `${itemSale.name} - ${itemSale.count} ${itemSale.unit}; `)}в течение <strong>90 дней со дня получения оплаты.</strong>
+    <span style="text-align:justify;font-size:10pt">1.1 Продавец обязуется поставить товар, а именно: ${items}в течение <strong>90 дней со дня получения оплаты.</strong>
     </span>
     <br>
     <span style="text-align:justify;font-size:10pt">1.2 Продавец по согласованию с Покупателем имеет право досрочно доставить товар.</span>

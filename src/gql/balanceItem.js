@@ -98,3 +98,35 @@ export const setBalanceItem = async({item, warehouse, amount, type})=>{
         console.error(err)
     }
 }
+
+export const getUnloadBalanceItems = async({item, warehouse, store}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {item, warehouse, store},
+            query: gql`
+                    query ($item: ID, $warehouse: ID, $store: ID) {
+                        unloadBalanceItems(item: $item, warehouse: $warehouse, store: $store)
+                    }`,
+        })
+        return res.data.unloadBalanceItems
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadBalanceItem = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadBalanceItem(document: $document) 
+                    }`})
+        return res.data.uploadBalanceItem
+    } catch(err){
+        console.error(err)
+    }
+}

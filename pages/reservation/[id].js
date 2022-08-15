@@ -47,7 +47,7 @@ const Reservation = React.memo((props) => {
     const { isMobileApp } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const { profile } = props.user;
-    const today = useRef();
+    let [today, setToday] = useState();
     const unsaved = useRef();
     let [edit, setEdit] = useState(false);
     let [paid, setPaid] = useState(data.object.paid);
@@ -59,9 +59,10 @@ const Reservation = React.memo((props) => {
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const router = useRouter()
     useEffect(()=>{
-        if(!today.current) {
-            today.current = new Date()
-            today.current.setHours(0, 0, 0, 0)
+        if(!today) {
+            today = new Date()
+            today.setHours(0, 0, 0, 0)
+            setToday(today)
         }
         amount = 0
         for (let i = 0; i < itemsReservation.length; i++) {
@@ -179,7 +180,7 @@ const Reservation = React.memo((props) => {
                                         <div className={classes.nameField}>
                                             Срок:
                                         </div>
-                                        <div className={classes.value} style={{ color: ['обработка'].includes(data.object.status)&&new Date(term)<today.current?'red':'black'}}>
+                                        <div className={classes.value} style={{ color: ['обработка'].includes(data.object.status)&&new Date(term)<today?'red':'black'}}>
                                             {pdDDMMYY(data.object.term)}
                                         </div>
                                     </div>
@@ -264,7 +265,7 @@ const Reservation = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsReservation.length}):</div>
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     itemsReservation.map((itemReservation, idx)=>
                                         <div className={classes.column} key={`itemsReservation${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -326,11 +327,11 @@ const Reservation = React.memo((props) => {
                                     :
                                     data.object.itemsReservation.map((itemReservation, idx)=>
                                         <div className={classes.column} key={`itemsReservation${idx}`}>
-                                            <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
-                                                <Link href='/item/[id]' as={`/item/${itemReservation.item}`} >
-                                                    {`${idx+1}) ${itemReservation.name}`}
-                                                </Link>
-                                            </div>
+                                            <Link href='/item/[id]' as={`/item/${itemReservation.item}`} >
+                                                <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
+                                                    {idx+1}) {itemReservation.name}
+                                                </div>
+                                            </Link>
                                             <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemReservation.characteristics.length?5:10}}>
                                                 {itemReservation.price} сом * {itemReservation.count} {itemReservation.unit} = {itemReservation.amount} сом
                                             </div>
@@ -346,7 +347,7 @@ const Reservation = React.memo((props) => {
                                     )
                             }
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
@@ -385,9 +386,8 @@ const Reservation = React.memo((props) => {
                                             element={newItem}
                                             setElement={(item)=>setNewItem(item)}
                                             getElements={async (search)=>{
-                                                return await getItems({search})
+                                                return await getItems({search, catalog: true, store: data.object.store._id})
                                             }}
-                                            minLength={0}
                                             label={'Добавить позицию'}
                                         />
                                     </div>
@@ -398,7 +398,7 @@ const Reservation = React.memo((props) => {
                                 data.object.status==='обработка'?
                                     <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                         {
-                                            ['admin', 'менеджер'].includes(profile.role)?
+                                            ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                                 edit?
                                                     <>
                                                     <Button color='primary' onClick={()=>{
@@ -463,7 +463,7 @@ const Reservation = React.memo((props) => {
                                                     :
                                                     <>
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                                             <Button color='primary' onClick={()=>{
                                                                 setEdit(true)
                                                             }}>
@@ -473,7 +473,7 @@ const Reservation = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                                             <Button color='secondary' onClick={()=>{
                                                                 const action = async() => {
                                                                     let element = {_id: router.query.id, status: 'отмена'}
@@ -513,7 +513,7 @@ const Reservation = React.memo((props) => {
 
 Reservation.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'менеджер'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

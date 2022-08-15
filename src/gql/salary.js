@@ -136,3 +136,35 @@ export const setSalary = async(variables)=>{
         console.error(err)
     }
 }
+
+export const getUnloadSalarys = async({date, search, store, employment, department, position}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {date, search, store, employment, department, position},
+            query: gql`
+                    query ($date: Date, $search: String, $store: ID, $employment: ID, $department: String, $position: String) {
+                        unloadSalarys(date: $date, search: $search, store: $store, employment: $employment, department: $department, position: $position)
+                    }`,
+        })
+        return res.data.unloadSalarys
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadSalary = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadSalary(document: $document) 
+                    }`})
+        return res.data.uploadSalary
+    } catch(err){
+        console.error(err)
+    }
+}

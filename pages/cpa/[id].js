@@ -107,7 +107,7 @@ const Cpa = React.memo((props) => {
                                     <TextField variant='standard'
                                                error={!name.length}
                                                id='name'
-                                               label='Название'
+                                               label='ФИО'
                                                value={name}
                                                onChange={(event) => setName(event.target.value)}
                                                className={classes.input}
@@ -187,7 +187,7 @@ const Cpa = React.memo((props) => {
                                         id='info'
                                         variant='standard'
                                         onChange={(event) => setInfo(event.target.value)}
-                                        label='Информация'
+                                        label='Комментарий'
                                         multiline={true}
                                         maxRows='5'
                                         value={info}
@@ -198,7 +198,7 @@ const Cpa = React.memo((props) => {
                                     <>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
-                                            Название:&nbsp;
+                                            ФИО:&nbsp;
                                         </div>
                                         <div className={classes.value}>
                                             {name}
@@ -212,14 +212,19 @@ const Cpa = React.memo((props) => {
                                             {percent}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Телефон:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
-                                        </div>
-                                    </div>
+                                    {
+                                        phones.length?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Телефон:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     {
                                         emails.length?
                                             <div className={classes.row}>
@@ -233,14 +238,19 @@ const Cpa = React.memo((props) => {
                                             :
                                             null
                                     }
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Информация:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {info}
-                                        </div>
-                                    </div>
+                                    {
+                                        info?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Комментарий:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {info}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     </>
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
@@ -323,7 +333,7 @@ const Cpa = React.memo((props) => {
 
 Cpa.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -333,8 +343,8 @@ Cpa.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             Router.push('/')
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
             object:ctx.query.id!=='new'?
                 await getCpa({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)

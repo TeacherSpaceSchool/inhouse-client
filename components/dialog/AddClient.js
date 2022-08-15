@@ -190,7 +190,7 @@ const AddClient =  React.memo(
                     id='info'
                     variant='standard'
                     onChange={(event) => setInfo(event.target.value)}
-                    label='Информация'
+                    label='Комментарий'
                     multiline={true}
                     maxRows='5'
                     value={info}

@@ -101,7 +101,7 @@ Faqs.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
             list: cloneObject(await getFaqs({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getFaqsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            count: await getFaqsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
         }
     };
 })

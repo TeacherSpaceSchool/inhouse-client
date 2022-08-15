@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getClients, getClientsCount} from '../src/gql/client'
+import {getClients, getClientsCount, getUnloadClients, uploadClient} from '../src/gql/client'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -18,6 +18,9 @@ import Card from '@mui/material/Card';
 import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
 import Fab from '@mui/material/Fab';
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id клиента (если требуется обновить);\nуровень (Бронза, Серебро, Золото, Платина);\nФИО;\nИНН;\nпаспорт;\nработа;\nадрес проживания;\nадрес прописки;\nдень рождения (ДД.ММ.ГГГГ);\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
 
 const Clients = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -118,6 +121,12 @@ const Clients = React.memo((props) => {
                     :
                     null
             }
+            {
+                data.add||data.edit?
+                    <UnloadUpload position={2} upload={uploadClient} uploadText={uploadText} unload={()=>getUnloadClients({search, ...filter.level?{level: filter.level}:{}})}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -127,7 +136,7 @@ const Clients = React.memo((props) => {
 
 Clients.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'завсклад', 'кассир', 'доставщик', 'менеджер/завсклад', 'управляющий', 'юрист'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -140,7 +149,7 @@ Clients.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     store.getState().app.filterType = '/client'
     return {
         data: {
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'менеджер', 'менеджер/завсклад', 'кассир'].includes(store.getState().user.profile.role),
             list: cloneObject(await getClients({
                 skip: 0,
                 ...store.getState().app.filter.level?{level: store.getState().app.filter.level}:{},

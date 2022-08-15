@@ -51,15 +51,15 @@ export const prepareAcceptOrder = async({_id}, client)=>{
     }
 }
 
-export const getOrders = async({skip, limit, manager, client, store, date, status, items}, clientGql)=>{
+export const getOrders = async({search, skip, limit, manager, client, store, date, status, items}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-                variables: {skip, limit, manager, client, store, date, status, items},
+                variables: {search, skip, limit, manager, client, store, date, status, items},
                 query: gql`
-                    query ($skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String, $items: Boolean) {
-                        orders(skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, date: $date, status: $status, items: $items) {
+                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String, $items: Boolean) {
+                        orders(search: $search, skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, date: $date, status: $status, items: $items) {
                             _id
                             createdAt
                             number
@@ -84,15 +84,15 @@ export const getOrders = async({skip, limit, manager, client, store, date, statu
     }
 }
 
-export const getOrdersCount = async({manager, client, store, date, status}, clientGql)=>{
+export const getOrdersCount = async({search, manager, client, store, date, status}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {manager, client, store, date, status},
+                variables: {search, manager, client, store, date, status},
                 query: gql`
-                    query ($manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
-                        ordersCount(manager: $manager, client: $client, store: $store, date: $date, status: $status)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
+                        ordersCount(search: $search, manager: $manager, client: $client, store: $store, date: $date, status: $status)
                     }`,
             })
         return res.data.ordersCount

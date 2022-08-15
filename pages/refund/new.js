@@ -12,32 +12,22 @@ import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import * as snackbarActions from '../../src/redux/actions/snackbar'
 import Router from 'next/router'
 import { urlMain } from '../../src/const'
-import { getClientGqlSsr } from '../../src/apollo'
-import { forceCheck } from 'react-lazyload';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
 import initialApp from '../../src/initialApp'
-import { getItems } from '../../src/gql/item'
-import { cloneObject } from '../../src/lib'
 import { wrapper } from '../../src/redux/configureStore'
-import SetCharacteristics from '../../components/dialog/SetCharacteristics'
 import * as appActions from '../../src/redux/actions/app'
 import Buy from '../../components/dialog/Buy'
-import ShowReservationOrderSale from '../../components/dialog/ShowReservationOrderSale'
 import {getClients} from '../../src/gql/client';
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
-import AddClient from '../../components/dialog/AddClient';
 import ShowItemsCatalog from '../../components/dialog/ShowItemsCatalog';
 import { getSales } from '../../src/gql/sale';
-import { getReservations } from '../../src/gql/reservation';
-import { getInstallments } from '../../src/gql/installment';
 
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
     const basketStyle = basketStyleFile();
     //props
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
-    const { data } = props;
     const {  profile } = props.user;
     const {  isMobileApp } = props.app;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
@@ -161,6 +151,8 @@ const Catalog = React.memo((props) => {
                                                             count: 0
                                                         }
                                                     basket[element.item].count = inputFloat(event.target.value)
+                                                    if(basket[element.item].count>element.count)
+                                                        basket[element.item].count = element.count
                                                     setBasket({...basket})
                                                 }}/>
                                                 <div className={basketStyle.classes.counterbtn} onClick={() => {
@@ -229,7 +221,7 @@ const Catalog = React.memo((props) => {
                                     })
                                 }
 
-                                setMiniDialog('Оформление', <Buy _discount={sale.discount} client={client} sale={sale._id} _currency={currency} items={items} type={'refund'}
+                                setMiniDialog('Оформление', <Buy _discount={checkFloat(sale.discount*100/sale.amountStart)} client={client} sale={sale._id} _currency={currency} items={items} type={'refund'}
                                                                  amountStart={amountStart}/>)
                                 showMiniDialog(true)
                             }
@@ -249,7 +241,7 @@ const Catalog = React.memo((props) => {
 
 Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if('менеджер'!==store.getState().user.profile.role)
+    if(!['менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

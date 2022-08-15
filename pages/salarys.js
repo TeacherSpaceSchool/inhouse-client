@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getSalarys, getSalarysCount, setSalary, addSalary, deleteSalary, getEmploymentsForSalary} from '../src/gql/salary'
+import {getSalarys, getSalarysCount, setSalary, addSalary, deleteSalary, getEmploymentsForSalary, getUnloadSalarys, uploadSalary} from '../src/gql/salary'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -29,6 +29,10 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
+
+const uploadText = 'Формат xlsx:\nдата (ММ.ГГГГ);\n_id сотрудника;\nоклад;\nставка;\nфак дни;\nраб дни;\nпремия;\nбонус;\nштрафы;\nавансы;\nоплачено.'
 
 const Salarys = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -151,7 +155,7 @@ const Salarys = React.memo((props) => {
                             Ставка
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Фак Дни
+                            Фак дни
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Раб дни
@@ -317,7 +321,7 @@ const Salarys = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                     <Input
-                                        placeholder='Фак Дни'
+                                        placeholder='Фак дни'
                                         variant='standard'
                                         className={classes.input}
                                         value={newElement.actualDays}
@@ -527,78 +531,101 @@ const Salarys = React.memo((props) => {
                                     :
                                     null
                             }
-                            <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                                {element.employment.name}
-                                <br/>
+                            <div className={classes.tableCell} style={{flexDirection: 'column', width: 200, justifyContent: data.edit?'center':'start'}}>
+                                <Link href='/user/[id]' as={`/user/${element.employment._id}`}>
+                                    <a>
+                                        {element.employment.name}
+                                    </a>
+                                </Link>
                                 {element.employment.position}
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Оклад'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={list[idx].salary}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].salary = inputMinusFloat(event.target.value)
-                                        list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Оклад'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.salary}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].salary = inputMinusFloat(event.target.value)
+                                                list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.salary
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Ставка'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.bid}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].bid = inputMinusFloat(event.target.value)
-                                        list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Ставка'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.bid}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].bid = inputMinusFloat(event.target.value)
+                                                list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.bid
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Фак Дни'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.actualDays}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].actualDays = inputFloat(event.target.value)
-                                        list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Фак дни'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.actualDays}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].actualDays = inputFloat(event.target.value)
+                                                list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.actualDays
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Раб дни'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.workingDay}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].workingDay = inputFloat(event.target.value)
-                                        list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Раб дни'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.workingDay}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].workingDay = inputFloat(event.target.value)
+                                                list[idx].accrued = checkFloat((checkFloat(list[idx].workingDay)?(checkFloat(list[idx].salary)/checkFloat(list[idx].workingDay)*checkFloat(list[idx].actualDays)):0)+checkFloat(list[idx].bid)*checkFloat(list[idx].actualDays))
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.workingDay
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                 {element.debtStart}
@@ -607,87 +634,112 @@ const Salarys = React.memo((props) => {
                                 {element.accrued}
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Премия'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.premium}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].premium = inputMinusFloat(event.target.value)
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Премия'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.premium}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].premium = inputMinusFloat(event.target.value)
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.premium
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Бонус'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.bonus}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].bonus = inputMinusFloat(event.target.value)
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Бонус'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.bonus}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].bonus = inputMinusFloat(event.target.value)
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.bonus
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Штраф'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.penaltie}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].penaltie = inputMinusFloat(event.target.value)
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Штраф'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.penaltie}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].penaltie = inputMinusFloat(event.target.value)
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.penaltie
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Аванс'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.advance}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].advance = inputMinusFloat(event.target.value)
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Аванс'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.advance}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].advance = inputMinusFloat(event.target.value)
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.advance
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                 {element.pay}
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                <Input
-                                    placeholder='Оплачено'
-                                    variant='standard'
-                                    className={classes.input}
-                                    value={element.paid}
-                                    onChange={(event) => {
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].paid = inputMinusFloat(event.target.value)
-                                        list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
-                                        list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
-                                        setList([...list])
-                                    }}
-                                />
+                                {
+                                    data.edit?
+                                        <Input
+                                            placeholder='Оплачено'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.paid}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].paid = inputMinusFloat(event.target.value)
+                                                list[idx].pay = checkFloat(checkFloat(list[idx].debtStart)+checkFloat(list[idx].accrued)+checkFloat(list[idx].bonus)+checkFloat(list[idx].premium)-checkFloat(list[idx].penaltie)-checkFloat(list[idx].advance))
+                                                list[idx].debtEnd = checkFloat(checkFloat(list[idx].pay)-checkFloat(list[idx].paid))
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.paid
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                 {element.debtEnd}
@@ -696,8 +748,42 @@ const Salarys = React.memo((props) => {
                     )}
                 </div>
             </Card>
-            <Button className={classes.fab} style={{width: 150}} variant='contained' color='primary' onClick={()=>{
-                setMiniDialog('Дата', <SetDate date={date} setDate={setDate} type='month'/>)
+            {
+                data.add||data.edit?
+                    <UnloadUpload position={3} upload={uploadSalary} uploadText={uploadText} unload={()=>getUnloadSalarys({
+                        search,
+                        date,
+                        ...filter.user?{employment: filter.user._id}:{},
+                        ...filter.department?{department: filter.department.name}:{},
+                        ...filter.position?{position: filter.position.name}:{},
+                        ...filter.store?{store: filter.store._id}:{}
+                    })}/>
+                    :
+                    null
+            }
+            <Button className={classes.fab} style={{width: 150, bottom: 30}} variant='contained' color='primary' onClick={()=>{
+                setMiniDialog('Дата', <SetDate date={date} setDate={(_date)=>{
+                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                        setNewElement({
+                            salary: '',
+                            bid: '',
+                            actualDays: '',
+                            workingDay: '',
+                            debtStart: '',
+                            premium: '',
+                            accrued: '',
+                            bonus: '',
+                            penaltie: '',
+                            advance: '',
+                            pay: '',
+                            paid: '',
+                            debtEnd: ''
+                        })
+                        setDate(_date)
+                    }
+                    else
+                        showSnackBar('Сохраните изменения или обновите страницу')
+                }} type='month'/>)
                 showMiniDialog(true)
             }}>
                 {pdMonthYYYY(date)}
@@ -711,7 +797,7 @@ const Salarys = React.memo((props) => {
 
 Salarys.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'кассир'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -727,9 +813,9 @@ Salarys.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     return {
         data: {
             date,
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             list: cloneObject(await getSalarys({
                 date,
                 skip: 0,

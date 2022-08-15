@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getTypeCharacteristics, getTypeCharacteristicsCount, addTypeCharacteristic, setTypeCharacteristic, deleteTypeCharacteristic} from '../src/gql/typeCharacteristic'
+import {getTypeCharacteristics, getTypeCharacteristicsCount, addTypeCharacteristic, setTypeCharacteristic, deleteTypeCharacteristic, getUnloadTypeCharacteristics, uploadTypeCharacteristic} from '../src/gql/typeCharacteristic'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -26,6 +26,8 @@ import Confirmation from '../components/dialog/Confirmation'
 import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id типа характеристики (если требуется обновить);\nназвание.'
 
 const TypeCharacteristics = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -258,13 +260,19 @@ const TypeCharacteristics = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadTypeCharacteristic} uploadText={uploadText} unload={()=>getUnloadTypeCharacteristics({search})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 TypeCharacteristics.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -276,9 +284,9 @@ TypeCharacteristics.getInitialProps = wrapper.getInitialPageProps(store => async
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getTypeCharacteristics({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getTypeCharacteristicsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

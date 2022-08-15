@@ -37,6 +37,7 @@ const Filter =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
         const { setFilter } = props.appActions;
+        const { profile } = props.user;
         const { filterShow } = props;
         const { filter, isMobileApp } = props.app;
         const { showMiniDialog } = props.mini_dialogActions;
@@ -142,7 +143,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.store?
+                    ['admin',  'управляющий'].includes(profile.role)&&filterShow.store?
                         <AutocomplectOnline
                             element={filter.store}
                             setElement={(store)=>{
@@ -205,7 +206,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.user?
+                    ['admin',  'управляющий'].includes(profile.role)&&filterShow.user?
                         <AutocomplectOnline
                             element={filter.user}
                             setElement={(user)=>{
@@ -264,7 +265,6 @@ const Filter =  React.memo(
                             getElements={async (search)=>{
                                 return await getItems({search})
                             }}
-                            minLength={0}
                             label={'Модель'}
                         />
                         :

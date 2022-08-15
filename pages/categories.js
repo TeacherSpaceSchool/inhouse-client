@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getCategorys, getCategorysCount, addCategory, setCategory, deleteCategory} from '../src/gql/category'
+import {getCategorys, getCategorysCount, addCategory, setCategory, deleteCategory, getUnloadCategorys, uploadCategory} from '../src/gql/category'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -26,6 +26,8 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import Card from '@mui/material/Card';
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id категории (если требуется обновить);\nназвание.'
 
 const Category = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -257,13 +259,19 @@ const Category = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadCategory} uploadText={uploadText} unload={()=>getUnloadCategorys({search})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 Category.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -275,9 +283,9 @@ Category.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getCategorys({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getCategorysCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

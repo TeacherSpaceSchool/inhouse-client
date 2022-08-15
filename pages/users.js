@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getUsers, getUsersCount} from '../src/gql/user'
+import {getUsers, getUsersCount, getUnloadUsers, uploadUser} from '../src/gql/user'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -18,6 +18,9 @@ import Card from '@mui/material/Card';
 import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
 import Fab from '@mui/material/Fab';
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id пользователя (если требуется обновить);\nлогин;\nпароль (если требуется обновить);\nФИО;\nроль (менеджер, завсклад, кассир, доставщик, менеджер/завсклад, управляющий, юрист, сотрудник);\nотдел;\nдолжность;\nначало работы (ДД.ММ.ГГГГ);\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\n_id магазина.'
 
 const Users = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -137,6 +140,18 @@ const Users = React.memo((props) => {
                     :
                     null
             }
+            {
+                data.add||data.edit?
+                    <UnloadUpload position={2} upload={uploadUser} uploadText={uploadText} unload={()=>getUnloadUsers({
+                        search,
+                        ...filter.store?{store: filter.store._id}:{},
+                        ...filter.role?{role: filter.role}:{},
+                        ...filter.department?{department: filter.department.name}:{},
+                        ...filter.position?{position: filter.position.name}:{}
+                    })}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -146,7 +161,7 @@ const Users = React.memo((props) => {
 
 Users.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

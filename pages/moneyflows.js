@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getMoneyFlows, getMoneyFlowsCount, setMoneyFlow, addMoneyFlow, deleteMoneyFlow, getPKO, getRKO} from '../src/gql/moneyFlow'
+import {getMoneyFlows, getMoneyFlowsCount, setMoneyFlow, addMoneyFlow, deleteMoneyFlow, getPKO, getRKO, uploadMoneyFlow, getUnloadMoneyFlows} from '../src/gql/moneyFlow'
 import {getCashboxes} from '../src/gql/cashbox'
 import {getMoneyArticles} from '../src/gql/moneyArticle'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
@@ -31,10 +31,13 @@ import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import DownloadIcon from '@mui/icons-material/Download';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
-import { inputFloat, checkFloat, pdDatePicker, pdDDMMYY } from '../src/lib'
+import { inputFloat, checkFloat, pdDatePicker, pdDDMMYYYY, pdDDMMYY } from '../src/lib'
 import Select from '@mui/material/Select';
 import Delete from '@mui/icons-material/Delete';
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
+const uploadText = 'Формат xlsx:\n_id движения денег (если требуется обновить);\nдата (ДД.ММ.ГГГГ);\n_id кассы;\n_id получателя (клиент, сотрудник, касса, получатель денег);\n_id операции клиента;\nмесяц рассрочки клиента;\n_id статьи;\nоперация (приход, расход);\nсумма;\nвалюта (сом, доллар, рубль, тенге, юань);\nкомментарий.'
 const operations = ['приход', 'расход']
 const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юань']
 
@@ -44,7 +47,7 @@ const MoneyFlows = React.memo((props) => {
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    const { filter } = props.app;
+    const { filter, search } = props.app;
     const { showLoad } = props.appActions;
     //настройка
     const unsaved = useRef({});
@@ -62,6 +65,7 @@ const MoneyFlows = React.memo((props) => {
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
         setList(cloneObject(await getMoneyFlows({skip: 0,
+            search,
             ...filter.date?{date: filter.date}:{},
             ...filter.currency?{currency: filter.currency}:{},
             ...filter.operation?{operation: filter.operation}:{},
@@ -73,10 +77,12 @@ const MoneyFlows = React.memo((props) => {
             ...filter.cashbox?{cashbox: filter.cashbox._id}:{},
             ...data.sale?{sale: data.sale}:{},
             ...data.reservation?{reservation: data.reservation}:{},
+            ...data.installment?{installment: data.installment}:{},
             ...data.order?{order: data.order}:{},
             ...data.refund?{refund: data.refund}:{},
         })));
         setCount(await getMoneyFlowsCount({
+            search,
             ...filter.store?{store: filter.store._id}:{},
             ...filter.date?{date: filter.date}:{},
             ...filter.currency?{currency: filter.currency}:{},
@@ -86,6 +92,7 @@ const MoneyFlows = React.memo((props) => {
             ...filter.user?{employment: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.cashbox?{cashbox: filter.cashbox._id}:{},
+            ...data.installment?{installment: data.installment}:{},
             ...data.sale?{sale: data.sale}:{},
             ...data.reservation?{reservation: data.reservation}:{},
             ...data.order?{order: data.order}:{},
@@ -96,19 +103,29 @@ const MoneyFlows = React.memo((props) => {
         paginationWork.current = true
     }
     //поиск/фильтр
+    let searchTimeOut = useRef(null);
+    useEffect(()=>{
+        (async()=>{
+            if(!initialRender.current) await getList()
+        })()
+    },[filter])
     useEffect(()=>{
         (async()=>{
             if(initialRender.current)
                 initialRender.current = false;
-            else
-                await getList()
+            else {
+                if(searchTimeOut.current)
+                    clearTimeout(searchTimeOut.current)
+                searchTimeOut.current = setTimeout(async () => await getList(), 500)
+            }
         })()
-    },[filter])
+    },[search])
     //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getMoneyFlows({skip: list.length,
+                search,
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.date?{date: filter.date}:{},
                 ...filter.currency?{currency: filter.currency}:{},
@@ -122,6 +139,7 @@ const MoneyFlows = React.memo((props) => {
                 ...data.reservation?{reservation: data.reservation}:{},
                 ...data.order?{order: data.order}:{},
                 ...data.refund?{refund: data.refund}:{},
+                ...data.installment?{installment: data.installment}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -136,7 +154,7 @@ const MoneyFlows = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App full unsaved={unsaved} filterShow={{date: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App searchShow={true} full unsaved={unsaved} filterShow={{date: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Движения денег</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -183,7 +201,7 @@ const MoneyFlows = React.memo((props) => {
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
                                             <MenuItem onClick={()=>{
-                                                if(newElement.date&&newElement.currency&&newElement.amount&&newElement.operation&&newElement.moneyArticle&&newElement.cashbox&&newElement.recipient&&(newElement.typeRecipient!=='Касса'||newElement.cashbox._id!==newElement.recipient._id)) {
+                                                if((newElement.typeClientOperation!=='Рассрочка'||(newElement.clientOperation&&newElement.installmentMonth))&&newElement.date&&newElement.currency&&newElement.amount&&newElement.operation&&newElement.moneyArticle&&newElement.cashbox&&newElement.recipient&&(newElement.typeRecipient!=='Касса'||newElement.cashbox._id!==newElement.recipient._id)) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
                                                         let res = await addMoneyFlow({
                                                             client: newElement.typeRecipient==='Клиент'?newElement.recipient._id:null,
@@ -194,6 +212,7 @@ const MoneyFlows = React.memo((props) => {
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='На заказ'?{order: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Бронь'?{reservation: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Возврат'?{refund: newElement.clientOperation._id}:{},
+                                                            ...newElement.clientOperation&&newElement.typeClientOperation==='Рассрочка'&&newElement.installmentMonth?{installment: newElement.clientOperation._id, installmentMonth: newElement.installmentMonth}:{},
                                                             cashbox: newElement.cashbox?newElement.cashbox._id:null,
                                                             moneyArticle: newElement.moneyArticle?newElement.moneyArticle._id:null,
                                                             operation: newElement.operation,
@@ -282,6 +301,9 @@ const MoneyFlows = React.memo((props) => {
                                     {
                                         newElement.clientOperation?<><br/>{newElement.typeClientOperation} №{newElement.clientOperation.number}</>:null
                                     }
+                                    {
+                                        newElement.installmentMonth?<><br/>{pdDDMMYYYY(newElement.installmentMonth)}</>:null
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 200}}>
                                     <AutocomplectOnline
@@ -328,20 +350,25 @@ const MoneyFlows = React.memo((props) => {
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{width: 115}}>
-                                    <Select className={classes.input} error={!newElement.currency&&newElement.unsaved} variant='standard' value={newElement.currency} onChange={(event) => {
-                                        newElement.unsaved = true
-                                        unsaved.current['new'] = true
-                                        newElement.currency = event.target.value
-                                        setNewElement({...newElement})
-                                    }}>
-                                        {currencies.map((element)=>
-                                            <MenuItem key={element} value={element}>{element}</MenuItem>
-                                        )}
-                                    </Select>
+                                    {
+                                        newElement.typeRecipient!=='Клиент'?
+                                            <Select className={classes.input} error={!newElement.currency&&newElement.unsaved} variant='standard' value={newElement.currency} onChange={(event) => {
+                                                newElement.unsaved = true
+                                                unsaved.current['new'] = true
+                                                newElement.currency = event.target.value
+                                                setNewElement({...newElement})
+                                            }}>
+                                                {currencies.map((element)=>
+                                                    <MenuItem key={element} value={element}>{element}</MenuItem>
+                                                )}
+                                            </Select>
+                                            :
+                                            newElement.currency
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 200}}>
                                     <Input
-                                        placeholder='Информация'
+                                        placeholder='Комментарий'
                                         multiline={true}
                                         maxRows='5'
                                         variant='standard'
@@ -451,29 +478,65 @@ const MoneyFlows = React.memo((props) => {
                                     element.cashbox.name
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{width: 200}} >
+                            <div className={classes.tableCell} style={{flexDirection: 'column', width: 200}} >
                                 {
-                                    element.client?element.client.name
+                                    element.client?
+                                        <Link href='/client/[id]' as={`/client/${element.client._id}`}>
+                                            <a>
+                                                {element.client.name}
+                                            </a>
+                                        </Link>
                                         :
                                     element.moneyRecipient?element.moneyRecipient.name
                                         :
-                                    element.employment?element.employment.name
+                                    element.employment?
+                                        <Link href='/user/[id]' as={`/user/${element.employment._id}`}>
+                                            <a>
+                                                element.employment.name
+                                            </a>
+                                        </Link>
                                         :
                                     element.cashboxRecipient?element.cashboxRecipient.name
                                         :
                                     'не указан'
                                 }
                                 {
-                                    element.sale?<><br/>Продажа №{element.sale.number}</>:null
+                                    element.sale?
+                                        <><Link href='/sale/[id]' as={`/sale/${element.sale._id}`}><a>Продажа №{element.sale.number}</a></Link></>
+                                        :
+                                        null
                                 }
                                 {
-                                    element.refund?<><br/>Возврат №{element.refund.number}</>:null
+                                    element.refund?
+                                        <><Link href='/refund/[id]' as={`/refund/${element.refund._id}`}><a>Возврат №{element.refund.number}</a></Link></>
+                                        :
+                                        null
                                 }
                                 {
-                                    element.reservation?<><br/>Бронь №{element.reservation.number}</>:null
+                                    element.reservation?
+                                        <><Link href='/reservation/[id]' as={`/reservation/${element.reservation._id}`}><a>Бронь №{element.reservation.number}</a></Link></>:
+                                        null
                                 }
                                 {
-                                    element.order?<><br/>На заказ №{element.order.number}</>:null
+                                    element.order?
+                                        <><Link href='/order/[id]' as={`/order/${element.order._id}`}><a>На заказ №{element.order.number}</a></Link></>
+                                        :
+                                        null
+                                }
+                                {
+                                    element.installment?
+                                        <><Link
+                                            href={{
+                                                pathname: '/installments',
+                                                query: {_id: element.installment._id}
+                                            }}
+                                            as={
+                                                `/installments?_id=${element.installment._id}`
+                                            }>
+                                            <a>Рассрочка №{element.installment.number}</a></Link>{pdDDMMYYYY(element.installmentMonth)}
+                                        </>
+                                        :
+                                        null
                                 }
                             </div>
                             <div className={classes.tableCell} style={{width: 200}}>
@@ -509,7 +572,7 @@ const MoneyFlows = React.memo((props) => {
                                 {
                                     data.edit?
                                         <Input
-                                            placeholder='Информация'
+                                            placeholder='Комментарий'
                                             multiline={true}
                                             maxRows='5'
                                             variant='standard'
@@ -533,13 +596,19 @@ const MoneyFlows = React.memo((props) => {
             <div className='count' style={{left: 10}}>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadMoneyFlow} uploadText={uploadText} unload={()=>getUnloadMoneyFlows({search})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -552,12 +621,13 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
     store.getState().app.sort = 'amount'
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             list: cloneObject(await getMoneyFlows({
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
                 ...ctx.query.sale?{sale: ctx.query.sale}:{},
+                ...ctx.query.installment?{installment: ctx.query.installment}:{},
                 ...ctx.query.reservation?{reservation: ctx.query.reservation}:{},
                 ...ctx.query.order?{order: ctx.query.order}:{},
                 ...ctx.query.refund?{refund: ctx.query.refund}:{},
@@ -569,11 +639,13 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 ...ctx.query.reservation?{reservation: ctx.query.reservation}:{},
                 ...ctx.query.order?{order: ctx.query.order}:{},
                 ...ctx.query.refund?{refund: ctx.query.refund}:{},
+                ...ctx.query.installment?{installment: ctx.query.installment}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
             ...ctx.query.sale?{sale: ctx.query.sale}:{},
             ...ctx.query.reservation?{reservation: ctx.query.reservation}:{},
             ...ctx.query.order?{order: ctx.query.order}:{},
             ...ctx.query.refund?{refund: ctx.query.refund}:{},
+            ...ctx.query.installment?{installment: ctx.query.installment}:{},
         }
     };
 })

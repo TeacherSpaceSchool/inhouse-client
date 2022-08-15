@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getCharacteristics, getCharacteristicsCount, addCharacteristic, setCharacteristic, deleteCharacteristic} from '../src/gql/characteristic'
+import {getCharacteristics, getCharacteristicsCount, addCharacteristic, setCharacteristic, deleteCharacteristic, getUnloadCharacteristics, uploadCharacteristic} from '../src/gql/characteristic'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -26,6 +26,8 @@ import Confirmation from '../components/dialog/Confirmation'
 import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id характеристики (если требуется обновить);\nназвание.'
 
 const Characteristics = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -143,7 +145,7 @@ const Characteristics = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: data.edit?'calc(100% - 40px)':'100%'}}>
                                 <Input
-                                        Input='Название'
+                                    placeholder='Название'
                                         error={!newElement.name&&newElement.unsaved}
                                         variant='standard'
                                         className={classes.input}
@@ -238,7 +240,7 @@ const Characteristics = React.memo((props) => {
                             {
                                     data.edit?
                                         <Input
-                                            Input='Название'
+                                            placeholder='Название'
                                             error={!element.name.length}
                                             variant='standard'
                                             className={classes.input}
@@ -263,13 +265,19 @@ const Characteristics = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadCharacteristic} uploadText={uploadText} unload={()=>getUnloadCharacteristics({search})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 Characteristics.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -281,9 +289,9 @@ Characteristics.getInitialProps = wrapper.getInitialPageProps(store => async(ctx
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getCharacteristics({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getCharacteristicsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

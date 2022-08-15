@@ -72,7 +72,7 @@ const CardFaq = React.memo((props) => {
                         <br/>
                         <br/>
                         <Button size='small' color={text?'primary':'secondary'} onClick={()=>{
-                            setMiniDialog('', <ViewText text={text} setText={setText}/>)
+                            setMiniDialog(name, <ViewText text={text} setText={setText}/>)
                             showMiniDialog(true)
                         }}>
                             Редактировать текст
@@ -193,7 +193,7 @@ const CardFaq = React.memo((props) => {
                                         <>
                                         <br/>
                                         <Button size='small' color='primary' onClick={()=>{
-                                            setMiniDialog('', <ViewText text={text}/>)
+                                            setMiniDialog(name, <ViewText text={text}/>)
                                             showMiniDialog(true)
                                         }}>
                                             Прочитать текст

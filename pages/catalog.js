@@ -127,7 +127,7 @@ const Catalog = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{factory: true, category: true}} checkPagination={checkPagination} searchShow={true} pageName='Каталог'>
+        <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Каталог'>
             <Head>
                 <title>Каталог</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -242,8 +242,8 @@ const Catalog = React.memo((props) => {
                     <Divider/>
                     <div className={basketStyle.classes.list}>
                         {
-                            list.map((element, idx) =>
-                                <div key={element._id}>
+                            list.map((element, idx) => {
+                                return <div key={element._id}>
                                     <div className={classes.rowTop}>
                                         <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
                                             setShowLightbox(true)
@@ -294,6 +294,8 @@ const Catalog = React.memo((props) => {
                                                             count: 0
                                                         }
                                                     basket[element._id].count = inputFloat(event.target.value)
+                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)))
+                                                        basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
                                                     setBasket({...basket})
                                                 }}/>
                                                 <div className={basketStyle.classes.counterbtn} onClick={() => {
@@ -317,7 +319,7 @@ const Catalog = React.memo((props) => {
                                     <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
                                         {
                                             data.type!=='order'?
-                                                <div className={basketStyle.classes.info} style={{...basket[element._id]&&basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))?{color: 'red'}:{}, right: 5, position: 'absolute'}}>
+                                                <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
                                                     {
                                                         itemsReservations[element._id]?
                                                             <>
@@ -330,7 +332,7 @@ const Catalog = React.memo((props) => {
                                                             null
                                                     }
                                                     Остаток: {element.free} {element.unit}
-                                                      </div>
+                                                </div>
                                                 :
                                                 null
                                         }
@@ -376,7 +378,7 @@ const Catalog = React.memo((props) => {
                                     <Divider/>
                                     <br/>
                                 </div>
-                            )
+                            })
                         }
                     </div>
                 </CardContent>
@@ -387,11 +389,11 @@ const Catalog = React.memo((props) => {
                         let list = Object.values(basket)
                         if(list.length) {
                             if (isMobileApp) {
-                                setFullDialog('Позиции', <ShowItemsCatalog list={list}/>)
+                                setFullDialog('Позиции', <ShowItemsCatalog itemsReservations={itemsReservations} list={list}/>)
                                 showFullDialog(true)
                             }
                             else {
-                                setMiniDialog('Позиции', <ShowItemsCatalog list={list}/>)
+                                setMiniDialog('Позиции', <ShowItemsCatalog itemsReservations={itemsReservations} list={list}/>)
                                 showMiniDialog(true)
                             }
                         }
@@ -400,8 +402,8 @@ const Catalog = React.memo((props) => {
                         <div className={basketStyle.classes.allPrice}>{amountStart} сом</div>
                     </div>
                     <Button color='primary' variant='contained' className={basketStyle.classes.buy} onClick={async ()=>{
-                        if(client) {
-                            if(allCount>0) {
+                        if (client) {
+                            if (allCount > 0) {
                                 let items = []
                                 const keys = Object.keys(basket)
                                 for (let i = 0; i < keys.length; i++) {
@@ -417,17 +419,19 @@ const Catalog = React.memo((props) => {
                                     })
                                 }
                                 let prepaid = 0, _reservations = [], _orders = []
-                                for(let i = 0; i <reservations.length; i++) {
+                                for (let i = 0; i < reservations.length; i++) {
                                     prepaid = checkFloat(prepaid + reservations[i].paid)
                                     _reservations[i] = reservations[i]._id
                                 }
-                                for(let i = 0; i <orders.length; i++) {
+                                for (let i = 0; i < orders.length; i++) {
                                     prepaid = checkFloat(prepaid + orders[i].paid)
                                     _orders[i] = orders[i]._id
                                 }
 
-                                setMiniDialog('Оформление', <Buy client={client} installmentsDebt={installmentsDebt} items={items} type={data.type} prepaid={prepaid}
-                                                                 amountStart={amountStart} orders={_orders} reservations={_reservations}/>)
+                                setMiniDialog('Оформление', <Buy client={client} installmentsDebt={installmentsDebt}
+                                                                 items={items} type={data.type} prepaid={prepaid}
+                                                                 amountStart={amountStart} orders={_orders}
+                                                                 reservations={_reservations}/>)
                                 showMiniDialog(true)
                             }
                             else
@@ -446,7 +450,7 @@ const Catalog = React.memo((props) => {
 
 Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if('менеджер'!==store.getState().user.profile.role)
+    if(!['менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

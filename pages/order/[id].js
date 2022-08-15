@@ -236,7 +236,7 @@ const Order = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsOrder.length}):</div>
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     itemsOrder.map((itemOrder, idx)=>
                                         <div className={classes.column} key={`itemsOrder${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -298,11 +298,11 @@ const Order = React.memo((props) => {
                                     :
                                     data.object.itemsOrder.map((itemOrder, idx)=>
                                         <div className={classes.column} key={`itemsOrder${idx}`}>
-                                            <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
-                                                <Link href='/item/[id]' as={`/item/${itemOrder.item}`} >
-                                                    {`${idx+1}) ${itemOrder.name}`}
-                                                </Link>
-                                            </div>
+                                            <Link href='/item/[id]' as={`/item/${itemOrder.item}`} >
+                                                <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
+                                                    {idx+1}) {itemOrder.name}
+                                                </div>
+                                            </Link>
                                             <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemOrder.characteristics.length?5:10}}>
                                                 {itemOrder.price} сом * {itemOrder.count} {itemOrder.unit} = {itemOrder.amount} сом
                                             </div>
@@ -318,7 +318,7 @@ const Order = React.memo((props) => {
                                     )
                             }
                             {
-                                edit?
+                                edit&&!data.object.paymentConfirmation?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
@@ -359,7 +359,6 @@ const Order = React.memo((props) => {
                                             getElements={async (search)=>{
                                                 return await getItems({search})
                                             }}
-                                            minLength={0}
                                             label={'Добавить позицию'}
                                         />
                                     </div>
@@ -370,7 +369,7 @@ const Order = React.memo((props) => {
                                 data.object.status==='обработка'?
                                     <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                         {
-                                            ['admin', 'менеджер'].includes(profile.role)?
+                                            ['admin', 'менеджер/завсклад', 'менеджер', 'завсклад'].includes(profile.role)?
                                                 edit?
                                                     <>
                                                     <Button color='primary' onClick={()=>{
@@ -433,7 +432,7 @@ const Order = React.memo((props) => {
                                                     :
                                                     <>
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                                             <Button color='primary' onClick={()=>{
                                                                 setEdit(true)
                                                             }}>
@@ -443,7 +442,7 @@ const Order = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
                                                             <Button color='primary' onClick={async()=>{
                                                                 const _prepareAcceptOrder = await prepareAcceptOrder({_id: router.query.id})
                                                                 if(_prepareAcceptOrder) {
@@ -461,7 +460,7 @@ const Order = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                                             <Button color='secondary' onClick={()=>{
                                                                 const action = async() => {
                                                                     let element = {_id: router.query.id, status: 'отмена'}
@@ -501,7 +500,7 @@ const Order = React.memo((props) => {
 
 Order.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'менеджер'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

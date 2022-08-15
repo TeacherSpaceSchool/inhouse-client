@@ -48,15 +48,15 @@ export const getSale = async({_id}, client)=>{
     }
 }
 
-export const getSales = async({skip, items, limit, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+export const getSales = async({search, skip, items, limit, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-                variables: {skip, items, limit, manager, client, cpa, date, delivery, status, store},
+                variables: {search, skip, items, limit, manager, client, cpa, date, delivery, status, store},
                 query: gql`
-                    query ($skip: Int, $items: Boolean, $limit: Int, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
-                        sales(skip: $skip, items: $items, limit: $limit, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store) {
+                    query ($search: String, $skip: Int, $items: Boolean, $limit: Int, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        sales(search: $search, skip: $skip, items: $items, limit: $limit, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store) {
                             _id
                             createdAt
                             number
@@ -95,15 +95,15 @@ export const getSales = async({skip, items, limit, manager, client, cpa, date, d
     }
 }
 
-export const getSalesCount = async({manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+export const getSalesCount = async({search, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {manager, client, cpa, date, delivery, status, store},
+                variables: {search, manager, client, cpa, date, delivery, status, store},
                 query: gql`
-                    query ($manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
-                        salesCount(manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store)
+                    query ($search: String, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        salesCount(search: $search, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store)
                     }`,
             })
         return res.data.salesCount

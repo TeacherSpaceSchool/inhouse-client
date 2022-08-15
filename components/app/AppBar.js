@@ -5,13 +5,15 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import MenuIcon from '@mui/icons-material/Menu';
-import ExitToApp from '@mui/icons-material/ExitToApp';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import * as userActions from '../../src/redux/actions/user'
 import * as appActions from '../../src/redux/actions/app'
 import appbarStyle from '../../src/styleMUI/appbar'
+import QrCodeScanner from '@mui/icons-material/QrCodeScanner';
 import ArrowUpward from '@mui/icons-material/ArrowUpward';
 import ArrowDownward from '@mui/icons-material/ArrowDownward';
 import Paper from '@mui/material/Paper';
@@ -21,24 +23,24 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Search from '@mui/icons-material/SearchRounded';
 import Sort from '@mui/icons-material/SortRounded';
 import FilterList from '@mui/icons-material/FilterListRounded';
-import PermIdentity from '@mui/icons-material/ManageAccounts';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Badge from '@mui/material/Badge';
 import Sign from '../dialog/Sign'
 import Filter from '../dialog/Filter'
 import Confirmation from '../dialog/Confirmation'
-import Router from 'next/router'
+import dynamic from 'next/dynamic';
+const Scan = dynamic(import('../dialog/Scan'), { ssr: false });
 
 const MyAppBar = React.memo((props) => {
     //props
     const initialRender = useRef(true);
     const {classes} = appbarStyle();
-    const { sorts, pageName, searchShow, unread, filterShow} = props
+    const { sorts, pageName, searchShow, unread, filterShow, qrScannerShow} = props
     const { drawer, search, filter, sort, isMobileApp } = props.app;
     const { showDrawer, setSearch, setSort } = props.appActions;
-    const { authenticated, profile } = props.user;
-    const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
+    const { authenticated } = props.user;
+    const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { logout } = props.userActions;
     //state
     const [anchorElMobileMenu, setAnchorElMobileMenu] = React.useState(null);
@@ -57,18 +59,16 @@ const MyAppBar = React.memo((props) => {
     let handleCloseSort = () => {
         setAnchorElSort(null);
     }
-    const [anchorElProfile, setAnchorElProfile] = useState(null);
-    const openProfile = Boolean(anchorElProfile);
-    let handleMenuProfile = (event) => {
-        setAnchorElProfile(event.currentTarget);
-    }
-    let handleCloseProfile = () => {
-        setAnchorElProfile(null);
-    }
     const [openSearch, setOpenSearch] = useState(search&&searchShow);
     let handleSearch = (event) => {
         setSearch(event.target.value)
     };
+    useEffect(()=>{
+        if(!initialRender.current) {
+            if (!openSearch&&search)
+                setOpenSearch(true)
+        }
+    },[search])
     useEffect(()=>{
         if(initialRender.current) {
             initialRender.current = false;
@@ -113,7 +113,7 @@ const MyAppBar = React.memo((props) => {
                             :
                             <>
                             {
-                                filterShow||searchShow||sorts?
+                                qrScannerShow||filterShow||searchShow||sorts?
                                     <IconButton
                                         style={{background: JSON.stringify(filter)!=='{}'?'rgba(255, 255, 255, 0.2)':'transparent'}}
                                         aria-owns={openMobileMenu ? 'menu-appbar' : undefined}
@@ -152,6 +152,20 @@ const MyAppBar = React.memo((props) => {
                                         }}>
                                             <div style={{display: 'flex'}}>
                                                 <Search/>&nbsp;Поиск
+                                            </div>
+                                        </MenuItem>
+                                        :
+                                        null
+                                }
+                                {
+                                    qrScannerShow?
+                                        <MenuItem key='search' onClick={()=>{
+                                            setFullDialog('Сканер', <Scan/>)
+                                            showFullDialog(true)
+                                            handleCloseMobileMenu();
+                                        }}>
+                                            <div style={{display: 'flex'}}>
+                                                <QrCodeScanner/>&nbsp;Сканер
                                             </div>
                                         </MenuItem>
                                         :
@@ -197,63 +211,39 @@ const MyAppBar = React.memo((props) => {
                                     :null
                                 }
                             </Menu>
-                            <Tooltip title='Профиль'>
-                                <IconButton
-                                    aria-owns='menu-appbar'
-                                    aria-haspopup='true'
-                                    color='inherit'
-                                    onClick={handleMenuProfile}
-                                >
-                                    <PermIdentity/>
-                                </IconButton>
-                            </Tooltip>
-                            <Menu
-                                id='menu-appbar'
-                                anchorEl={anchorElProfile}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={openProfile}
-                                onClose={handleCloseProfile}
-                            >
-                                {
-                                    authenticated?
-                                        [
-                                            profile.role!=='superadmin'?
-                                                <MenuItem key='profile' onClick={async()=>{
-                                                    Router.push(`/user/${profile._id}`)
-                                                    Router.reload()
-                                                }}>
-                                                    Профиль
-                                                </MenuItem>
-                                                :
-                                                null,
-                                            <MenuItem key='outProfile' onClick={()=>{
-                                                handleCloseProfile()
+                            {
+                                authenticated?
+                                    <Tooltip title='Выйти'>
+                                        <IconButton
+                                            aria-owns='menu-appbar'
+                                            aria-haspopup='true'
+                                            color='inherit'
+                                            onClick={()=>{
                                                 const action = async() => {
                                                     logout(true)
                                                 }
                                                 setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
                                                 showMiniDialog(true)
-                                            }}>
-                                                Выйти
-                                            </MenuItem>
-                                        ]
-                                        :
-                                        <MenuItem key='enterProfile' onClick={()=>{
-                                            handleCloseProfile()
-                                            setMiniDialog('Вход', <Sign isMobileApp={isMobileApp}/>)
-                                            showMiniDialog(true)
-                                        }}>
-                                            Войти
-                                        </MenuItem>
-                                }
-                            </Menu>
+                                            }}
+                                        >
+                                            <LogoutIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip title='Войти'>
+                                        <IconButton
+                                            aria-owns='menu-appbar'
+                                            aria-haspopup='true'
+                                            color='inherit'
+                                            onClick={()=>{
+                                                setMiniDialog('Вход', <Sign isMobileApp={isMobileApp}/>)
+                                                showMiniDialog(true)
+                                            }}
+                                        >
+                                            <LoginIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                            }
                             </>
                         :
                         openSearch?
@@ -325,6 +315,24 @@ const MyAppBar = React.memo((props) => {
                                 :null
                             }
                             {
+                                qrScannerShow?
+                                    <Tooltip title='Сканер'>
+                                        <IconButton
+                                            aria-owns={openSearch ? 'menu-appbar' : undefined}
+                                            aria-haspopup='true'
+                                            onClick={()=>{
+                                                setFullDialog('Сканер', <Scan/>)
+                                                showFullDialog(true)
+                                            }}
+                                            color='inherit'
+                                        >
+                                            <QrCodeScanner />
+                                        </IconButton>
+                                    </Tooltip>
+                                    :
+                                    null
+                            }
+                            {
                                 searchShow?
                                     <Tooltip title='Поиск'>
                                         <IconButton
@@ -345,70 +353,39 @@ const MyAppBar = React.memo((props) => {
                                     :
                                     null
                             }
-                            <Tooltip title='Профиль'>
-                                <IconButton
-                                    aria-owns='menu-appbar'
-                                    aria-haspopup='true'
-                                    color='inherit'
-                                    onClick={handleMenuProfile}
-                                >
-                                    <PermIdentity/>
-                                </IconButton>
-                            </Tooltip>
-                            <Menu
-                                id='menu-appbar'
-                                anchorEl={anchorElProfile}
-                                anchorOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'right',
-                                }}
-                                open={openProfile}
-                                onClose={handleCloseProfile}
-                            >
-                                {
-                                    authenticated?
-                                        [
-                                            profile.role!=='superadmin'?
-                                                <MenuItem key='profile' onClick={async()=>{
-                                                    await Router.push(`/user/${profile._id}`)
-                                                    await Router.reload()
-                                                }}>
-                                                    <div style={{display: 'flex'}}>
-                                                        <PermIdentity/>&nbsp;Профиль
-                                                    </div>
-                                                </MenuItem>
-                                            :
-                                            null,
-                                        <MenuItem key='logout' onClick={()=>{
-                                            handleCloseProfile()
-                                            const action = async() => {
-                                                logout(true)
-                                            }
-                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                            showMiniDialog(true)
-                                        }}>
-                                            <div style={{display: 'flex'}}>
-                                                <ExitToApp/>&nbsp;Выйти
-                                            </div>
-                                        </MenuItem>
-                                        ]
-                                        :
-                                        <MenuItem onClick={()=>{
-                                            handleCloseProfile()
-                                            setMiniDialog('Вход', <Sign isMobileApp={isMobileApp}/>)
-                                            showMiniDialog(true)
-                                        }}>
-                                            <div style={{display: 'flex'}}>
-                                                <ExitToApp/>&nbsp;Войти
-                                            </div>
-                                        </MenuItem>
-                                }
-                            </Menu>
-
+                            {
+                                authenticated?
+                                    <Tooltip title='Выйти'>
+                                        <IconButton
+                                            aria-owns='menu-appbar'
+                                            aria-haspopup='true'
+                                            color='inherit'
+                                            onClick={()=>{
+                                                const action = async() => {
+                                                    logout(true)
+                                                }
+                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                showMiniDialog(true)
+                                            }}
+                                        >
+                                            <LogoutIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip title='Войти'>
+                                        <IconButton
+                                            aria-owns='menu-appbar'
+                                            aria-haspopup='true'
+                                            color='inherit'
+                                            onClick={()=>{
+                                                setMiniDialog('Вход', <Sign isMobileApp={isMobileApp}/>)
+                                                showMiniDialog(true)
+                                            }}
+                                        >
+                                            <LoginIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                            }
                             </>
                     }
                 </Toolbar>

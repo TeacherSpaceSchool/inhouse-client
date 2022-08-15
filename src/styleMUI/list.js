@@ -191,6 +191,16 @@ export default makeStyles()(()=>{
             bottom: '20px',
             right: '90px'
         },
+        fab3: {
+            position: 'fixed!important',
+            bottom: '20px',
+            right: '160px'
+        },
+        fab4: {
+            position: 'fixed!important',
+            bottom: '20px',
+            right: '230px'
+        },
         row:{
             alignItems: 'baseline',
             display: 'flex',

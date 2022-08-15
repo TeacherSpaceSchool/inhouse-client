@@ -154,7 +154,7 @@ const Task = React.memo((props) => {
                                         error={!info}
                                         variant='standard'
                                         onChange={(event) => setInfo(event.target.value)}
-                                        label='Информация'
+                                        label='Комментарий'
                                         multiline={true}
                                         value={info}
                                         className={classes.input}
@@ -196,7 +196,7 @@ const Task = React.memo((props) => {
                                     </div>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
-                                            Информация:&nbsp;
+                                            Комментарий:&nbsp;
                                         </div>
                                         <div className={classes.value}>
                                             {info}
@@ -335,7 +335,7 @@ const Task = React.memo((props) => {
 
 Task.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!store.getState().user.authenticated)
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

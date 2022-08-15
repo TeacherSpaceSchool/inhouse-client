@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getCashboxes, getCashboxesCount, addCashbox, setCashbox, deleteCashbox} from '../src/gql/cashbox'
+import {getCashboxes, getCashboxesCount, addCashbox, setCashbox, deleteCashbox, getUnloadCashboxes, uploadCashbox} from '../src/gql/cashbox'
 import {getStores} from '../src/gql/store'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
@@ -28,6 +28,10 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id кассы/банка (если требуется обновить);\nназвание;\n_id магазина.'
+
 
 const Cashboxes = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -327,13 +331,19 @@ const Cashboxes = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadCashbox} uploadText={uploadText} unload={()=>getUnloadCashboxes({search, ...filter.store?{store: filter.store._id}:{}})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 Cashboxes.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'кассир'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

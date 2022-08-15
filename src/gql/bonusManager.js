@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getManagerForBonusManagers = async({search}, client)=>{
+export const getManagerForBonusManagers = async({search, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search},
+                variables: {search, store},
                 query: gql`
-                    query ($search: String) {
-                        managerForBonusManagers(search: $search) {
+                    query ($search: String, $store: ID) {
+                        managerForBonusManagers(search: $search, store: $store) {
                             _id
                             name
                         }
@@ -21,15 +21,15 @@ export const getManagerForBonusManagers = async({search}, client)=>{
     }
 }
 
-export const getBonusManagers = async({search, skip}, client)=>{
+export const getBonusManagers = async({search, skip, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, skip},
+                variables: {search, skip, store},
                 query: gql`
-                    query ($skip: Int, $search: String) {
-                        bonusManagers(skip: $skip, search: $search) {
+                    query ($skip: Int, $search: String, $store: ID) {
+                        bonusManagers(skip: $skip, search: $search, store: $store) {
                             _id
                             createdAt
                             manager {_id name}
@@ -43,15 +43,15 @@ export const getBonusManagers = async({search, skip}, client)=>{
     }
 }
 
-export const getBonusManagersCount = async({search}, client)=>{
+export const getBonusManagersCount = async({search, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search},
+                variables: {search, store},
                 query: gql`
-                    query ($search: String) {
-                        bonusManagersCount(search: $search)
+                    query ($search: String, $store: ID) {
+                        bonusManagersCount(search: $search, store: $store)
                     }`,
             })
         return res.data.bonusManagersCount
@@ -105,6 +105,38 @@ export const setBonusManager = async(variables)=>{
                         setBonusManager(_id: $_id, bonus: $bonus)
                     }`})
         return res.data.setBonusManager
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadBonusManagers = async({search, store}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search, store},
+            query: gql`
+                    query ($search: String, $store: ID) {
+                        unloadBonusManagers(search: $search, store: $store)
+                    }`,
+        })
+        return res.data.unloadBonusManagers
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadBonusManager = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadBonusManager(document: $document) 
+                    }`})
+        return res.data.uploadBonusManager
     } catch(err){
         console.error(err)
     }

@@ -52,15 +52,15 @@ export const prepareAcceptReservation = async({_id}, client)=>{
     }
 }
 
-export const getReservations = async({skip, limit, manager, client, store, date, status, soon, late, today, items}, clientGql)=>{
+export const getReservations = async({search, skip, limit, manager, client, store, date, status, soon, late, today, items}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {skip, limit, manager, client, store, date, status, soon, late, today, items},
+            variables: {search, skip, limit, manager, client, store, date, status, soon, late, today, items},
             query: gql`
-                    query ($skip: Int, $limit: Int, $manager: ID, $soon: Boolean, $client: ID, $store: ID, $date: Date, $status: String, $late: Boolean, $today: Boolean, $items: Boolean) {
-                        reservations(skip: $skip, items: $items, limit: $limit, soon: $soon, manager: $manager, client: $client, store: $store, date: $date, status: $status, late: $late, today: $today) {
+                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $soon: Boolean, $client: ID, $store: ID, $date: Date, $status: String, $late: Boolean, $today: Boolean, $items: Boolean) {
+                        reservations(search: $search, skip: $skip, items: $items, limit: $limit, soon: $soon, manager: $manager, client: $client, store: $store, date: $date, status: $status, late: $late, today: $today) {
                             _id
                             createdAt
                             number
@@ -86,15 +86,15 @@ export const getReservations = async({skip, limit, manager, client, store, date,
     }
 }
 
-export const getReservationsCount = async({manager, client, store, date, status, soon, late, today}, clientGql)=>{
+export const getReservationsCount = async({search, manager, client, store, date, status, soon, late, today}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {manager, client, store, date, status, soon, late, today},
+                variables: {search, manager, client, store, date, status, soon, late, today},
                 query: gql`
-                    query ($manager: ID, $client: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
-                        reservationsCount(manager: $manager, client: $client, soon: $soon, store: $store, date: $date, status: $status, late: $late, today: $today)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
+                        reservationsCount(search: $search, manager: $manager, client: $client, soon: $soon, store: $store, date: $date, status: $status, late: $late, today: $today)
                     }`,
             })
         return res.data.reservationsCount

@@ -161,13 +161,14 @@ const AddInstallment =  React.memo(
                                 grid.push({
                                     month: new Date(month),
                                     amount: paid,
-                                    paid: paid,
+                                    paid: 0,
                                     datePaid: month
                                 })
                                 month.setMonth(month.getMonth()+1)
                                 for(let i = 0; i < monthInstallment; i++) {
                                     grid.push({
                                         month: new Date(month),
+                                        paid: 0,
                                         amount: paidInstallment
                                     })
                                     month.setMonth(month.getMonth()+1)
@@ -176,10 +177,10 @@ const AddInstallment =  React.memo(
                                 let res = await addInstallment({
                                     renew,
                                     grid,
-                                    debt: checkFloat((amount+(renew?installmentsDebt:0))-paid),
+                                    debt: checkFloat(amount+(renew?installmentsDebt:0)),
                                     client: client._id,
                                     amount: amount+(renew?installmentsDebt:0),
-                                    paid,
+                                    paid: 0,
                                     datePaid: grid[1].month,
                                     store: store._id,
                                     currency: 'сом'

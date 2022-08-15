@@ -23,7 +23,7 @@ const ShowReservationOrderSale =  React.memo(
                                         {type==='order'?'На заказ':type==='reservation'?'Бронь':'Продажа'} №{element.number}:&nbsp;
                                     </div>
                                     <div className={classes.value} style={{marginBottom: 0}}>
-                                        {element.amount} сом
+                                        {type!=='sale'?`${element.paid} сом/`:''}{element.amount} сом
                                     </div>
                                 </div>
                             </a>

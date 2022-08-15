@@ -9,17 +9,24 @@ import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Collapse from '@mui/material/Collapse';
 //import Badge from '@mui/material/Badge';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import HomeIcon from '@mui/icons-material/Home';
-import InfoIcon from '@mui/icons-material/Info';
 import Router from 'next/router'
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import HelpIcon from '@mui/icons-material/Help';
+import ArticleIcon from '@mui/icons-material/Article';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TableViewIcon from '@mui/icons-material/TableView';
+import ErrorIcon from '@mui/icons-material/Error';
 
 const MyDrawer = React.memo((props) => {
-    const { unread, unsaved, full } = props
+    const { unsaved, full } = props
     const {classes} = drawerStyle()
     const { drawer, isMobileApp } = props.app;
     const { profile } = props.user;
@@ -28,7 +35,21 @@ const MyDrawer = React.memo((props) => {
     const open = isMobileApp||full?drawer:true;
     const router = useRouter();
     const variant = isMobileApp||full?'temporary' : 'permanent';
-    let [uncover, setUncover] = useState('');
+    let [uncover, setUncover] = useState(
+        router.pathname.includes('categories')||router.pathname.includes('typecharacteristics')||router.pathname.includes('characteristics')||router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||router.pathname.includes('warehouses')||router.pathname.includes('factorys')||router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||router.pathname.includes('cpa')||router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||router.pathname.includes('user')?
+            'Данные'
+            :
+            router.pathname.includes('refund')||router.pathname.includes('order')||router.pathname.includes('reservation')||router.pathname.includes('sale')||router.pathname.includes('wayitems')?
+                'Операции'
+                :
+                router.pathname.includes('bonusmanagers')||router.pathname.includes('balanceclients')||router.pathname.includes('salarys')||router.pathname.includes('moneyflows')||router.pathname.includes('installments')||router.pathname.includes('moneyrecipients')||router.pathname.includes('moneyarticles')||router.pathname.includes('cashboxes')||router.pathname.includes('doc')?
+                    'Бухгалтерия'
+                    :
+                    router.pathname.includes('/consultations')||router.pathname==='/balanceitems'||router.pathname==='/storebalanceitems'?
+                        'Статистика'
+                        :
+                        ''
+    );
     const handleUncover = (item)=>{
         if(uncover===item) item = ''
         setUncover(item)
@@ -54,9 +75,9 @@ const MyDrawer = React.memo((props) => {
             <List>
                 <Divider />
                 {
-                    ['менеджер'].includes(profile.role)?
+                    ['менеджер', 'менеджер/завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
+                        <ListItem style={{background: router.pathname==='/'||router.pathname==='/catalog'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                             handleUncover('');
                             showDrawer(false);
                             if(!unsaved||JSON.stringify(unsaved.current)==='{}')
@@ -73,197 +94,544 @@ const MyDrawer = React.memo((props) => {
                         null
                 }
                 {
-                    ['admin'].includes(profile.role)?
+                    ['admin', 'менеджер', 'завсклад', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/categories'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/categories')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Категории' />
+                        <ListItem style={{background: router.pathname.includes('categories')||router.pathname.includes('typecharacteristics')||router.pathname.includes('characteristics')||router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||router.pathname.includes('warehouses')||router.pathname.includes('factorys')||router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||router.pathname.includes('cpa')||router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||router.pathname.includes('user')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Данные');}}>
+                            <ListItemIcon><DashboardIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Данные' />
+                            <ListItemIcon>{uncover==='Данные'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
                         </ListItem>
                         <Divider/>
                         </>
                         :
                         null
                 }
+                <Collapse in={uncover==='Данные'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
+                        {
+                            ['admin',  'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/stores')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Магазины' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('warehouse')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/warehouses')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Склады' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background:router.pathname.includes('user')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/users')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Пользователи' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('client')&&!router.pathname.includes('balanceclients')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/clients')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Клиенты' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', ', менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('cpa')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/cpas')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Партнеры' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'завсклад', 'менеджер/завсклад', 'управляющий', 'менеджер'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background:router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/items')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Модели' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'менеджер/завсклад', 'завсклад', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('factory')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/factorys')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Фабрики' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/categories'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/categories')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Категории' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/typecharacteristics'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/typecharacteristics')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Типы характеристик' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/characteristics'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/characteristics')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Характеристики' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                    </List>
+                </Collapse>
                 {
-                    ['admin'].includes(profile.role)?
+                    ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'доставщик', 'завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/typecharacteristics'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/typecharacteristics')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Типы характеристик' />
+                        <ListItem style={{background: router.pathname.includes('refund')||router.pathname.includes('order')||router.pathname.includes('reservation')||router.pathname.includes('sale')||router.pathname.includes('wayitems')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Операции');}}>
+                            <ListItemIcon><ReceiptIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Операции' />
+                            <ListItemIcon>{uncover==='Операции'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
                         </ListItem>
                         <Divider/>
                         </>
                         :
                         null
                 }
+                <Collapse in={uncover==='Операции'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'доставщик', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('sale')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/sales')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Продажи' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('reservation')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/reservations')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Брони' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('order')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/orders')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='На заказ' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('refund')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/refunds')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Возвраты' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/wayitems'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/wayitems')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='В пути' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                    </List>
+                </Collapse>
                 {
-                    ['admin'].includes(profile.role)?
+                    ['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад', 'юрист'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/characteristics'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/characteristics')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Характеристики' />
+                        <ListItem style={{background: router.pathname.includes('bonusmanagers')||router.pathname.includes('balanceclients')||router.pathname.includes('salarys')||router.pathname.includes('moneyflows')||router.pathname.includes('installments')||router.pathname.includes('moneyrecipients')||router.pathname.includes('moneyarticles')||router.pathname.includes('cashboxes')||router.pathname.includes('doc')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Бухгалтерия');}}>
+                            <ListItemIcon><TableViewIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Бухгалтерия' />
+                            <ListItemIcon>{uncover==='Бухгалтерия'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
                         </ListItem>
                         <Divider/>
                         </>
                         :
                         null
                 }
+                <Collapse in={uncover==='Бухгалтерия'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
+                        {
+                            ['admin', 'кассир', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/balanceclients'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/balanceclients')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Баланс клиентов' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад', 'юрист'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/installments'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/installments')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Рассрочки' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/salarys'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/salarys')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Зарплаты' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/bonusmanagers'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/bonusmanagers')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Ставки' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/moneyflows'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/moneyflows')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Движения денег' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/cashboxes'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/cashboxes')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Кассы/Банки' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/moneyrecipients'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/moneyrecipients')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Получатели денег' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/moneyarticles'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/moneyarticles')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Статьи' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/doc'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/doc')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Реквизиты' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                    </List>
+                </Collapse>
                 {
-                    ['admin'].includes(profile.role)?
+                    ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/moneyrecipients'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/moneyrecipients')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Получатели денег' />
+                        <ListItem style={{background: router.pathname.includes('/consultations')||router.pathname==='/balanceitems'||router.pathname==='/storebalanceitems'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Статистика');}}>
+                            <ListItemIcon><TimelineIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Статистика' />
+                            <ListItemIcon>{uncover==='Статистика'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
                         </ListItem>
                         <Divider/>
                         </>
                         :
                         null
                 }
+                <Collapse in={uncover==='Статистика'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
+                        {
+                            ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/balanceitems'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/balanceitems')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Баланс складов' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/storebalanceitems'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/storebalanceitems')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Баланс моделей' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/consultations'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/consultations')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Консультации' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                    </List>
+                </Collapse>
                 {
-                    ['admin'].includes(profile.role)?
+                    profile.role?
                         <>
-                        <ListItem style={{background: router.pathname==='/moneyarticles'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
+                        <ListItem style={{background: router.pathname.includes('task')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                             showDrawer(false)
                             if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/moneyarticles')
+                                Router.push('/tasks')
                             else
                                 showSnackBar('Сохраните изменения или обновите страницу')
                         }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Статьи движения денег' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/stores')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Магазины' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('warehouse')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/warehouses')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Склады' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('factory')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/factorys')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Фабрики' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('client')&&!router.pathname.includes('balanceclients')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/clients')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Клиенты' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('cpa')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/cpas')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Партнеры' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/cashboxes'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/cashboxes')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Кассы/Банки' />
+                            <ListItemIcon><ArticleIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Задачи' />
                         </ListItem>
                         <Divider/>
                         </>
@@ -273,14 +641,14 @@ const MyDrawer = React.memo((props) => {
                 {
                     profile.role?
                         <>
-                        <ListItem style={{background: router.pathname==='/faqs'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
+                        <ListItem style={{background: router.pathname==='/faqs'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                             showDrawer(false)
                             if(!unsaved||JSON.stringify(unsaved.current)==='{}')
                                 Router.push('/faqs')
                             else
                                 showSnackBar('Сохраните изменения или обновите страницу')
                         }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
+                            <ListItemIcon><HelpIcon color='inherit'/></ListItemIcon>
                             <ListItemText primary='Инструкции' />
                         </ListItem>
                         <Divider/>
@@ -289,305 +657,17 @@ const MyDrawer = React.memo((props) => {
                         null
                 }
                 {
-                    ['admin'].includes(profile.role)?
+                    profile.role==='admin'?
                         <>
-                        <ListItem style={{background:router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
+                        <ListItem style={{background: router.pathname==='/errors'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                             showDrawer(false)
                             if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/items')
+                                Router.push('/errors')
                             else
                                 showSnackBar('Сохраните изменения или обновите страницу')
                         }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Модели' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background:router.pathname.includes('user')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/users')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Пользователи' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/balanceitems'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/balanceitems')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Баланс складов' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/storebalanceitems'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/storebalanceitems')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Баланс моделей' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/bonusmanagers'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/bonusmanagers')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Ставки' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/balanceclients'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/balanceclients')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Баланс клиентов' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/salarys'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/salarys')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Зарплаты' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/moneyflows'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/moneyflows')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                           }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Движения денег' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/wayitems'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/wayitems')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='В пути' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('task')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/tasks')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Задачи' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/consultations'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/consultations')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Консультации' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('order')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/orders')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='На заказ' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('reservation')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/reservations')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Брони' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('sale')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/sales')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Продажи' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/installments'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/installments')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Рассрочки' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname.includes('refund')?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/refunds')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Возвраты' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
-                {
-                    ['admin'].includes(profile.role)?
-                        <>
-                        <ListItem style={{background: router.pathname==='/doc'?'#f5f5f5':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/doc')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><InfoIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Реквизиты' />
+                            <ListItemIcon><ErrorIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Сбои' />
                         </ListItem>
                         <Divider/>
                         </>

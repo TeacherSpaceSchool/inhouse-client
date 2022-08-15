@@ -33,15 +33,15 @@ export const getRefund = async({_id}, client)=>{
     }
 }
 
-export const getRefunds = async({skip, limit, manager, client, store, date, status}, clientGql)=>{
+export const getRefunds = async({search, skip, limit, manager, client, store, date, status}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-                variables: {skip, limit, manager, client, store, date, status},
+                variables: {search, skip, limit, manager, client, store, date, status},
                 query: gql`
-                    query ($skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
-                        refunds(skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, date: $date, status: $status) {
+                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
+                        refunds(search: $search, skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, date: $date, status: $status) {
                             _id
                             createdAt
                             number
@@ -62,15 +62,15 @@ export const getRefunds = async({skip, limit, manager, client, store, date, stat
     }
 }
 
-export const getRefundsCount = async({manager, client, store, date, status}, clientGql)=>{
+export const getRefundsCount = async({search, manager, client, store, date, status}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {manager, client, store, date, status},
+                variables: {search, manager, client, store, date, status},
                 query: gql`
-                    query ($manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
-                        refundsCount(manager: $manager, client: $client, store: $store, date: $date, status: $status)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
+                        refundsCount(search: $search, manager: $manager, client: $client, store: $store, date: $date, status: $status)
                     }`,
             })
         return res.data.refundsCount

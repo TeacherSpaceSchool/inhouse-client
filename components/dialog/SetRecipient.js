@@ -10,6 +10,7 @@ import { getOrders } from '../../src/gql/order'
 import { getReservations } from '../../src/gql/reservation'
 import { getSales } from '../../src/gql/sale'
 import { getRefunds } from '../../src/gql/refund'
+import { getInstallments } from '../../src/gql/installment'
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
 import AutocomplectOnline from '../app/AutocomplectOnline'
@@ -17,9 +18,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import {pdDDMMYY, checkFloat} from '../../src/lib';
 
 const types = ['Клиент', 'Сотрудник', 'Касса', 'Получатель денег']
-const typesClientOperation = ['Продажа', 'На заказ', 'Бронь', 'Возврат']
+const typesClientOperation = ['Продажа', 'На заказ', 'Бронь', 'Возврат', 'Рассрочка']
 
 const SetRecipient =  React.memo(
     (props) =>{
@@ -31,6 +33,8 @@ const SetRecipient =  React.memo(
         let [recipient, setRecipient] = useState(newElement.recipient);
         let [clientOperation, setClientOperation] = useState(newElement.clientOperation);
         let [typeClientOperation, setTypeClientOperation] = useState(newElement.typeClientOperation);
+        let [installmentMonthes, setInstallmentMonthes] = useState(newElement.installmentMonthes);
+        let [installmentMonth, setInstallmentMonth] = useState(newElement.installmentMonth);
         const width = isMobileApp? (window.innerWidth-113) : 500
         return (
             <div className={classes.main} style={{width}}>
@@ -41,9 +45,17 @@ const SetRecipient =  React.memo(
                         newElement.unsaved = true
                         unsaved.current['new'] = true
                         newElement.typeRecipient = event.target.value
-                        setRecipient(null)
-                        setClientOperation(null)
                         setType(event.target.value)
+                        newElement.recipient = null
+                        setRecipient(null)
+                        newElement.clientOperation = null
+                        setClientOperation(null)
+                        newElement.installmentMonth = null
+                        setInstallmentMonth(null)
+                        newElement.installmentMonthes = null
+                        setInstallmentMonthes(null)
+                        if(event.target.value==='Клиент')
+                            newElement.currency = 'сом'
                         setNewElement({...newElement})
                     }}>
                         {types.map((element)=>
@@ -106,7 +118,12 @@ const SetRecipient =  React.memo(
                                 unsaved.current['new'] = true
                                 newElement.recipient = recipient
                                 setRecipient(recipient)
+                                newElement.clientOperation = null
                                 setClientOperation(null)
+                                newElement.installmentMonth = null
+                                setInstallmentMonth(null)
+                                newElement.installmentMonthes = null
+                                setInstallmentMonthes(null)
                                 setNewElement({...newElement})
                             }}
                             defaultValue={recipient}
@@ -126,8 +143,13 @@ const SetRecipient =  React.memo(
                                         newElement.unsaved = true
                                         unsaved.current['new'] = true
                                         newElement.typeClientOperation = event.target.value
-                                        setClientOperation(null)
                                         setTypeClientOperation(event.target.value)
+                                        newElement.clientOperation = null
+                                        setClientOperation(null)
+                                        newElement.installmentMonth = null
+                                        setInstallmentMonth(null)
+                                        newElement.installmentMonthes = null
+                                        setInstallmentMonthes(null)
                                         setNewElement({...newElement})
                                     }}>
                                         {typesClientOperation.map((element)=>
@@ -143,12 +165,16 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                if(clientOperation)
+                                                    newElement.amount = clientOperation.paid
+                                                else
+                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
                                                 setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getSales({search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getSales({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}
@@ -164,12 +190,16 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                if(clientOperation)
+                                                    newElement.amount = clientOperation.paid
+                                                else
+                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
                                                 setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getOrders({search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getOrders({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}
@@ -185,12 +215,16 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                if(clientOperation)
+                                                    newElement.amount = clientOperation.paid
+                                                else
+                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
                                                 setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getReservations({search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getReservations({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}
@@ -206,16 +240,81 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                if(clientOperation)
+                                                    newElement.amount = clientOperation.paid
+                                                else
+                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
                                                 setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getRefunds({search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getRefunds({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}
                                         />
+                                        :
+                                        null
+                                }
+                                {
+                                    typeClientOperation==='Рассрочка'?
+                                        <>
+                                        <AutocomplectOnline
+                                            element={clientOperation}
+                                            setElement={(clientOperation)=>{
+                                                newElement.unsaved = true
+                                                unsaved.current['new'] = true
+                                                newElement.clientOperation = clientOperation
+                                                setClientOperation(clientOperation)
+                                                newElement.installmentMonth = null
+                                                setInstallmentMonth(null)
+                                                if(clientOperation) {
+                                                    if(clientOperation.sale)
+                                                        clientOperation.grid = clientOperation.grid.slice(1)
+                                                    let installmentMonthes = []
+                                                    for(let i = 0; i <clientOperation.grid.length; i++) {
+                                                        if(clientOperation.grid[i].paid<clientOperation.grid[i].amount) {
+                                                            installmentMonthes.push(clientOperation.grid[i]);
+                                                        }
+                                                    }
+                                                    newElement.installmentMonthes = installmentMonthes
+                                                    setInstallmentMonthes(installmentMonthes)
+                                                    newElement.amount = installmentMonthes[installmentMonthes.length-1].amount
+                                                }
+                                                else {
+                                                    newElement.installmentMonthes = null
+                                                    setInstallmentMonthes(null)
+                                                }
+                                                setNewElement({...newElement})
+                                            }}
+                                            defaultValue={clientOperation}
+                                            getElements={async (search)=>{
+                                                return await getInstallments({search, client: recipient._id, status: 'активна', ...filter.store?{store: filter.store._id}:{}})
+                                            }}
+                                            minLength={0}
+                                            label={typeClientOperation}
+                                        />
+                                        {
+                                            installmentMonthes?
+                                                <FormControl className={classes.input}>
+                                                    <InputLabel>Месяц</InputLabel>
+                                                    <Select error={!installmentMonth} variant='standard' value={installmentMonth} onChange={(event) => {
+                                                        newElement.unsaved = true
+                                                        unsaved.current['new'] = true
+                                                        newElement.installmentMonth = event.target.value
+                                                        setInstallmentMonth(event.target.value)
+                                                        setNewElement({...newElement})
+                                                    }}>
+                                                        {installmentMonthes.map((element)=>
+                                                            <MenuItem key={element.month} value={element.month}>{pdDDMMYY(element.month)}({checkFloat(element.paid)}/{element.amount})</MenuItem>
+                                                        )}
+                                                    </Select>
+                                                </FormControl>
+                                                :
+                                                null
+                                        }
+                                        </>
                                         :
                                         null
                                 }

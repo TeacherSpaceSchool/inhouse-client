@@ -42,7 +42,7 @@ const colors = {
 const Refund = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
-    const { isMobileApp, filter } = props.app;
+    const { isMobileApp } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const { profile } = props.user;
     const unsaved = useRef();
@@ -203,11 +203,11 @@ const Refund = React.memo((props) => {
                             <div className={classes.nameField}>Позиции({data.object.itemsRefund.length}):</div>
                             {data.object.itemsRefund.map((itemRefund, idx)=>
                                 <div className={classes.column} key={`itemsRefund${idx}`}>
-                                    <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
-                                        <Link href='/item/[id]' as={`/item/${itemRefund.item}`} >
-                                            {`${idx+1}) ${itemRefund.name}`}
-                                        </Link>
-                                    </div>
+                                    <Link href='/item/[id]' as={`/item/${itemRefund.item}`} >
+                                        <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
+                                            {idx+1}) {itemRefund.name}
+                                        </div>
+                                    </Link>
                                     <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemRefund.characteristics.length?5:10}}>
                                         {itemRefund.price} сом * {itemRefund.count} {itemRefund.unit} = {itemRefund.amount} сом
                                     </div>
@@ -225,7 +225,7 @@ const Refund = React.memo((props) => {
                                 data.object.status==='обработка'?
                                     <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                         {
-                                            ['admin', 'менеджер'].includes(profile.role)?
+                                            ['admin', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
                                                 edit?
                                                     <>
                                                     <Button color='primary' onClick={()=>{
@@ -255,7 +255,7 @@ const Refund = React.memo((props) => {
                                                     :
                                                     <>
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)?
+                                                        ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)?
                                                             <Button color='primary' onClick={()=>{
                                                                 setEdit(true)
                                                             }}>
@@ -265,7 +265,7 @@ const Refund = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin'].includes(profile.role)?
+                                                        ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)?
                                                             <Button color='primary' onClick={async()=>{
                                                                 const warehouses = await getWarehouses({store: data.object.store._id})
                                                                 const acceptRefund = {}
@@ -289,7 +289,7 @@ const Refund = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'менеджер'].includes(profile.role)&&!data.object.paymentConfirmation?
+                                                        ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&!data.object.paymentConfirmation?
                                                             <Button color='secondary' onClick={()=>{
                                                                 const action = async() => {
                                                                     let element = {_id: router.query.id, status: 'отмена'}
@@ -329,7 +329,7 @@ const Refund = React.memo((props) => {
 
 Refund.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'менеджер'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

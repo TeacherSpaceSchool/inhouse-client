@@ -44,7 +44,7 @@ const Index = React.memo((props) => {
                 <Card className={classes.message} style={{width: isMobileApp?300:500, minHeight: isMobileApp?300:500}}>
                     <CardContent>
                         {
-                            profile.role==='менеджер'?
+                            ['менеджер/завсклад', 'менеджер'].includes(profile.role)?
                                 !consultation?
                                     <>
                                     <center>
@@ -191,7 +191,7 @@ const Index = React.memo((props) => {
 Index.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
     let consultation
-    if('менеджер'===store.getState().user.profile.role)
+    if(['менеджер/завсклад', 'менеджер'].includes(store.getState().user.profile.role))
         consultation = (await getConsultations({active: true}, ctx.req?await getClientGqlSsr(ctx.req):undefined))[0]
     return {
         data: {

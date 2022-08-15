@@ -91,3 +91,35 @@ export const setCashbox = async(variables)=>{
         console.error(err)
     }
 }
+
+export const getUnloadCashboxes = async({search, store}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search, store},
+            query: gql`
+                    query ($search: String, $store: ID) {
+                        unloadCashboxes(search: $search, store: $store)
+                    }`,
+        })
+        return res.data.unloadCashboxes
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadCashbox = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadCashbox(document: $document) 
+                    }`})
+        return res.data.uploadCashbox
+    } catch(err){
+        console.error(err)
+    }
+}

@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getItems, getItemsCount} from '../src/gql/item'
+import {getItems, getItemsCount, getUnloadItems, uploadItem} from '../src/gql/item'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -20,6 +20,9 @@ import Calculate from '@mui/icons-material/Calculate';
 import Link from 'next/link';
 import Fab from '@mui/material/Fab';
 import UsdToKgs from '../components/dialog/UsdToKgs'
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id модели (если требуется обновить);\nназвание;\nартикул;\nID;\n_id категории;\n_id фабрики;\nцена в долларах;\nцена в сомах;\nсебестоимость в долларах;\nсебестоимость в сомах;\nскидка в сомах;\nединица измерения;\nразмер;\nхарактеристики (через запятую с пробелом. Пример: тип характеристики1: характеристика1, тип характеристики2: характеристика2);\nкомментарий.'
 
 const Items = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -70,7 +73,7 @@ const Items = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{factory: true, category: true}} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
+        <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
             <Head>
                 <title>Модели</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -117,6 +120,12 @@ const Items = React.memo((props) => {
                 </div>
             </Card>
             {
+                data.add||data.edit?
+                    <UnloadUpload position={3} upload={uploadItem} uploadText={uploadText} unload={()=>getUnloadItems({search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}})}/>
+                    :
+                    null
+            }
+            {
                 data.edit?
                     <Fab color='primary' aria-label='add' className={classes.fab2} onClick={()=>{
                         setMiniDialog('Рассчитать по курсу', <UsdToKgs getList={getList}/>)
@@ -146,7 +155,7 @@ const Items = React.memo((props) => {
 
 Items.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'завсклад', 'менеджер/завсклад', 'управляющий', 'менеджер'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -159,8 +168,8 @@ Items.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     store.getState().app.filterType = '/item'
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'завсклад', 'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'завсклад', 'менеджер/завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getItems({
                 skip: 0,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},

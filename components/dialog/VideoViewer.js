@@ -13,7 +13,7 @@ const VideoViewer =  React.memo(
         return (
             <div className={classes.column}>
                 <iframe style={{height: window.innerHeight-145, width: window.innerWidth-48}} src={video} frameborder='0' allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture' allowfullscreen='allowfullscreen'/>
-                <center>
+                <center style={{width: window.innerWidth-48}}>
                     <Button variant='contained' color='secondary' onClick={()=>{showFullDialog(false);}} className={classes.button}>
                             Закрыть
                     </Button>

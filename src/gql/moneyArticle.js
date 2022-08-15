@@ -87,3 +87,35 @@ export const setMoneyArticle = async(variables)=>{
         console.error(err)
     }
 }
+
+export const uploadMoneyArticle = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadMoneyArticle(document: $document) 
+                    }`})
+        return res.data.uploadMoneyArticle
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadMoneyArticles = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadMoneyArticles(search: $search)
+                    }`,
+        })
+        return res.data.unloadMoneyArticles
+    } catch(err){
+        console.error(err)
+    }
+}

@@ -121,3 +121,35 @@ export const addClient = async(variables)=>{
         console.error(err)
     }
 }
+
+export const getUnloadClients = async({search, level}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search, level},
+            query: gql`
+                    query ($search: String, $level: String) {
+                        unloadClients(search: $search, level: $level)
+                    }`,
+        })
+        return res.data.unloadClients
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadClient = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadClient(document: $document) 
+                    }`})
+        return res.data.uploadClient
+    } catch(err){
+        console.error(err)
+    }
+}

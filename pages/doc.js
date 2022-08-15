@@ -81,6 +81,9 @@ const Doc = React.memo((props) => {
                                value={name}
                                onChange={(event) => setName(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='wallet'
@@ -89,6 +92,9 @@ const Doc = React.memo((props) => {
                                value={wallet}
                                onChange={(event) => setWallet(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='court'
@@ -97,6 +103,9 @@ const Doc = React.memo((props) => {
                                value={court}
                                onChange={(event) => setCourt(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='phoneCheckInstallment'
@@ -105,14 +114,9 @@ const Doc = React.memo((props) => {
                                value={phoneCheckInstallment}
                                onChange={(event) => setPhoneCheckInstallment(event.target.value)}
                                className={classes.input}
-                    />
-                    <TextField variant='standard'
-                               id='name'
-                               error={!name}
-                               label='Название'
-                               value={name}
-                               onChange={(event) => setName(event.target.value)}
-                               className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='address'
@@ -121,6 +125,9 @@ const Doc = React.memo((props) => {
                                onChange={(event) => setAddress(event.target.value)}
                                value={address}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='inn'
@@ -129,6 +136,9 @@ const Doc = React.memo((props) => {
                                value={inn}
                                onChange={(event) => setInn(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='okpo'
@@ -137,6 +147,9 @@ const Doc = React.memo((props) => {
                                value={okpo}
                                onChange={(event) => setOkpo(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='bank'
@@ -145,6 +158,9 @@ const Doc = React.memo((props) => {
                                value={bank}
                                onChange={(event) => setBank(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='bik'
@@ -153,6 +169,9 @@ const Doc = React.memo((props) => {
                                value={bik}
                                onChange={(event) => setBik(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='account'
@@ -161,6 +180,9 @@ const Doc = React.memo((props) => {
                                value={account}
                                onChange={(event) => setAccount(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <TextField variant='standard'
                                id='director'
@@ -169,6 +191,9 @@ const Doc = React.memo((props) => {
                                value={director}
                                onChange={(event) => setDirector(event.target.value)}
                                className={classes.input}
+                               inputProps={{
+                                   readOnly: !data.edit
+                               }}
                     />
                     <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                         {
@@ -205,7 +230,7 @@ const Doc = React.memo((props) => {
 
 Doc.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

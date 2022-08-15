@@ -35,7 +35,7 @@ const Tasks = React.memo((props) => {
     const { search, isMobileApp, filter } = props.app;
     //настройка
     const initialRender = useRef(true);
-    const today = useRef();
+    let [today, setToday] = useState();
     //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -58,8 +58,9 @@ const Tasks = React.memo((props) => {
         (async()=>{
             if(initialRender.current) {
                 initialRender.current = false;
-                today.current = new Date()
-                today.current.setHours(0, 0, 0, 0)
+                today = new Date()
+                today.setHours(0, 0, 0, 0)
+                setToday(today)
             }
             else {
                 if(searchTimeOut.current)
@@ -111,7 +112,7 @@ const Tasks = React.memo((props) => {
                                     Исполнитель
                                 </div>
                                 <div className={classes.tableCell} style={{width: 'calc(100% - 500px)', justifyContent: 'start'}}>
-                                    Информация
+                                    Комментарий
                                 </div>
                                 </>
                                 :
@@ -129,7 +130,7 @@ const Tasks = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100, color: !['выполнен', 'проверен'].includes(element.status)&&new Date(element.date)<today.current?'red':'black'}}>
+                                <div className={classes.tableCell} style={{width: 100, color: !['выполнен', 'проверен'].includes(element.status)&&new Date(element.date)<today?'red':'black'}}>
                                     {pdDDMMYYYY(element.date)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150}}>
@@ -167,7 +168,7 @@ const Tasks = React.memo((props) => {
 
 Tasks.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!store.getState().user.authenticated)
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

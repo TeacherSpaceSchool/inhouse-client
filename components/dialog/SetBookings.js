@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField';
 const SetBookings =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { element, setElement } = props;
+        const { element, setElement, edit } = props;
         const { filter, isMobileApp } = props.app;
         const { showMiniDialog } = props.mini_dialogActions;
         let [bookings, setBookings] = useState(element.bookings);
@@ -27,7 +27,7 @@ const SetBookings =  React.memo(
                         <div className={classes.column} key={`setBooking${idx}`}>
                             <div className={![undefined, 'обработка', 'в пути'].includes(element.status)||isMobileApp?classes.column:classes.row}>
                                 {
-                                    [undefined, 'обработка', 'в пути'].includes(element.status)?
+                                    edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                                         <AutocomplectOnline
                                             error={!booking.manager}
                                             element={booking.manager}
@@ -53,7 +53,7 @@ const SetBookings =  React.memo(
                                         </div>
                                 }
                                 {
-                                    [undefined, 'обработка', 'в пути'].includes(element.status)?
+                                    edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                                         <AutocomplectOnline
                                             element={booking.client}
                                             setElement={(client)=>{
@@ -83,7 +83,7 @@ const SetBookings =  React.memo(
                             </div>
                             <div className={![undefined, 'обработка', 'в пути'].includes(element.status)||isMobileApp?classes.column:classes.row}>
                                 {
-                                    [undefined, 'обработка', 'в пути'].includes(element.status)?
+                                    edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                                         <TextField
                                             id='amount'
                                             error={!booking.amount}
@@ -108,7 +108,7 @@ const SetBookings =  React.memo(
                                         </div>
                                 }
                                 {
-                                    [undefined, 'обработка', 'в пути'].includes(element.status)?
+                                    edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                                         <Button size='small' color='secondary' onClick={()=>{
                                             bookings.splice(idx, 1);
                                             setBookings([...bookings])
@@ -124,7 +124,7 @@ const SetBookings =  React.memo(
                     )
                 }
                 {
-                    [undefined, 'обработка', 'в пути'].includes(element.status)?
+                    edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                         <Button onClick={async()=>{
                             setBookings([
                                 {
@@ -142,7 +142,7 @@ const SetBookings =  React.memo(
                 }
                 <div>
                     {
-                        [undefined, 'обработка', 'в пути'].includes(element.status)?
+                        edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                             <Button variant='contained' color='primary' onClick={async()=>{
                                 let check = true
                                 for(let i = 0; i <bookings.length; i++){

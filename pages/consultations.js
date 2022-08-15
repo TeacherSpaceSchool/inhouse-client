@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getConsultations, getConsultationsCount} from '../src/gql/consultation'
+import {getConsultations, getConsultationsCount, getUnloadConsultations} from '../src/gql/consultation'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -16,6 +16,8 @@ import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
 import Card from '@mui/material/Card';
 import {pdDatePicker} from '../src/lib'
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const Consultations = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -100,7 +102,11 @@ const Consultations = React.memo((props) => {
                     {list.map((element) =>
                         <div className={classes.tableRow}>
                             <div className={classes.tableCell} style={{width: '100%', overflow: 'auto'}}>
-                                {element.manager.name}
+                                <Link href='/user/[id]' as={`/user/${element.manager._id}`}>
+                                    <a>
+                                        {element.manager.name}
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{width: '100%', overflow: 'auto'}}>
                                 {element.store.name}
@@ -115,6 +121,11 @@ const Consultations = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            <UnloadUpload unload={()=>getUnloadConsultations({
+                ...filter.store?{store: filter.store._id}:{},
+                ...filter.user?{manager: filter.user._id}:{},
+                ...filter.date?{date: filter.date}:{}
+            })}/>
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -124,7 +135,7 @@ const Consultations = React.memo((props) => {
 
 Consultations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

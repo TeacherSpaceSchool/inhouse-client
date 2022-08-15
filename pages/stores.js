@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getStores, getStoresCount, addStore, setStore, deleteStore} from '../src/gql/store'
+import {getStores, getStoresCount, addStore, setStore, deleteStore, uploadStore, getUnloadStores} from '../src/gql/store'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -26,6 +26,8 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import Card from '@mui/material/Card';
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id магазина (если требуется обновить);\nназвание.'
 
 const Store = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -255,6 +257,12 @@ const Store = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadStore} uploadText={uploadText} unload={()=>getUnloadStores({search})}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -264,7 +272,7 @@ const Store = React.memo((props) => {
 
 Store.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

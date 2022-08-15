@@ -47,7 +47,7 @@ const BuyBasket =  React.memo(
         let [comment, setComment] = useState('');
         let [commentShow, setCommentShow] = useState(false);
         let [discount, setDiscount] = useState(_discount?_discount:'');
-        let [discountType, setDiscountType] = useState('сом');
+        let [discountType, setDiscountType] = useState(_discount?'%':'сом');
         let [amountEnd, setAmountEnd] = useState(amountStart);
         useEffect(() => {
             amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
@@ -156,6 +156,8 @@ const BuyBasket =  React.memo(
                                     value={paid}
                                     onChange={(event) => {
                                         paid = inputFloat(event.target.value)
+                                        if(paid>amountEnd)
+                                            paid = amountEnd
                                         setPaid(paid)
                                     }}
                                     onFocus={()=>{
@@ -165,6 +167,8 @@ const BuyBasket =  React.memo(
                                 />
                                 <div className={classes.counterbtn} onClick={() => {
                                     paid = checkFloat(checkFloat(paid) + 5)
+                                    if(paid>amountEnd)
+                                        paid = amountEnd
                                     setPaid(paid)
                                 }}>+
                                 </div>
@@ -178,7 +182,7 @@ const BuyBasket =  React.memo(
                         null
                 }
                 {
-                    (checkFloat(paid)+prepaid)<amountEnd?
+                    type==='sale'&&(checkFloat(paid)+prepaid)<amountEnd?
                         <>
                         <div className={classes.row}>
                             <center className={classes.input}>
@@ -387,13 +391,14 @@ const BuyBasket =  React.memo(
                                             grid.push({
                                                 month: new Date(month),
                                                 amount: paid,
-                                                paid: paid,
+                                                paid: 0,
                                                 datePaid: month
                                             })
                                             month.setMonth(month.getMonth() + 1)
                                             for (let i = 0; i < monthInstallment; i++) {
                                                 grid.push({
                                                     month: new Date(month),
+                                                    paid: 0,
                                                     amount: paidInstallment
                                                 })
                                                 month.setMonth(month.getMonth() + 1)
@@ -402,10 +407,10 @@ const BuyBasket =  React.memo(
                                             let _res = await addInstallment({
                                                 renew,
                                                 grid,
-                                                debt: checkFloat((amountEnd + (renew ? installmentsDebt : 0)) - paid - checkFloat(prepaid)),
+                                                debt: checkFloat(amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid)),
                                                 client: client._id,
                                                 amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
-                                                paid,
+                                                paid: 0,
                                                 sale: res,
                                                 datePaid: grid[1].month,
                                                 store: profile.store,

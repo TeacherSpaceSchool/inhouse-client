@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getMoneyArticles, getMoneyArticlesCount, addMoneyArticle, setMoneyArticle, deleteMoneyArticle} from '../src/gql/moneyArticle'
+import {getMoneyArticles, getMoneyArticlesCount, addMoneyArticle, setMoneyArticle, deleteMoneyArticle, getUnloadMoneyArticles, uploadMoneyArticle} from '../src/gql/moneyArticle'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -26,6 +26,8 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import Card from '@mui/material/Card';
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id статьи (если требуется обновить);\nназвание.'
 
 const MoneyArticle = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -81,11 +83,11 @@ const MoneyArticle = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Статьи движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Статьи' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
-                <title>Статьи движения денег</title>
+                <title>Статьи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content='Статьи движения денег' />
+                <meta property='og:title' content='Статьи' />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
@@ -258,13 +260,19 @@ const MoneyArticle = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadMoneyArticle} uploadText={uploadText} unload={()=>getUnloadMoneyArticles({search})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 MoneyArticle.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'кассир'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -276,9 +284,9 @@ MoneyArticle.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'кассир'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             list: cloneObject(await getMoneyArticles({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getMoneyArticlesCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

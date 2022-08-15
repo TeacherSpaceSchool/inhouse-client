@@ -24,7 +24,7 @@ export const alert = React.createRef();
 export let containerRef;
 
 const App = React.memo(props => {
-    let { checkPagination, sorts, pageName, searchShow, setList, list, filterShow, menuItems, anchorElQuick, setAnchorElQuick, unsaved, full } = props;
+    let { checkPagination, qrScannerShow, sorts, pageName, searchShow, setList, list, filterShow, menuItems, anchorElQuick, setAnchorElQuick, unsaved, full } = props;
 
     const { setProfile, logout } = props.userActions;
     const { setIsMobileApp, setShowAppBar, setShowLightbox } = props.appActions;
@@ -174,7 +174,7 @@ const App = React.memo(props => {
                 showAppBar?
                     <>
                     <Drawer full={full} unsaved={unsaved} unread={unread} setUnread={setUnread}/>
-                    <AppBar filterShow={filterShow} unread={unread} searchShow={searchShow} pageName={pageName} sorts={sorts}/>
+                    <AppBar qrScannerShow={qrScannerShow} filterShow={filterShow} unread={unread} searchShow={searchShow} pageName={pageName} sorts={sorts}/>
                     </>
                     :
                     null

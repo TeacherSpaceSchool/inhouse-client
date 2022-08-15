@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getStoreBalanceItems, getStoreBalanceItemsCount} from '../src/gql/storeBalanceItem'
+import {getStoreBalanceItems, getStoreBalanceItemsCount, getUnloadStoreBalanceItems} from '../src/gql/storeBalanceItem'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -15,11 +15,25 @@ import * as snackbarActions from '../src/redux/actions/snackbar'
 import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
 import Card from '@mui/material/Card';
+import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const sorts = [
     {
         name: 'Остаток',
         field: 'amount'
+    },
+    {
+        name: 'Доступно',
+        field: 'free'
+    },
+    {
+        name: 'Бронь',
+        field: 'reservation'
+    },
+    {
+        name: 'Продажа',
+        field: 'sale'
     }
 ]
 
@@ -89,7 +103,11 @@ const StoreBalanceItems = React.memo((props) => {
                     {list.map((element) =>
                         <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - 200px) / 2)`, justifyContent: 'center'}}>
-                                {element.item.name}
+                                <Link href='/item/[id]' as={`/item/${element.item._id}`}>
+                                    <a>
+                                        {element.item.name}
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - 200px) / 2)`, justifyContent: 'center'}}>
                                 {element.store.name}
@@ -135,13 +153,14 @@ const StoreBalanceItems = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            <UnloadUpload unload={()=>getUnloadStoreBalanceItems({...filter.item?{item: filter.item._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
         </App>
     )
 })
 
 StoreBalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -151,7 +170,7 @@ StoreBalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(c
         else {
             Router.push('/')
         }
-    store.getState().app.sort = 'amount'
+    store.getState().app.sort = '-amount'
     if(ctx.query.item)
         store.getState().app.filter.item = ctx.query.item
     return {

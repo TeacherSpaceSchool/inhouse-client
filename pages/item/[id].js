@@ -42,6 +42,7 @@ import Link from 'next/link';
 const Item = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
+    const { profile } = props.user;
     const { isMobileApp } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
@@ -144,6 +145,8 @@ const Item = React.memo((props) => {
                                             <div className={classes.noteImageButton} style={{background: 'red'}} onClick={()=>{
                                                 images.splice(idx, 1)
                                                 setImages([...images])
+                                                uploads.splice(idx, 1)
+                                                setUploads([...uploads])
                                             }}>X</div>
                                             :
                                             null
@@ -366,7 +369,7 @@ const Item = React.memo((props) => {
                                         id='info'
                                         variant='standard'
                                         onChange={(event) => setInfo(event.target.value)}
-                                        label='Информация'
+                                        label='Комментарий'
                                         multiline={true}
                                         maxRows='5'
                                         value={info}
@@ -399,22 +402,32 @@ const Item = React.memo((props) => {
                                             {ID}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Категория:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {category.name}
-                                        </div>
-                                    </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Фабрика:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {factory.name}
-                                        </div>
-                                    </div>
+                                    {
+                                        category?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Категория:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {category.name}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        factory?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Фабрика:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {factory.name}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Цена в долларах:&nbsp;
@@ -423,14 +436,19 @@ const Item = React.memo((props) => {
                                             {priceUSD}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Себестоимость в долларах:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {primeCostUSD}
-                                        </div>
-                                    </div>
+                                    {
+                                        ['admin', 'управляющий'].includes(profile.role)?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Себестоимость в долларах:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {primeCostUSD}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Цена в сомах:&nbsp;
@@ -439,22 +457,32 @@ const Item = React.memo((props) => {
                                             {priceKGS}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Себестоимость в сомах:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {primeCostKGS}
-                                        </div>
-                                    </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Скидка:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {discount} {typeDiscount}
-                                        </div>
-                                    </div>
+                                    {
+                                        ['admin', 'управляющий'].includes(profile.role)?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Себестоимость в сомах:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {primeCostKGS}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        discount?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Скидка:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {discount} {typeDiscount}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Цена после скидки в сомах:&nbsp;
@@ -465,36 +493,51 @@ const Item = React.memo((props) => {
                                     </div>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
-                                            Единица измерения сомах:&nbsp;
+                                            Единица измерения:&nbsp;
                                         </div>
                                         <div className={classes.value}>
                                             {unit}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Размер:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {size}
-                                        </div>
-                                    </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Характеристики:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {characteristics.map((element, idx)=><div className={classes.value} key={`characteristic${idx}`}>{element[0]} - {element[1]}</div>)}
-                                        </div>
-                                    </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Информация:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {info}
-                                        </div>
-                                    </div>
+                                    {
+                                        size?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Размер:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {size}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        characteristics.length?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Характеристики:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {characteristics.map((element, idx)=><div className={classes.value} key={`characteristic${idx}`}>{element[0]} - {element[1]}</div>)}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        info?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Комментарий:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {info}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     </>
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
@@ -649,7 +692,7 @@ const Item = React.memo((props) => {
 
 Item.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!store.getState().user.authenticated)
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -659,9 +702,9 @@ Item.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             Router.push('/')
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
             object:ctx.query.id!=='new'?
                 await getItem({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
                 :

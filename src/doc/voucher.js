@@ -44,7 +44,7 @@ export const getVoucherDoc = async ({client, doc, installment})=>{
     const id = 'donwloadVoucherDocs'
     link.id = id
     link.href = blobUrl;
-    link.download = `Договор рассрочки №${installment.number}.docx`;
+    link.download = `Расписка к рассрочке №${installment.number}.docx`;
     document.body.appendChild(link);
     document.getElementById(id).click()
 };

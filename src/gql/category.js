@@ -87,3 +87,35 @@ export const setCategory = async(variables)=>{
         console.error(err)
     }
 }
+
+export const uploadCategory = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadCategory(document: $document) 
+                    }`})
+        return res.data.uploadCategory
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadCategorys = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadCategorys(search: $search)
+                    }`,
+        })
+        return res.data.unloadCategorys
+    } catch(err){
+        console.error(err)
+    }
+}

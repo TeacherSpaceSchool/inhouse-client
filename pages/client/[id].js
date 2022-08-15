@@ -265,7 +265,7 @@ const Client = React.memo((props) => {
                                         id='info'
                                         variant='standard'
                                         onChange={(event) => setInfo(event.target.value)}
-                                        label='Информация'
+                                        label='Комментарий'
                                         multiline={true}
                                         maxRows='5'
                                         value={info}
@@ -349,14 +349,19 @@ const Client = React.memo((props) => {
                                             {address1}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Телефон:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
-                                        </div>
-                                    </div>
+                                    {
+                                        phones.length?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Телефон:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     {
                                         emails.length?
                                             <div className={classes.row}>
@@ -370,14 +375,19 @@ const Client = React.memo((props) => {
                                             :
                                             null
                                     }
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Информация:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {info}
-                                        </div>
-                                    </div>
+                                    {
+                                        info?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Комментарий:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {info}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     </>
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
@@ -486,7 +496,7 @@ const Client = React.memo((props) => {
 
 Client.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'завсклад', 'кассир', 'доставщик', 'менеджер/завсклад', 'управляющий', 'юрист'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -496,8 +506,8 @@ Client.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             Router.push('/')
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'менеджер', 'менеджер/завсклад', 'кассир'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'менеджер', 'менеджер/завсклад', 'кассир'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
             object:ctx.query.id!=='new'?
                 await getClient({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)

@@ -190,3 +190,35 @@ export const setDevice = async(device, client)=>{
         console.error(err)
     }
 }
+
+export const getUnloadUsers = async({store, role, department, position}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {store, role, department, position},
+            query: gql`
+                    query ($store: ID, $role: String, $department: String, $position: String) {
+                        unloadUsers(store: $store, role: $role, department: $department, position: $position)
+                    }`,
+        })
+        return res.data.unloadUsers
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadUser = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadUser(document: $document) 
+                    }`})
+        return res.data.uploadUser
+    } catch(err){
+        console.error(err)
+    }
+}

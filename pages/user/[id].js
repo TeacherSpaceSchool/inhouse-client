@@ -421,14 +421,18 @@ const User = React.memo((props) => {
                                             {pdDDMMYYYY(startWork)}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Телефон:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
-                                        </div>
-                                    </div>
+                                    {phones.length?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Телефон:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {phones.map((element, idx)=><div className={classes.value} key={`Телефон${idx}`}>+996{element}</div>)}
+                                                </div>
+                                            </div>
+                                        :
+                                        null
+                                    }
                                     </>
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
@@ -438,7 +442,7 @@ const User = React.memo((props) => {
                                         <Button color='primary' onClick={()=>{
                                             let res
                                             let checkPhones = !phones.length||validPhones1(phones)
-                                            if (name.length&&(store||role==='управляющий')&&checkPhones&&!loginError&&role&&(router.query.id!=='new'||password.length>7)&&department&&position&&startWork) {
+                                            if (name&&name!=='admin'&&(store||role==='управляющий')&&checkPhones&&!loginError&&role&&(router.query.id!=='new'||password.length>7)&&department&&position&&startWork) {
                                                 const action = async() => {
                                                     if(router.query.id==='new') {
                                                         res = await addUser({
@@ -547,7 +551,7 @@ const User = React.memo((props) => {
 
 User.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

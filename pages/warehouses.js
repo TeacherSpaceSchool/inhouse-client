@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getWarehouses, getWarehousesCount, addWarehouse, setWarehouse, deleteWarehouse} from '../src/gql/warehouse'
+import {getWarehouses, getWarehousesCount, addWarehouse, setWarehouse, deleteWarehouse, uploadWarehouse, getUnloadWarehouses} from '../src/gql/warehouse'
 import {getStores} from '../src/gql/store'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
@@ -28,6 +28,9 @@ import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import Card from '@mui/material/Card';
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id склада (если требуется обновить);\nназвание;\n_id магазина.'
 
 const Warehouses = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -288,6 +291,12 @@ const Warehouses = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadWarehouse} uploadText={uploadText} unload={()=>getUnloadWarehouses({search, ...filter.store?{store: filter.store._id}:{}})}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -297,7 +306,7 @@ const Warehouses = React.memo((props) => {
 
 Warehouses.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -309,9 +318,9 @@ Warehouses.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            edit: store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getWarehouses({
                 skip: 0,
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}

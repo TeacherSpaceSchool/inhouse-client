@@ -1,6 +1,38 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadWarehouses = async({search, store}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search, store},
+            query: gql`
+                    query ($search: String, $store: ID) {
+                        unloadWarehouses(search: $search, store: $store)
+                    }`,
+        })
+        return res.data.unloadWarehouses
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadWarehouse = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadWarehouse(document: $document) 
+                    }`})
+        return res.data.uploadWarehouse
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getWarehouses = async({search, skip, store}, client)=>{
     let res
     try{

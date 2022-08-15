@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getCpas, getCpasCount} from '../src/gql/cpa'
+import {getCpas, getCpasCount, getUnloadCpas, uploadCpa} from '../src/gql/cpa'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -18,6 +18,9 @@ import Card from '@mui/material/Card';
 import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
 import Fab from '@mui/material/Fab';
+
+import UnloadUpload from '../components/app/UnloadUpload';
+const uploadText = 'Формат xlsx:\n_id партнера (если требуется обновить);\nФИО;\nпроцент;\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
 
 const Cpas = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -106,6 +109,12 @@ const Cpas = React.memo((props) => {
                     :
                     null
             }
+            {
+                data.add||data.edit?
+                    <UnloadUpload position={2} upload={uploadCpa} uploadText={uploadText} unload={()=>getUnloadCpas({search})}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
@@ -115,7 +124,7 @@ const Cpas = React.memo((props) => {
 
 Cpas.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -128,7 +137,7 @@ Cpas.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     store.getState().app.filterType = '/cpa'
     return {
         data: {
-            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getCpas({
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 skip: 0,

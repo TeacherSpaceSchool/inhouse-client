@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBonusManagers, getBonusManagersCount, setBonusManager, addBonusManager, getManagerForBonusManagers} from '../src/gql/bonusManager'
+import {getBonusManagers, getBonusManagersCount, setBonusManager, addBonusManager, getManagerForBonusManagers, deleteBonusManager, uploadBonusManager, getUnloadBonusManagers} from '../src/gql/bonusManager'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -29,6 +29,11 @@ import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import { inputFloat, checkFloat } from '../src/lib'
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
+import Link from 'next/link';
+import Delete from '@mui/icons-material/Delete';
+import UnloadUpload from '../components/app/UnloadUpload';
+
+const uploadText = 'Формат xlsx:\n_id менеджера;\nставка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%).'
 
 const BonusManagers = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -36,7 +41,7 @@ const BonusManagers = React.memo((props) => {
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    const { search, isMobileApp } = props.app;
+    const { search, isMobileApp, filter } = props.app;
     //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
@@ -47,14 +52,20 @@ const BonusManagers = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
-        setList(cloneObject(await getBonusManagers({search, skip: 0})));
-        setCount(await getBonusManagersCount({search}));
+        setList(cloneObject(await getBonusManagers({...filter.store?{store: filter.store._id}:{}, search, skip: 0})));
+        setCount(await getBonusManagersCount({...filter.store?{store: filter.store._id}:{}, search}));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
     }
     //поиск/фильтр
     let searchTimeOut = useRef(null);
+    useEffect(()=>{
+        (async()=>{
+            if(!initialRender.current)
+                await getList()
+        })()
+    },[filter])
     useEffect(()=>{
         (async()=>{
             if(initialRender.current)
@@ -70,7 +81,7 @@ const BonusManagers = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getBonusManagers({skip: list.length, search}))
+            let addedList = cloneObject(await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: list.length, search}))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -84,7 +95,7 @@ const BonusManagers = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Ставки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} searchShow={true} pageName='Ставки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Ставки</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -103,7 +114,7 @@ const BonusManagers = React.memo((props) => {
                             Менеджер
                         </div>
                         <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
-                            Ставка(Скидка/Бонус)
+                            Ставка(Скидка%/Бонус%)
                         </div>
                     </div>
                     {
@@ -113,7 +124,13 @@ const BonusManagers = React.memo((props) => {
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
                                             <MenuItem onClick={()=>{
-                                                if(newElement.manager&&newElement.bonus.length) {
+                                                let checkBonus = true
+                                                for(let i = 0; i <newElement.bonus.length; i++)
+                                                    if(!newElement.bonus[i][0]||!newElement.bonus[i][1]) {
+                                                        checkBonus = false
+                                                        break
+                                                    }
+                                                if(checkBonus&&newElement.manager&&newElement.bonus.length) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
                                                         for(let i = 0; i <newElement.bonus.length; i++)
                                                             newElement.bonus[i] = [checkFloat(newElement.bonus[i][0]), checkFloat(newElement.bonus[i][1])]
@@ -208,7 +225,7 @@ const BonusManagers = React.memo((props) => {
                                         <Button onClick={async()=>{
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
-                                            newElement.bonus = [['', ''], ...newElement.bonus]
+                                            newElement.bonus = [...newElement.bonus, ['', '']]
                                             setNewElement({...newElement})
                                         }} size='small'>
                                             Добавить ставку
@@ -228,7 +245,13 @@ const BonusManagers = React.memo((props) => {
                                             setMenuItems(
                                                 [
                                                     <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
-                                                        if(element.bonus.length) {
+                                                        let checkBonus = true
+                                                        for(let i = 0; i <element.bonus.length; i++)
+                                                            if(!element.bonus[i][0]||!element.bonus[i][1]) {
+                                                                checkBonus = false
+                                                                break
+                                                            }
+                                                        if(element.bonus.length&&checkBonus) {
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                 for(let i = 0; i <element.bonus.length; i++)
                                                                     element.bonus[i] = [checkFloat(element.bonus[i][0]), checkFloat(element.bonus[i][1])]
@@ -258,7 +281,29 @@ const BonusManagers = React.memo((props) => {
                                                         handleCloseQuick()
                                                     }}>
                                                         <HistoryIcon/>&nbsp;История
-                                                    </MenuItem>
+                                                    </MenuItem>,
+                                                    data.deleted?
+                                                        <MenuItem key='MenuItem3' onClick={async()=>{
+                                                            setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                                                let res = await deleteBonusManager(element._id)
+                                                                if(res==='OK'){
+                                                                    showSnackBar('Успешно', 'success')
+                                                                    delete unsaved.current[list[idx]._id]
+                                                                    let _list = [...list]
+                                                                    _list.splice(idx, 1)
+                                                                    setList(_list)
+                                                                    setCount(--count)
+                                                                }
+                                                                else
+                                                                    showSnackBar('Ошибка', 'error')
+                                                            }}/>)
+                                                            showMiniDialog(true)
+                                                            handleCloseQuick()
+                                                        }}>
+                                                            <Delete sx={{color: 'red'}}/>&nbsp;Удалить
+                                                        </MenuItem>
+                                                        :
+                                                        null
                                                 ]
                                             )
                                             handleMenuQuick(event)
@@ -272,7 +317,11 @@ const BonusManagers = React.memo((props) => {
                                     null
                             }
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)'}}>
-                                {element.manager.name}
+                                <Link href='/user/[id]' as={`/user/${element.manager._id}`}>
+                                    <a>
+                                        {element.manager.name}
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{flexDirection: 'column', ...isMobileApp?{minWidth: 200}:{}, width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)'}}>
                                 {element.bonus.map((element1, idx1)=>
@@ -332,7 +381,7 @@ const BonusManagers = React.memo((props) => {
                                             <Button onClick={async()=>{
                                                 list[idx].unsaved = true
                                                 unsaved.current[list[idx]._id] = true
-                                                list[idx].bonus = [['', ''], ...list[idx].bonus]
+                                                list[idx].bonus = [...list[idx].bonus, ['', '']]
                                                 setList([...list])
                                             }} size='small'>
                                                 Добавить ставку
@@ -349,13 +398,19 @@ const BonusManagers = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadBonusManager} uploadText={uploadText} unload={()=>getUnloadBonusManagers({search, ...filter.store?{store: filter.store._id}:{}})}/>
+                    :
+                    null
+            }
         </App>
     )
 })
 
 BonusManagers.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -370,8 +425,9 @@ BonusManagers.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) 
         data: {
             edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
-            list: cloneObject(await getBonusManagers({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getBonusManagersCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            list: cloneObject(await getBonusManagers({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}, skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getBonusManagersCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })

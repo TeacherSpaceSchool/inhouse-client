@@ -87,3 +87,35 @@ export const setTypeCharacteristic = async(variables)=>{
         console.error(err)
     }
 }
+
+export const uploadTypeCharacteristic = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadTypeCharacteristic(document: $document) 
+                    }`})
+        return res.data.uploadTypeCharacteristic
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadTypeCharacteristics = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadTypeCharacteristics(search: $search)
+                    }`,
+        })
+        return res.data.unloadTypeCharacteristics
+    } catch(err){
+        console.error(err)
+    }
+}

@@ -87,3 +87,35 @@ export const addFactory = async(variables)=>{
         console.error(err)
     }
 }
+
+export const uploadFactory = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadFactory(document: $document) 
+                    }`})
+        return res.data.uploadFactory
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadFactorys = async({search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {search},
+            query: gql`
+                    query ($search: String) {
+                        unloadFactorys(search: $search)
+                    }`,
+        })
+        return res.data.unloadFactorys
+    } catch(err){
+        console.error(err)
+    }
+}

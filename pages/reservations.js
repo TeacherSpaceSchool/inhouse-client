@@ -31,7 +31,7 @@ const Reservations = React.memo((props) => {
     const { data } = props;
     const { search, filter, isMobileApp } = props.app;
     //настройка
-    const today = useRef();
+    let [today, setToday] = useState();
     const initialRender = useRef(true);
     //получение данных
     let [list, setList] = useState(data.list);
@@ -71,8 +71,9 @@ const Reservations = React.memo((props) => {
     useEffect(()=>{
         (async()=>{
             if(initialRender.current) {
-                today.current = new Date()
-                today.current.setHours(0, 0, 0, 0)
+                today = new Date()
+                today.setHours(0, 0, 0, 0)
+                setToday(today)
                 initialRender.current = false;
             }
             else {
@@ -148,7 +149,7 @@ const Reservations = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                                     {element.number}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', color: ['обработка'].includes(element.status)&&new Date(element.term)<today.current?'red':'black'}}>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', color: ['обработка'].includes(element.status)&&new Date(element.term)<today?'red':'black'}}>
                                     {pdDDMMYYYY(element.term)}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
@@ -171,7 +172,7 @@ const Reservations = React.memo((props) => {
 
 Reservations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
