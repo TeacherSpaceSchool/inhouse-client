@@ -1,6 +1,38 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadWayItems = async({item, store, status, late, soon, today, date}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {item, store, status, late, soon, today, date},
+            query: gql`
+                    query ($item: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
+                        unloadWayItems(item: $item, date: $date, store: $store, soon: $soon, status: $status, late: $late, today: $today)
+                    }`,
+        })
+        return res.data.unloadWayItems
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const uploadWayItem = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($document: Upload!) {
+                        uploadWayItem(document: $document) 
+                    }`})
+        return res.data.uploadWayItem
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getWayItems = async({skip, item, store, status, late, soon, today, date}, client)=>{
     let res
     try{

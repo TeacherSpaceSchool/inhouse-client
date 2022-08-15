@@ -29,7 +29,7 @@ const Filter =  React.memo(
         return (
             <div className={classes.main} style={{width}}>
                 <div className={classes.value} style={{fontWeight: 'normal'}}>
-                    {uploadText}
+                    {`Первоночально переведите все ячейки xlsx в текстовый тип.\n${uploadText}`}
                 </div>
                 <br/>
                 <Button color={document?'primary':'secondary'} onClick={()=>{documentRef.current.click()}}>

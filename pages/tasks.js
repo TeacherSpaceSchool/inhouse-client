@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getTasks, getTasksCount} from '../src/gql/task'
+import {getTasks, getTasksCount, getUnloadTasks} from '../src/gql/task'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -18,6 +18,7 @@ import Card from '@mui/material/Card';
 import AddIcon from '@mui/icons-material/Add';
 import Link from 'next/link';
 import Fab from '@mui/material/Fab';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
@@ -162,6 +163,7 @@ const Tasks = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
+            <UnloadUpload position={2} unload={()=>getUnloadTasks({search, ...filter.status?{status: filter.status}:{}})}/>
         </App>
     )
 })

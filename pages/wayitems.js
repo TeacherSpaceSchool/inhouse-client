@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getWayItems, getWayItemsCount, setWayItem, addWayItem} from '../src/gql/wayItem'
+import {getWayItems, getWayItemsCount, setWayItem, addWayItem, getUnloadWayItems, uploadWayItem} from '../src/gql/wayItem'
 import {getWarehouses} from '../src/gql/warehouse'
 import {getItems} from '../src/gql/item'
 import {getStores} from '../src/gql/store'
@@ -36,7 +36,9 @@ import Cancel from '@mui/icons-material/Cancel';
 import Done from '@mui/icons-material/Done';
 import Link from 'next/link';
 import Button from '@mui/material/Button';
+import UnloadUpload from '../components/app/UnloadUpload';
 
+const uploadText = 'Формат xlsx:\n_id в пути (если требуется обновить);\n_id модели;\n_id магазина;\nколичество;\nприбытие (ДД.ММ.ГГГГ);\nбронь (через запятую с пробелом. Пример: _id менеджер1: количество1, _id менеджер2: количество2).'
 const status = ['все', 'в пути', 'прибыл', 'отмена']
 const colors = {
     'в пути': 'blue',
@@ -519,6 +521,18 @@ const WayItems = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            {
+                data.add||data.edit?
+                    <UnloadUpload upload={uploadWayItem} uploadText={uploadText} unload={()=>getUnloadWayItems({
+                        ...filter.date?{date: filter.date}:{},
+                        ...filter.item?{item: filter.item._id}:{},
+                        ...filter.store?{store: filter.store._id}:{},
+                        ...filter.status?{status: filter.status}:{},
+                        ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
+                    })}/>
+                    :
+                    null
+            }
             <div className='count'>
                 {`Всего: ${count}`}
             </div>

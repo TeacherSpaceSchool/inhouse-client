@@ -1,6 +1,23 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadTasks = async({status, search}, client)=>{
+    let res
+    try{
+        client = client? client : getClientGql()
+        res = await client.query({
+            variables: {status, search},
+            query: gql`
+                    query ($status: String, $search: String) {
+                        unloadTasks(status: $status, search: $search)
+                    }`,
+        })
+        return res.data.unloadTasks
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getTask = async({_id}, client)=>{
     try{
         client = client? client : getClientGql()
