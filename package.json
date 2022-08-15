@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "set dev=true&& set URL=localhost&& next -p 80",
     "build": "set URL=localhost&& next build",
+    "build-server": "URL=inhouse-app.kg next build",
     "start": "set URL=localhost&& node server.js"
   },
   "author": "",
