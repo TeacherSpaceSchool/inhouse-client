@@ -2,11 +2,11 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getInstallments, getInstallmentsCount, setInstallment} from '../src/gql/installment'
+import {getInstallments, getInstallmentsCount, setInstallment, getUnloadInstallments} from '../src/gql/installment'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYYY, checkFloat, inputFloat } from '../src/lib'
+import { cloneObject, pdDDMMYYYY } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -27,17 +27,20 @@ import HistoryIcon from '@mui/icons-material/History';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddIcon from '@mui/icons-material/Add';
 import PaidIcon from '@mui/icons-material/Paid';
+import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import AddInstallment from '../components/dialog/AddInstallment';
 import Fab from '@mui/material/Fab';
 import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
     'активна': 'orange',
     'оплачен': 'green',
     'отмена': 'red',
     'перерасчет': 'red',
+    'безнадежна': 'red',
 }
-const status = ['все', 'активна', 'оплачен', 'отмена', 'перерасчет']
+const status = ['все', 'активна', 'оплачен', 'отмена', 'перерасчет', 'безнадежна']
 
 const Installments = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -170,7 +173,7 @@ const Installments = React.memo((props) => {
                                         <IconButton onClick={(event)=>{
                                             setMenuItems(
                                                 [
-                                                    element.status==='активна'?
+                                                    ['активна', 'безнадежна'].includes(element.status)?
                                                         <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
                                                         setMiniDialog('Вы уверены?', <Confirmation
                                                             action={async () => {
@@ -209,7 +212,52 @@ const Installments = React.memo((props) => {
                                                     }}>
                                                         <PaidIcon/>&nbsp;Платежи
                                                     </MenuItem>,
-                                                    data.deleted&&element.status==='активна'?
+                                                    data.edit&&'активна'===element.status?
+                                                        <MenuItem key='MenuItem3' onClick={async()=>{
+                                                            setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                                                let res = await setInstallment({
+                                                                    _id: element._id,
+                                                                    status: 'безнадежна'
+                                                                })
+                                                                if(res==='OK'){
+                                                                    showSnackBar('Успешно', 'success')
+                                                                    let _list = [...list]
+                                                                    _list[idx].status = 'безнадежна'
+                                                                    setList(_list)
+                                                                }
+                                                                else
+                                                                    showSnackBar('Ошибка', 'error')
+                                                            }}/>)
+                                                            showMiniDialog(true)
+                                                            handleCloseQuick()
+                                                        }}>
+                                                            <ViewCarouselIcon style={{color: 'red'}}/>&nbsp;Отметить безнадежной
+                                                        </MenuItem>
+                                                        :
+                                                        data.edit&&'безнадежна'===element.status?
+                                                            <MenuItem key='MenuItem3' onClick={async()=>{
+                                                                setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                                                    let res = await setInstallment({
+                                                                        _id: element._id,
+                                                                        status: 'активна'
+                                                                    })
+                                                                    if(res==='OK'){
+                                                                        showSnackBar('Успешно', 'success')
+                                                                        let _list = [...list]
+                                                                        _list[idx].status = 'активна'
+                                                                        setList(_list)
+                                                                    }
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }}/>)
+                                                                showMiniDialog(true)
+                                                                handleCloseQuick()
+                                                            }}>
+                                                                <ViewCarouselIcon style={{color: 'orange'}}/>&nbsp;Отметить активной
+                                                            </MenuItem>
+                                                            :
+                                                            null,
+                                                    data.deleted&&['активна', 'безнадежна'].includes(element.status)?
                                                         <MenuItem key='MenuItem3' onClick={async()=>{
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                 let res = await setInstallment({
@@ -270,7 +318,7 @@ const Installments = React.memo((props) => {
                             <div className={classes.tableCell} onClick={()=>{if(!showComment)setShowComment(true)}} style={{width: showComment?200:30, justifyContent: data.edit?'center':'start'}}>
                                 {
                                     showComment?
-                                        data.edit&&element.status==='активна'?
+                                        data.edit&&['активна', 'безнадежна'].includes(element.status)?
                                             <Input
                                                 placeholder='Комментарий'
                                                 multiline={true}
@@ -303,7 +351,7 @@ const Installments = React.memo((props) => {
                                 {
                                     element.grid.map((grid, idx1)=>
                                         <div className={classes.column} key={`${element._id}${idx1}`} style={{width: 100, borderRight: 'solid 1px #00000040', padding: 5}}>
-                                            <div style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center', color: !grid.paid&&['активна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'black'}}>{pdDDMMYYYY(grid.month)}</div>
+                                            <div style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center', color: !grid.paid&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'black'}}>{pdDDMMYYYY(grid.month)}</div>
                                             <div style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>{grid.amount}</div>
                                             <div style={{height: 30, justifyContent: 'start', display: 'flex', alignItems: 'center'}}>{grid.paid}</div>
                                         </div>
@@ -325,6 +373,15 @@ const Installments = React.memo((props) => {
                         null
                 }
             </Card>
+            <UnloadUpload position={2} unload={()=>getUnloadInstallments({
+                search,
+                ...filter.client?{client: filter.client._id}:{},
+                ...filter.status?{status: filter.status}:{},
+                ...filter.date?{date: filter.date}:{},
+                ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
+                ...filter.store?{store: filter.store._id}:{},
+                ...data._id?{_id: data._id}:{},
+            })}/>
             <div className='count' style={{left: 10}}>
                 {`Всего: ${count}`}
             </div>

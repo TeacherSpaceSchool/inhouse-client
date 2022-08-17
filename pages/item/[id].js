@@ -674,7 +674,7 @@ const Item = React.memo((props) => {
                             </div>
                             <input
                                 ref={imageRef}
-                                accept='image/*'
+                                accept='.png, .jpg, .jpeg'
                                 style={{ display: 'none' }}
                                 id={'addCertificate'}
                                 type='file'

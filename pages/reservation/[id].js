@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getReservation, setReservation } from '../../src/gql/reservation'
+import { getReservation, setReservation, getUnloadReservations } from '../../src/gql/reservation'
 import { getItems } from '../../src/gql/item'
 import { getStoreBalanceItems } from '../../src/gql/storeBalanceItem'
 import pageListStyle from '../../src/styleMUI/list'
@@ -31,6 +31,7 @@ import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
 import SetCharacteristics from '../../components/dialog/SetCharacteristics'
+import UnloadUpload from '../../components/app/UnloadUpload';
 
 const colors = {
     'продан': 'green',
@@ -501,6 +502,7 @@ const Reservation = React.memo((props) => {
                                     :
                                     null
                             }
+                            <UnloadUpload position={'Z'} unload={()=>getUnloadReservations({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'

@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useRef, useEffect } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getRefund, setRefund } from '../../src/gql/refund'
+import { getRefund, setRefund, getUnloadRefunds } from '../../src/gql/refund'
 import { getWarehouses } from '../../src/gql/warehouse'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -26,6 +26,7 @@ import { wrapper } from '../../src/redux/configureStore'
 import { pdDDMMYYHHMM } from '../../src/lib'
 import Link from 'next/link';
 import AcceptRefund from '../../components/dialog/AcceptRefund'
+import UnloadUpload from '../../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
@@ -317,6 +318,7 @@ const Refund = React.memo((props) => {
                                     :
                                     null
                             }
+                            <UnloadUpload position={'Z'} unload={()=>getUnloadRefunds({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'

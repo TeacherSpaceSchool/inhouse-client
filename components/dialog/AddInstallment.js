@@ -43,11 +43,18 @@ const AddInstallment =  React.memo(
             (async()=>{
                 installmentsDebt = 0
                 if(client&&store) {
-                    let installments = await getInstallments({
-                        client: client._id,
-                        store: store._id,
-                        status: 'активна'
-                    })
+                    let installments = [
+                        ...await getInstallments({
+                            client: client._id,
+                            store: store._id,
+                            status: 'безнадежна'
+                        }),
+                        ...await getInstallments({
+                            client: client._id,
+                            store: store._id,
+                            status: 'активна'
+                        }),
+                    ]
                     for(let i = 0; i <installments.length; i++) {
                         installmentsDebt += installments[i].debt
                     }

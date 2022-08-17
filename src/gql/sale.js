@@ -1,6 +1,23 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadSales = async({search, manager, client, cpa, date, delivery, status, store, _id}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {search, manager, client, cpa, date, delivery, status, store, _id},
+            query: gql`
+                    query ($search: String, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID, $_id: ID) {
+                        unloadSales(search: $search, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store, _id: $_id)
+                    }`,
+        })
+        return res.data.unloadSales
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getSale = async({_id}, client)=>{
     try{
         client = client? client : getClientGql()

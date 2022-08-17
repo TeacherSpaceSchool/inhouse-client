@@ -23,13 +23,16 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import TableViewIcon from '@mui/icons-material/TableView';
-import ErrorIcon from '@mui/icons-material/Error';
+import SettingsIcon from '@mui/icons-material/Settings';
+import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
+import ClearDB from '../../components/dialog/ClearDB'
 
 const MyDrawer = React.memo((props) => {
     const { unsaved, full } = props
     const {classes} = drawerStyle()
     const { drawer, isMobileApp } = props.app;
     const { profile } = props.user;
+    const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
     const { showDrawer } = props.appActions;
     const { showSnackBar } = props.snackbarActions;
     const open = isMobileApp||full?drawer:true;
@@ -48,7 +51,10 @@ const MyDrawer = React.memo((props) => {
                     router.pathname.includes('/consultations')||router.pathname==='/balanceitems'||router.pathname==='/storebalanceitems'?
                         'Статистика'
                         :
-                        ''
+                        router.pathname==='/errors'?
+                            'Инструменты'
+                            :
+                            ''
     );
     const handleUncover = (item)=>{
         if(uncover===item) item = ''
@@ -621,6 +627,59 @@ const MyDrawer = React.memo((props) => {
                     </List>
                 </Collapse>
                 {
+                    'admin'===profile.role?
+                        <>
+                        <ListItem style={{background: router.pathname==='/errors'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Инструменты');}}>
+                            <ListItemIcon><SettingsIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Инструменты' />
+                            <ListItemIcon>{uncover==='Инструменты'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
+                        </ListItem>
+                        <Divider/>
+                        </>
+                        :
+                        null
+                }
+                <Collapse in={uncover==='Инструменты'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
+                        {
+                            profile.role==='admin'?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/errors'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/errors')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Сбои' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            profile.role==='admin'?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Очистить БД', <ClearDB/>)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Очистить БД' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                    </List>
+                </Collapse>
+                {
                     profile.role?
                         <>
                         <ListItem style={{background: router.pathname.includes('task')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
@@ -656,24 +715,6 @@ const MyDrawer = React.memo((props) => {
                         :
                         null
                 }
-                {
-                    profile.role==='admin'?
-                        <>
-                        <ListItem style={{background: router.pathname==='/errors'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
-                            showDrawer(false)
-                            if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                Router.push('/errors')
-                            else
-                                showSnackBar('Сохраните изменения или обновите страницу')
-                        }}>
-                            <ListItemIcon><ErrorIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Сбои' />
-                        </ListItem>
-                        <Divider/>
-                        </>
-                        :
-                        null
-                }
             </List>
         </Drawer>
     )
@@ -688,6 +729,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps(dispatch) {
     return {
+        mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
         appActions: bindActionCreators(appActions, dispatch),
         snackbarActions: bindActionCreators(snackbarActions, dispatch),
     }

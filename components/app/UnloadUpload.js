@@ -72,7 +72,7 @@ const UnloadUpload =  React.memo(
                         null
                 }
             </Menu>
-            <Fab color='primary' aria-label='add' className={position===4?classes.fab4:position===3?classes.fab3:position===2?classes.fab2:classes.fab} onClick={handleMenuQuick}>
+            <Fab color='primary' aria-label='add' className={position==='Z'?classes.fabZ:position===4?classes.fab4:position===3?classes.fab3:position===2?classes.fab2:classes.fab} onClick={handleMenuQuick}>
                 {upload&&unload?<SwapVert/>:upload?<ArrowUpward/>:<ArrowDownward/>}
             </Fab>
             </>

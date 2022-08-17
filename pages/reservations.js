@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getReservations, getReservationsCount} from '../src/gql/reservation'
+import {getReservations, getReservationsCount, getUnloadReservations} from '../src/gql/reservation'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -16,6 +16,7 @@ import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
 import Card from '@mui/material/Card';
 import Link from 'next/link';
+import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
@@ -163,6 +164,15 @@ const Reservations = React.memo((props) => {
                     )}
                 </div>
             </Card>
+            <UnloadUpload unload={()=>getUnloadReservations({
+                ...filter.store?{store: filter.store._id}:{},
+                ...filter.user?{manager: filter.user._id}:{},
+                ...filter.client?{client: filter.client._id}:{},
+                ...filter.status?{status: filter.status}:{},
+                ...filter.date?{date: filter.date}:{},
+                ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
+                search
+            })}/>
             <div className='count'>
                 {`Всего: ${count}`}
             </div>

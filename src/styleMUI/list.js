@@ -201,6 +201,12 @@ export default makeStyles()(()=>{
             bottom: '20px',
             right: '230px'
         },
+        fabZ: {
+            position: 'fixed!important',
+            zIndex: 15000,
+            bottom: 2,
+            right: 16
+        },
         row:{
             alignItems: 'baseline',
             display: 'flex',

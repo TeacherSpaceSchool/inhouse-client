@@ -147,11 +147,18 @@ const Catalog = React.memo((props) => {
                         setElement={async (client)=>{
                             if(data.type==='sale') {
                                 if (client) {
-                                    let installments = await getInstallments({
-                                        store: profile.store,
-                                        client: client._id,
-                                        status: 'активна'
-                                    })
+                                    let installments = [
+                                        ...await getInstallments({
+                                            store: profile.store,
+                                            client: client._id,
+                                            status: 'безнадежна'
+                                        }),
+                                        ...await getInstallments({
+                                            store: profile.store,
+                                            client: client._id,
+                                            status: 'активна'
+                                        }),
+                                    ]
                                     installmentsDebt = 0
                                     for(let i = 0; i <installments.length; i++) {
                                         installmentsDebt += installments[i].debt

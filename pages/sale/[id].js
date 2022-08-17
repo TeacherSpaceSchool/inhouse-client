@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getSale, setSale, getAttachment } from '../../src/gql/sale'
+import { getSale, setSale, getAttachment, getUnloadSales } from '../../src/gql/sale'
 import { getClient } from '../../src/gql/client'
 import { getDoc } from '../../src/gql/doc'
 import { getItems } from '../../src/gql/item'
@@ -46,6 +46,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import dynamic from 'next/dynamic';
 import DownloadIcon from '@mui/icons-material/Download';
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
+import UnloadUpload from '../../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
@@ -787,6 +788,7 @@ const Sale = React.memo((props) => {
                                         null
                                 }
                             </div>
+                            <UnloadUpload position={'Z'} unload={()=>getUnloadSales({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'

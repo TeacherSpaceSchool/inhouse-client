@@ -51,3 +51,18 @@ export const clearAllErrors = async()=>{
         console.error(err)
     }
 }
+
+export const clearDB = async(password)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables: {password},
+            mutation : gql`
+                    mutation($password: String) {
+                        clearDB(password: $password)
+                    }`})
+        return res.data.clearDB
+    } catch(err){
+        console.error(err)
+    }
+}

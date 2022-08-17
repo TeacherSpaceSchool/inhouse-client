@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getOrder, setOrder, prepareAcceptOrder } from '../../src/gql/order'
+import { getOrder, setOrder, prepareAcceptOrder, getUnloadOrders } from '../../src/gql/order'
 import { getItems } from '../../src/gql/item'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -31,6 +31,7 @@ import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
 import SetCharacteristics from '../../components/dialog/SetCharacteristics'
+import UnloadUpload from '../../components/app/UnloadUpload';
 
 const colors = {
     'продан': 'green',
@@ -488,6 +489,7 @@ const Order = React.memo((props) => {
                                     :
                                     null
                             }
+                            <UnloadUpload  position={'Z'} unload={()=>getUnloadOrders({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'
