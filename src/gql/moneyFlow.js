@@ -147,8 +147,8 @@ export const setMoneyFlow = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $info: String, $amount: Float) {
-                        setMoneyFlow(_id: $_id, info: $info, amount: $amount)
+                    mutation ($_id: ID!, $info: String, $amount: Float, $moneyArticle: ID) {
+                        setMoneyFlow(_id: $_id, info: $info, amount: $amount, moneyArticle: $moneyArticle)
                     }`})
         return res.data.setMoneyFlow
     } catch(err){

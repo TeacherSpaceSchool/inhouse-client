@@ -126,6 +126,7 @@ export function setProfile() {
                             login
                             error
                             store
+                            cashbox {_id name}
                             add
                             edit
                             deleted
@@ -157,9 +158,10 @@ export async function getProfile(client) {
                           login
                           error
                           store
-                            add
-                            edit
-                            deleted
+                          cashbox {_id name}
+                          add
+                          edit
+                          deleted
                        }
                    }`
             })

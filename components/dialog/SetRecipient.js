@@ -19,6 +19,7 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import {pdDDMMYY, checkFloat} from '../../src/lib';
+import AddClient from './AddClient';
 
 const types = ['Клиент', 'Сотрудник', 'Касса', 'Получатель денег']
 const typesClientOperation = ['Продажа', 'На заказ', 'Бронь', 'Возврат', 'Рассрочка']
@@ -26,15 +27,16 @@ const typesClientOperation = ['Продажа', 'На заказ', 'Бронь',
 const SetRecipient =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { newElement, setNewElement, unsaved } = props;
+        const { newElement, setNewElement, unsaved, defaultMoneyArticle } = props;
         const { filter, isMobileApp } = props.app;
         const { showMiniDialog } = props.mini_dialogActions;
+        const { profile } = props.user;
         let [type, setType] = useState(newElement.typeRecipient);
         let [recipient, setRecipient] = useState(newElement.recipient);
         let [clientOperation, setClientOperation] = useState(newElement.clientOperation);
         let [typeClientOperation, setTypeClientOperation] = useState(newElement.typeClientOperation);
         let [installmentMonthes, setInstallmentMonthes] = useState(newElement.installmentMonthes);
-        let [installmentMonth, setInstallmentMonth] = useState(newElement.installmentMonth);
+        let [installmentMonth, setInstallmentMonth] = useState(null);
         const width = isMobileApp? (window.innerWidth-113) : 500
         return (
             <div className={classes.main} style={{width}}>
@@ -48,6 +50,7 @@ const SetRecipient =  React.memo(
                         setType(event.target.value)
                         newElement.recipient = null
                         setRecipient(null)
+                        newElement.installment = null
                         newElement.clientOperation = null
                         setClientOperation(null)
                         newElement.installmentMonth = null
@@ -56,6 +59,12 @@ const SetRecipient =  React.memo(
                         setInstallmentMonthes(null)
                         if(event.target.value==='Клиент')
                             newElement.currency = 'сом'
+
+                        if(event.target.value==='Сотрудник')
+                            newElement.moneyArticle = defaultMoneyArticle['Зарплата']
+                        else
+                            newElement.moneyArticle = defaultMoneyArticle['Не указано']
+
                         setNewElement({...newElement})
                     }}>
                         {types.map((element)=>
@@ -118,6 +127,7 @@ const SetRecipient =  React.memo(
                                 unsaved.current['new'] = true
                                 newElement.recipient = recipient
                                 setRecipient(recipient)
+                                newElement.installment = null
                                 newElement.clientOperation = null
                                 setClientOperation(null)
                                 newElement.installmentMonth = null
@@ -132,6 +142,20 @@ const SetRecipient =  React.memo(
                             }}
                             minLength={0}
                             label={type}
+                            dialogAddElement={profile.add?(setElement, setInputValue, value)=>{return <AddClient setClient={(recipient)=>{
+                                newElement.unsaved = true
+                                unsaved.current['new'] = true
+                                newElement.recipient = recipient
+                                setRecipient(recipient)
+                                newElement.installment = null
+                                newElement.clientOperation = null
+                                setClientOperation(null)
+                                newElement.installmentMonth = null
+                                setInstallmentMonth(null)
+                                newElement.installmentMonthes = null
+                                setInstallmentMonthes(null)
+                                setNewElement({...newElement})
+                            }} value={value}/>}:null}
                         />
                         {
                             recipient?
@@ -144,6 +168,7 @@ const SetRecipient =  React.memo(
                                         unsaved.current['new'] = true
                                         newElement.typeClientOperation = event.target.value
                                         setTypeClientOperation(event.target.value)
+                                        newElement.installment = null
                                         newElement.clientOperation = null
                                         setClientOperation(null)
                                         newElement.installmentMonth = null
@@ -165,10 +190,14 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
-                                                if(clientOperation)
+                                                newElement.operation = 'приход'
+                                                if(clientOperation) {
                                                     newElement.amount = clientOperation.paid
-                                                else
+                                                    newElement.installment = clientOperation.installment
+                                                } else {
                                                     newElement.amount = ''
+                                                    newElement.installment = null
+                                                }
                                                 setClientOperation(clientOperation)
                                                 setNewElement({...newElement})
                                             }}
@@ -190,6 +219,7 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                newElement.operation = 'приход'
                                                 if(clientOperation)
                                                     newElement.amount = clientOperation.paid
                                                 else
@@ -215,6 +245,7 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                newElement.operation = 'приход'
                                                 if(clientOperation)
                                                     newElement.amount = clientOperation.paid
                                                 else
@@ -240,6 +271,7 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                newElement.operation = 'расход'
                                                 if(clientOperation)
                                                     newElement.amount = clientOperation.paid
                                                 else
@@ -266,6 +298,7 @@ const SetRecipient =  React.memo(
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
+                                                newElement.operation = 'приход'
                                                 setClientOperation(clientOperation)
                                                 newElement.installmentMonth = null
                                                 setInstallmentMonth(null)
@@ -280,7 +313,6 @@ const SetRecipient =  React.memo(
                                                     }
                                                     newElement.installmentMonthes = installmentMonthes
                                                     setInstallmentMonthes(installmentMonthes)
-                                                    newElement.amount = installmentMonthes[installmentMonthes.length-1].amount
                                                 }
                                                 else {
                                                     newElement.installmentMonthes = null
@@ -305,12 +337,13 @@ const SetRecipient =  React.memo(
                                                     <Select error={!installmentMonth} variant='standard' value={installmentMonth} onChange={(event) => {
                                                         newElement.unsaved = true
                                                         unsaved.current['new'] = true
-                                                        newElement.installmentMonth = event.target.value
+                                                        newElement.installmentMonth = event.target.value.month
+                                                        newElement.amount = event.target.value.amount
                                                         setInstallmentMonth(event.target.value)
                                                         setNewElement({...newElement})
                                                     }}>
                                                         {installmentMonthes.map((element)=>
-                                                            <MenuItem key={element.month} value={element.month}>{pdDDMMYY(element.month)}({checkFloat(element.paid)}/{element.amount})</MenuItem>
+                                                            <MenuItem key={element.month} value={element}>{pdDDMMYY(element.month)}({checkFloat(element.paid)}/{element.amount})</MenuItem>
                                                         )}
                                                     </Select>
                                                 </FormControl>

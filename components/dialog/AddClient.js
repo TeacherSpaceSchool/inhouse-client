@@ -39,6 +39,7 @@ const AddClient =  React.memo(
         let [birthday, setBirthday] = useState(pdDatePicker(new Date()));
         let [info, setInfo] = useState('');
         let [address, setAddress] = useState('');
+        let [address1, setAddress1] = useState('');
         let [emails, setEmails] = useState([]);
         let addEmails = ()=>{
             emails = [...emails, '']
@@ -110,9 +111,17 @@ const AddClient =  React.memo(
                 <TextField variant='standard'
                            id='address'
                            error={!address.length}
-                           label='Адрес'
+                           label='Адрес проживания'
                            onChange={(event) => setAddress(event.target.value)}
                            value={address}
+                           className={classes.input}
+                />
+                <TextField variant='standard'
+                           id='address'
+                           error={!address1.length}
+                           label='Адрес прописки'
+                           onChange={(event) => setAddress1(event.target.value)}
+                           value={address1}
                            className={classes.input}
                 />
                 <TextField variant='standard'
@@ -199,11 +208,11 @@ const AddClient =  React.memo(
                 <br/>
                 <div>
                     <Button variant='contained' color='primary' onClick={async()=>{
-                        let checkPhones = phones.length&&validPhones1(phones)
+                        let checkPhones = !phones.length||validPhones1(phones)
                         let checkMail = !emails.length||validMails(emails)
                         let res
-                        if (name.length&&checkPhones&&checkMail&&address&&work&&passport&&inn&&level&&birthday) {
-                            let client = {name, emails, phones, address, info, work, passport, inn, level, birthday}
+                        if (name&&checkPhones&&checkMail/*&&address&&address1&&work&&passport&&inn&&level&&birthday*/) {
+                            let client = {name, emails, phones, address1, address, info, work, passport, inn, level, birthday}
                             res = await addClient(client)
                             if(res!=='ERROR'&&res) {
                                 showSnackBar('Успешно', 'success')

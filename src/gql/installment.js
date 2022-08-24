@@ -102,8 +102,8 @@ export const setInstallment = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $info: String, $status: String) {
-                        setInstallment(_id: $_id, info: $info, status: $status)
+                    mutation ($_id: ID!, $info: String, $status: String, $grid: [InstallmentGridInput]) {
+                        setInstallment(_id: $_id, info: $info, status: $status, grid: $grid)
                     }`})
         return res.data.setInstallment
     } catch(err){

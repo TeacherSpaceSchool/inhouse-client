@@ -5,6 +5,7 @@ import App from '../../layouts/App';
 import { connect } from 'react-redux'
 import { getUser, setUser, addUser, deleteUser, checkLogin, getDepartments, getPositions } from '../../src/gql/user'
 import { getStores } from '../../src/gql/store'
+import { getCashboxes } from '../../src/gql/cashbox'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -76,6 +77,7 @@ const User = React.memo((props) => {
         setPhones([...phones])
     };
     let [store, setStore] = useState(data.object?data.object.store:null);
+    let [cashbox, setCashbox] = useState(data.object?data.object.cashbox:null);
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const router = useRouter()
     useEffect(()=>{
@@ -239,7 +241,8 @@ const User = React.memo((props) => {
                                     <Input
                                         error={router.query.id === 'new' && !password || password&&password.length<8}
                                         placeholder='Новый пароль'
-                                        type={hide?'password':'text'}
+                                        type='text'
+                                        style={hide?{textSecurity: 'disc', WebkitTextSecurity: 'disc'}:{}}
                                         value={password}
                                         onChange={(event) => setPassword(event.target.value)}
                                         className={classes.input}
@@ -279,6 +282,7 @@ const User = React.memo((props) => {
                                         error={!store&&role!=='управляющий'}
                                         setElement={(store)=>{
                                             setStore(store)
+                                            setCashbox(null)
                                         }}
                                         defaultValue={store}
                                         getElements={async (search)=>{
@@ -287,6 +291,24 @@ const User = React.memo((props) => {
                                         minLength={0}
                                         label={'Магазин'}
                                     />
+                                    {
+                                        role==='кассир'&&store?
+                                            <AutocomplectOnline
+                                                element={cashbox}
+                                                error={!cashbox}
+                                                setElement={(cashbox)=>{
+                                                    setCashbox(cashbox)
+                                                }}
+                                                defaultValue={cashbox}
+                                                getElements={async (search)=>{
+                                                    return await getCashboxes({search, store: store._id})
+                                                }}
+                                                minLength={0}
+                                                label={'Касса'}
+                                            />
+                                            :
+                                            null
+                                    }
                                     <AutocomplectOnline
                                         element={department}
                                         error={!department}
@@ -397,6 +419,19 @@ const User = React.memo((props) => {
                                             {store.name}
                                         </div>
                                     </div>
+                                    {
+                                        cashbox?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Касса:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {cashbox.name}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Отдел:&nbsp;
@@ -446,7 +481,7 @@ const User = React.memo((props) => {
                                                 const action = async() => {
                                                     if(router.query.id==='new') {
                                                         res = await addUser({
-                                                            add, edit, deleted, login, password, role, name, phones, store: store?store._id:null, department, position, startWork
+                                                            add, edit, deleted, login, password, role, name, phones, store: store?store._id:null, cashbox: cashbox?cashbox._id:null, department, position, startWork
                                                         })
                                                         if(res!=='ERROR'&&res) {
                                                             unsaved.current = {}
@@ -457,14 +492,16 @@ const User = React.memo((props) => {
                                                             showSnackBar('Ошибка', 'error')
                                                     }
                                                     else {
-                                                        let element = {_id: router.query.id, store: store?store._id:null}
+                                                        let element = {_id: router.query.id}
                                                         if (add!==data.object.add) element.add = add
                                                         if (edit!==data.object.edit) element.edit = edit
                                                         if (deleted!==data.object.deleted) element.deleted = deleted
                                                         if (name!==data.object.name) element.name = name
+                                                        if (JSON.stringify(cashbox)!==JSON.stringify(data.object.cashbox)) element.cashbox = cashbox?cashbox._id:null
+                                                        if (JSON.stringify(store)!==JSON.stringify(data.object.store)) element.store = store?store._id:null
                                                         if (department!==data.object.department) element.department = department
                                                         if (position!==data.object.position) element.position = position
-                                                        if (startWork!==data.object.startWork) element.startWork = startWork
+                                                        if (startWork!==pdDatePicker(data.object.startWork)) element.startWork = startWork
                                                         if (login!==data.object.login) element.login = login
                                                         if (password&&password.length>7) element.password = password
                                                         if (JSON.stringify(phones)!==JSON.stringify(data.object.phones)) element.phones = phones
@@ -576,7 +613,8 @@ User.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                     position: null,
                     department: null,
                     startWork: pdDatePicker(new Date()),
-                    store: null
+                    store: null,
+                    cashbox: null
                 }
         }
     };

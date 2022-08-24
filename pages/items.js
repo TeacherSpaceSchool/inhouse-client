@@ -36,8 +36,19 @@ const Items = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
-        setList(cloneObject(await getItems({search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}, skip: 0})));
-        setCount(await getItemsCount({search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}}));
+        setList(cloneObject(await getItems({
+            search,
+            ...filter.factory?{factory: filter.factory._id}:{},
+            ...filter.category?{category: filter.category._id}:{},
+            skip: 0,
+            ...filter.typeItem?{type: filter.typeItem.name}:{}
+        })));
+        setCount(await getItemsCount({
+            search,
+            ...filter.factory?{factory: filter.factory._id}:{},
+            ...filter.category?{category: filter.category._id}:{},
+            ...filter.typeItem?{type: filter.typeItem.name}:{}
+        }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
@@ -64,7 +75,13 @@ const Items = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getItems({skip: list.length, search, ...filter.factory?{factory: filter.factory._id}:{}, ...filter.category?{category: filter.category._id}:{}}))
+            let addedList = cloneObject(await getItems({
+                skip: list.length,
+                search,
+                ...filter.factory?{factory: filter.factory._id}:{},
+                ...filter.category?{category: filter.category._id}:{},
+                ...filter.typeItem?{type: filter.typeItem.name}:{}
+            }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -73,7 +90,7 @@ const Items = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
+        <App filterShow={{factory: true, category: true, typeItem: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
             <Head>
                 <title>Модели</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -87,14 +104,17 @@ const Items = React.memo((props) => {
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
-                        <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 3)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 4)', justifyContent: 'start'}}>
                             Название
                         </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 3)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 4)', justifyContent: 'start'}}>
                             Цена(сом)
                         </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 3)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
                             Категория
+                        </div>
+                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
+                            Фабрика
                         </div>
                     </div>
                     {list.map((element) =>
@@ -105,14 +125,17 @@ const Items = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'item'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
-                                <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 3)'}}>
+                                <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 4)'}}>
                                     {element.name}
                                 </div>
-                                <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 3)'}}>
+                                <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 4)'}}>
                                     {element.priceAfterDiscountKGS}
                                 </div>
-                                <div className={classes.tableCell} style={{maxHeight: 100, overflow: 'auto', width: isMobileApp?150:'calc(100% / 3)'}}>
+                                <div className={classes.tableCell} style={{maxHeight: 100, overflow: 'auto', width: isMobileApp?150:'calc(100% / 4)'}}>
                                     {element.category.name}
+                                </div>
+                                <div className={classes.tableCell} style={{maxHeight: 100, overflow: 'auto', width: isMobileApp?150:'calc(100% / 4)'}}>
+                                    {element.factory.name}
                                 </div>
                             </div>
                         </Link>
@@ -175,12 +198,14 @@ Items.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.factory?{factory: store.getState().app.filter.factory._id}:{},
                 ...store.getState().app.filter.category?{category: store.getState().app.filter.category._id}:{},
-                ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
+                ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{},
+                ...store.getState().app.filter.typeItem?{type: store.getState().app.filter.typeItem}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getItemsCount({
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.factory?{factory: store.getState().app.filter.factory._id}:{},
                 ...store.getState().app.filter.category?{category: store.getState().app.filter.category._id}:{},
+                ...store.getState().app.filter.typeItem?{type: store.getState().app.filter.typeItem}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

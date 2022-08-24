@@ -6,7 +6,7 @@ import { getStores } from '../../src/gql/store'
 import { getPositions, getDepartments } from '../../src/gql/user'
 import { getFactorys } from '../../src/gql/factory'
 import { getCategorys } from '../../src/gql/category'
-import { getItems } from '../../src/gql/item'
+import { getItems, getTypeItems } from '../../src/gql/item'
 import { getWarehouses } from '../../src/gql/warehouse'
 import * as appActions from '../../src/redux/actions/app'
 import Button from '@mui/material/Button';
@@ -180,7 +180,7 @@ const Filter =  React.memo(
                                 return await getCashboxes({search, ...filter.store?{store: filter.store._id}:{}})
                             }}
                             minLength={0}
-                            label={'Касса'}
+                            label={'Касса/Банк'}
                         />
                         :
                         null
@@ -286,6 +286,26 @@ const Filter =  React.memo(
                             }}
                             minLength={0}
                             label={'Фабрика'}
+                        />
+                        :
+                        null
+                }
+                {
+                    filterShow.typeItem?
+                        <AutocomplectOnline
+                            element={filter.typeItem}
+                            setElement={(typeItem)=>{
+                                setFilter({
+                                    ...filter,
+                                    typeItem
+                                })
+                            }}
+                            defaultValue={filter.typeItem}
+                            getElements={async (search)=>{
+                                return await getTypeItems({search})
+                            }}
+                            minLength={0}
+                            label={'Тип товара'}
                         />
                         :
                         null

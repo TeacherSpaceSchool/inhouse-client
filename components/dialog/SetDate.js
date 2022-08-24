@@ -6,24 +6,25 @@ import * as appActions from '../../src/redux/actions/app'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
-import { pdDatePickerMonth } from '../../src/lib'
+import { pdDatePicker, pdDatePickerMonth } from '../../src/lib'
 
 const SetDate =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { date, setDate, type } = props;
+        const { date, setDate, month } = props;
         const { isMobileApp } = props.app;
-        let [_date, _setDate] = useState(pdDatePickerMonth(date));
+        let [_date, _setDate] = useState(month?pdDatePickerMonth(date):pdDatePicker(date));
         const { showMiniDialog } = props.mini_dialogActions;
         const width = isMobileApp? (window.innerWidth-113) : 500
         return (
             <div className={classes.main}>
-                <TextField variant='standard'
-                           id='date'
-                           style={{width}}
+                <TextField
+                    variant='standard'
+                    id='date'
+                    style={{width}}
                     className={classes.textField}
                     label='Дата'
-                    type={type?type:'date'}
+                    type={month?'month':'date'}
                     InputLabelProps={{
                         shrink: true,
                     }}

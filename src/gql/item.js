@@ -1,16 +1,16 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getItems = async({skip, limit, store, search, category, factory, catalog}, client)=>{
+export const getItems = async({skip, limit, type, store, search, category, factory, catalog}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client
             .query({
-                variables: {skip, limit, search, store, category, factory, catalog},
+                variables: {skip, limit, type, search, store, category, factory, catalog},
                 query: gql`
-                    query ($skip: Int, $store: ID, $search: String, $limit: Int, $category: ID, $factory: ID, $catalog: Boolean) {
-                        items(skip: $skip, store: $store, search: $search, limit: $limit, category: $category, factory: $factory, catalog: $catalog) {
+                    query ($skip: Int, $type: String, $store: ID, $search: String, $limit: Int, $category: ID, $factory: ID, $catalog: Boolean) {
+                        items(skip: $skip, type: $type, store: $store, search: $search, limit: $limit, category: $category, factory: $factory, catalog: $catalog) {
                             _id
                             createdAt
                             category {_id name}
@@ -27,6 +27,7 @@ export const getItems = async({skip, limit, store, search, category, factory, ca
                             discount
                             priceAfterDiscountKGS
                             info
+                            type
                             unit
                             size
                             characteristics
@@ -40,15 +41,34 @@ export const getItems = async({skip, limit, store, search, category, factory, ca
     }
 }
 
-export const getItemsCount = async({search, category, factory}, client)=>{
+export const getTypeItems = async({search}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, category, factory},
+                variables: {search},
                 query: gql`
-                    query ($search: String, $category: ID, $factory: ID) {
-                        itemsCount(search: $search, category: $category, factory: $factory) 
+                    query ($search: String) {
+                        typeItems(search: $search) {
+                            name
+                        }
+                    }`,
+            })
+        return res.data.typeItems
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getItemsCount = async({search, category, factory, type}, client)=>{
+    try{
+        client = client? client : getClientGql()
+        let res = await client
+            .query({
+                variables: {search, category, factory, type},
+                query: gql`
+                    query ($search: String, $type: String, $category: ID, $factory: ID) {
+                        itemsCount(search: $search, type: $type, category: $category, factory: $factory) 
                     }`,
             })
         return res.data.itemsCount
@@ -76,6 +96,7 @@ export const getItem = async({_id}, client)=>{
                             priceUSD
                             primeCostUSD
                             art
+                            type
                             priceKGS
                             primeCostKGS
                             discount
@@ -115,8 +136,8 @@ export const addItem = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($ID: String!, $art: String!, $typeDiscount: String!, $name: String!, $uploads: [Upload], $priceUSD: Float!, $primeCostUSD: Float!, $priceKGS: Float!, $primeCostKGS: Float!, $discount: Float!, $priceAfterDiscountKGS: Float!, $info: String!, $unit: String!, $size: String!, $characteristics: [[String]]!, $category: ID!, $factory: ID!) {
-                        addItem(ID: $ID, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
+                    mutation ($ID: String!, $type: String!, $art: String!, $typeDiscount: String!, $name: String!, $uploads: [Upload], $priceUSD: Float!, $primeCostUSD: Float!, $priceKGS: Float!, $primeCostKGS: Float!, $discount: Float!, $priceAfterDiscountKGS: Float!, $info: String!, $unit: String!, $size: String!, $characteristics: [[String]]!, $category: ID!, $factory: ID!) {
+                        addItem(ID: $ID, type: $type, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
                     }`})
         return res.data.addItem
     } catch(err){
@@ -130,8 +151,8 @@ export const setItem = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $ID: String, $art: String, $typeDiscount: String, $name: String, $uploads: [Upload], $images: [String], $priceUSD: Float, $primeCostUSD: Float, $priceKGS: Float, $primeCostKGS: Float, $discount: Float, $priceAfterDiscountKGS: Float, $info: String, $unit: String, $size: String, $characteristics: [[String]], $category: ID, $factory: ID) {
-                        setItem(_id: $_id, ID: $ID, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, images: $images, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
+                    mutation ($_id: ID!, $type: String, $ID: String, $art: String, $typeDiscount: String, $name: String, $uploads: [Upload], $images: [String], $priceUSD: Float, $primeCostUSD: Float, $priceKGS: Float, $primeCostKGS: Float, $discount: Float, $priceAfterDiscountKGS: Float, $info: String, $unit: String, $size: String, $characteristics: [[String]], $category: ID, $factory: ID) {
+                        setItem(_id: $_id, type: $type, ID: $ID, name: $name, art: $art, typeDiscount: $typeDiscount, uploads: $uploads, images: $images, priceUSD: $priceUSD, primeCostUSD: $primeCostUSD, priceKGS: $priceKGS, primeCostKGS: $primeCostKGS, discount: $discount, priceAfterDiscountKGS: $priceAfterDiscountKGS, info: $info, unit: $unit, size: $size, characteristics: $characteristics, category: $category, factory: $factory)
                     }`})
         return res.data.setItem
     } catch(err){
@@ -154,15 +175,15 @@ export const kgsFromUsdItem = async(variables)=>{
     }
 }
 
-export const getUnloadItems = async({search, category, factory}, client)=>{
+export const getUnloadItems = async({search, category, factory, type}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-            variables: {search, category, factory},
+            variables: {search, category, factory, type},
             query: gql`
-                    query ($search: String, $category: ID, $factory: ID) {
-                        unloadItems(search: $search, category: $category, factory: $factory)
+                    query ($search: String, $type: String, $category: ID, $factory: ID) {
+                        unloadItems(search: $search, type: $type, category: $category, factory: $factory)
                     }`,
         })
         return res.data.unloadItems

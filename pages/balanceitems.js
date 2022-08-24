@@ -20,9 +20,11 @@ import Input from '@mui/material/Input';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MoreVert from '@mui/icons-material/MoreVert';
+import SwapHoriz from '@mui/icons-material/SwapHoriz';
 import Add from '@mui/icons-material/Add';
 import Save from '@mui/icons-material/Save';
 import Confirmation from '../components/dialog/Confirmation'
+import MovingWarehouses from '../components/dialog/MovingWarehouses'
 import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
@@ -30,6 +32,7 @@ import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import { inputFloat, checkFloat } from '../src/lib'
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
+import Fab from '@mui/material/Fab';
 
 const uploadText = 'Формат xlsx:\n_id модели (если требуется обновить);\n_id склада;\nостаток.'
 const sorts = [
@@ -251,7 +254,7 @@ const BalanceItems = React.memo((props) => {
                                                                     setList([...list])
                                                                 }
                                                                 else
-                                                                    showSnackBar('Ошибка', 'error')
+                                                                    showSnackBar('Неверный остаток', 'error')
                                                             }}/>)
                                                             showMiniDialog(true)
                                                         }
@@ -326,8 +329,19 @@ const BalanceItems = React.memo((props) => {
                 </div>
             </Card>
             {
+                data.edit?
+                    <Fab color='primary' aria-label='add' className={classes.fab} onClick={()=>{
+                        setMiniDialog('Переместить', <MovingWarehouses/>)
+                        showMiniDialog(true)
+                    }}>
+                        <SwapHoriz/>
+                    </Fab>
+                    :
+                    null
+            }
+            {
                 data.add||data.edit?
-                    <UnloadUpload upload={uploadBalanceItem} uploadText={uploadText} unload={()=>getUnloadBalanceItems({search, ...filter.item?{item: filter.item._id}:{}, ...filter.warehouse?{warehouse: filter.warehouse._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
+                    <UnloadUpload position={2} upload={uploadBalanceItem} uploadText={uploadText} unload={()=>getUnloadBalanceItems({search, ...filter.item?{item: filter.item._id}:{}, ...filter.warehouse?{warehouse: filter.warehouse._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
                     :
                     null
             }

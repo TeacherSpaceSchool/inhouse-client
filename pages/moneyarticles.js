@@ -150,10 +150,12 @@ const MoneyArticle = React.memo((props) => {
                                         className={classes.input}
                                         value={newElement.name}
                                         onChange={(event) => {
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.name = event.target.value
-                                            setNewElement({...newElement})
+                                            if(!['Зарплата', 'Не указано'].includes(event.target.value)) {
+                                                newElement.unsaved = true
+                                                unsaved.current['new'] = true
+                                                newElement.name = event.target.value
+                                                setNewElement({...newElement})
+                                            }
                                         }}
                                     />
                                 </div>
@@ -164,7 +166,7 @@ const MoneyArticle = React.memo((props) => {
                     {list.map((element, idx) =>
                         <div className={classes.tableRow} key={element._id}>
                             {
-                                data.edit?
+                                data.edit&&!['Зарплата', 'Не указано'].includes(element.name)?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                         <IconButton onClick={(event)=>{
                                             setMenuItems(
@@ -243,10 +245,12 @@ const MoneyArticle = React.memo((props) => {
                                             className={classes.input}
                                             value={element.name}
                                             onChange={(event) => {
-                                                list[idx].unsaved = true
-                                                unsaved.current[list[idx]._id] = true
-                                                list[idx].name = event.target.value
-                                                setList([...list])
+                                                if(!['Зарплата', 'Не указано'].includes(element.name)&&!['Зарплата', 'Не указано'].includes(event.target.value)) {
+                                                    list[idx].unsaved = true
+                                                    unsaved.current[list[idx]._id] = true
+                                                    list[idx].name = event.target.value
+                                                    setList([...list])
+                                                }
                                             }}
                                         />
                                         :

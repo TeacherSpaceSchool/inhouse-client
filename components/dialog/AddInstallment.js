@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import { getClients } from '../../src/gql/client'
-import { addInstallment, getInstallments } from '../../src/gql/installment'
+import { addInstallment, getInstallments, setInstallment } from '../../src/gql/installment'
 import {getStores} from '../../src/gql/store';
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
@@ -16,8 +16,9 @@ import Confirmation from './Confirmation'
 
 const AddInstallment =  React.memo(
     (props) =>{
+        const initialRender = useRef(true);
         const { classes } = dialogContentStyle();
-        const { list, setList } = props;
+        const { list, setList, idx } = props;
         const { isMobileApp } = props.app;
         const { showSnackBar } = props.snackbarActions;
         const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
@@ -29,85 +30,116 @@ const AddInstallment =  React.memo(
         let [store, setStore] = useState(profile.store?{_id: profile.store}:null);
         let [monthInstallment, setMonthInstallment] = useState('');
         let [paidInstallment, setPaidInstallment] = useState(0);
+        let [remainder, setRemainder] = useState(0);
         let [installmentsDebt, setInstallmentsDebt] = useState(0);
         const width = isMobileApp? (window.innerWidth-113) : 500
         useEffect(() => {
-            monthInstallment = checkFloat(monthInstallment)
-            if(monthInstallment)
-                paidInstallment = checkFloat((checkFloat(amount)+(renew?installmentsDebt:0)-checkFloat(paid)) / monthInstallment)
-            else
-                paidInstallment = 0
-            setPaidInstallment(paidInstallment)
-        }, [paid, amount, monthInstallment, renew]);
-        useEffect(() => {
-            (async()=>{
-                installmentsDebt = 0
-                if(client&&store) {
-                    let installments = [
-                        ...await getInstallments({
-                            client: client._id,
-                            store: store._id,
-                            status: 'безнадежна'
-                        }),
-                        ...await getInstallments({
-                            client: client._id,
-                            store: store._id,
-                            status: 'активна'
-                        }),
-                    ]
-                    for(let i = 0; i <installments.length; i++) {
-                        installmentsDebt += installments[i].debt
+            if(!initialRender.current) {
+                monthInstallment = checkFloat(monthInstallment)
+                remainder = 0
+                if (monthInstallment) {
+                    let allAmount = checkFloat(amount) + (renew ? installmentsDebt : 0) - checkFloat(paid)
+                    paidInstallment = checkFloat(allAmount / monthInstallment)
+                    remainder = paidInstallment % (paidInstallment >= 100 ? 100 : 1)
+                    remainder = Math.round(remainder * monthInstallment)
+                    if (remainder) {
+                        allAmount -= remainder
+                        paidInstallment = checkFloat(allAmount / monthInstallment)
                     }
                 }
-                setInstallmentsDebt(installmentsDebt)
-                setRenew(false)
-            })()
+                else
+                    paidInstallment = 0
+                setPaidInstallment(paidInstallment)
+                setRemainder(remainder)
+            }
+        }, [paid, amount, monthInstallment, renew]);
+        useEffect(() => {
+            if(!initialRender.current&&idx===undefined)
+                (async () => {
+                    installmentsDebt = 0
+                    if (client && store) {
+                        let installments = [
+                            ...await getInstallments({
+                                client: client._id,
+                                store: store._id,
+                                status: 'безнадежна'
+                            }),
+                            ...await getInstallments({
+                                client: client._id,
+                                store: store._id,
+                                status: 'активна'
+                            }),
+                        ]
+                        for (let i = 0; i < installments.length; i++) {
+                            installmentsDebt += installments[i].debt
+                        }
+                    }
+                    setInstallmentsDebt(installmentsDebt)
+                    setRenew(false)
+                })()
         }, [client, store]);
+        useEffect(() => {
+            if(initialRender.current) {
+                initialRender.current = false
+                if(idx!==undefined) {
+                    setAmount(list[idx].debt)
+                    setClient(list[idx].client)
+                    setStore(list[idx].store)
+                }
+            }
+        }, []);
         return (
             <div className={classes.main} style={{width}}>
                 <br/>
                 {
-                    !profile.store?
+                    idx===undefined?
+                        <>
+                        {
+                            !profile.store?
+                                <AutocomplectOnline
+                                    error={!store}
+                                    element={store}
+                                    setElement={store=>setStore(store)}
+                                    getElements={async (search)=>{
+                                        return await getStores({search})
+                                    }}
+                                    minLength={0}
+                                    label={'Магазин'}
+                                />
+                                :
+                                null
+                        }
                         <AutocomplectOnline
-                            error={!store}
-                            element={store}
-                            setElement={store=>setStore(store)}
+                            error={!client}
+                            element={client}
+                            setElement={client => setClient(client)}
                             getElements={async (search)=>{
-                                return await getStores({search})
+                                return await getClients({search})
                             }}
                             minLength={0}
-                            label={'Магазин'}
+                            label={'Клиент'}
                         />
+                        <div className={classes.row} style={{marginTop: 10}}>
+                            <center className={classes.input}>
+                                <Button size='small' onClick={() => {setRenew(false)}} style={{color: !renew?'#10183D':'#A0A0A0'}}>
+                                    Новая рассрочка
+                                </Button>
+                            </center>
+                            {
+                                installmentsDebt?
+                                    <center className={classes.input}>
+                                        <Button size='small' onClick={() => {setRenew(true)}} style={{color: renew?'#10183D':'#A0A0A0'}}>
+                                            Объединить рассрочки<br/>({installmentsDebt} сом)
+                                        </Button>
+                                    </center>
+                                    :
+                                    null
+                            }
+                        </div>
+                        </>
                         :
                         null
                 }
-                <AutocomplectOnline
-                    error={!client}
-                    element={client}
-                    setElement={client => setClient(client)}
-                    getElements={async (search)=>{
-                        return await getClients({search})
-                    }}
-                    minLength={0}
-                    label={'Клиент'}
-                />
-                <div className={classes.row} style={{marginTop: 10}}>
-                    <center className={classes.input}>
-                        <Button size='small' onClick={() => {setRenew(false)}} style={{color: !renew?'#10183D':'#A0A0A0'}}>
-                            Новая рассрочка
-                        </Button>
-                    </center>
-                    {
-                        installmentsDebt?
-                            <center className={classes.input}>
-                                <Button size='small' onClick={() => {setRenew(true)}} style={{color: renew?'#10183D':'#A0A0A0'}}>
-                                    Объединить рассрочки<br/>({installmentsDebt} сом)
-                                </Button>
-                            </center>
-                            :
-                            null
-                    }
-                </div>
                 <div className={classes.row}>
                     <TextField
                         id='amount'
@@ -143,7 +175,6 @@ const AddInstallment =  React.memo(
                         style={{marginRight: 10}}
                     />
                     <TextField
-                        id='paidInstallment'
                         error={!paidInstallment||paidInstallment<0}
                         variant='standard'
                         label='Месячный платеж'
@@ -153,7 +184,23 @@ const AddInstallment =  React.memo(
                             'aria-placeholder': 'description',
                             readOnly: true,
                         }}
+                        style={{marginRight: 10}}
                     />
+                    {
+                        remainder?
+                            <TextField
+                                variant='standard'
+                                label='Последний платеж'
+                                value={paidInstallment+remainder}
+                                className={classes.input}
+                                inputProps={{
+                                    'aria-placeholder': 'description',
+                                    readOnly: true,
+                                }}
+                            />
+                            :
+                            null
+                    }
                 </div>
                 <br/>
                 <div>
@@ -165,6 +212,7 @@ const AddInstallment =  React.memo(
                             setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
                                 const grid = []
                                 let month = new Date()
+                                month.setHours(0, 0, 0, 0)
                                 grid.push({
                                     month: new Date(month),
                                     amount: paid,
@@ -180,7 +228,7 @@ const AddInstallment =  React.memo(
                                     })
                                     month.setMonth(month.getMonth()+1)
                                 }
-
+                                grid[grid.length-1].amount += remainder
                                 let res = await addInstallment({
                                     renew,
                                     grid,
@@ -188,15 +236,24 @@ const AddInstallment =  React.memo(
                                     client: client._id,
                                     amount: amount+(renew?installmentsDebt:0),
                                     paid: 0,
-                                    datePaid: grid[1].month,
+                                    datePaid: grid[0].month,
                                     store: store._id,
                                     currency: 'сом'
                                 })
                                 if(res&&res._id!=='ERROR') {
-                                    if(renew)
-                                        Router.reload()
+                                    if(idx!==undefined)
+                                        res = await setInstallment({
+                                            _id: list[idx]._id,
+                                            status: 'перерасчет'
+                                        })
+                                    if(res!=='ERROR') {
+                                        if (renew || idx !== undefined)
+                                            Router.reload()
+                                        else
+                                            setList([res, ...list])
+                                    }
                                     else
-                                        setList([res, ...list])
+                                        showSnackBar('Ошибка', 'error')
                                     showMiniDialog(false)
                                 }
                                 else

@@ -43,7 +43,7 @@ export const getSale = async({_id}, client)=>{
                             amountStart
                             amountEnd
                             typePayment
-                            installment {_id status}
+                            installment {_id status number}
                             address
                             prepaid
                             addressInfo
@@ -91,7 +91,7 @@ export const getSales = async({search, skip, items, limit, manager, client, cpa,
                             amountStart
                             amountEnd
                             typePayment
-                            installment {_id status}
+                            installment {_id status number}
                             address
                             addressInfo
                             comment

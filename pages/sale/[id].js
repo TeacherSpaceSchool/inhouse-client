@@ -100,6 +100,8 @@ const Sale = React.memo((props) => {
         if(amountEnd<0)
             amountEnd = 0
         setAmountEnd(amountEnd)
+        if(!data.object.installment)
+            setPaid(amountEnd)
     },[amountStart, discount, discountType])
     useEffect(()=>{
         if(!unsaved.current)
@@ -122,7 +124,7 @@ const Sale = React.memo((props) => {
             <Card className={classes.page}>
                 <div className={classes.status}>
                     {
-                        ['admin'].includes(profile.role)&&data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
+                        data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                             <DownloadIcon onClick={async()=>{
                                 await showLoad(true)
                                 await getSaleDoc({
@@ -346,7 +348,7 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
                                         <Input
@@ -391,7 +393,7 @@ const Sale = React.memo((props) => {
                                     null
                             }
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <TextField
                                         error={paid>amountEnd}
                                         id='paid'
@@ -510,7 +512,7 @@ const Sale = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsSale.length}):</div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     itemsSale.map((itemSale, idx)=>
                                         <div className={classes.column} key={`itemsSale${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -592,7 +594,7 @@ const Sale = React.memo((props) => {
                                     )
                             }
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {

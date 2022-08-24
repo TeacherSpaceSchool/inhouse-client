@@ -6,7 +6,7 @@ import {getInstallments, getInstallmentsCount, setInstallment, getUnloadInstallm
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYYY } from '../src/lib'
+import { cloneObject, pdDDMMYYYY, pdtDatePicker } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -25,10 +25,12 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import CancelIcon from '@mui/icons-material/Cancel';
+import TableViewIcon from '@mui/icons-material/TableView';
 import AddIcon from '@mui/icons-material/Add';
 import PaidIcon from '@mui/icons-material/Paid';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import AddInstallment from '../components/dialog/AddInstallment';
+import SetDate from '../components/dialog/SetDate';
 import Fab from '@mui/material/Fab';
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
@@ -150,7 +152,7 @@ const Installments = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                             Клиент
                         </div>
-                        <div className={classes.tableCell} onClick={()=>setShowComment(!showComment)} style={{width: showComment?200:30, overflow: 'hidden', justifyContent: data.edit&&showComment?'center':'start'}}>
+                        <div className={classes.tableCell} onClick={()=>setShowComment(!showComment)} style={{width: showComment?400:30, overflow: 'hidden', justifyContent: data.edit&&showComment?'center':'start'}}>
                             {
                                 showComment?'Комментарий':'...'
                             }
@@ -177,9 +179,19 @@ const Installments = React.memo((props) => {
                                                         <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
                                                         setMiniDialog('Вы уверены?', <Confirmation
                                                             action={async () => {
+                                                                let grid = []
+                                                                for(let i=0; i<element.grid.length; i++) {
+                                                                    grid.push({
+                                                                        month: element.grid[i].month,
+                                                                        amount: element.grid[i].amount,
+                                                                        paid: element.grid[i].paid,
+                                                                        datePaid: element.grid[i].datePaid
+                                                                    })
+                                                                }
                                                                 let res = await setInstallment({
                                                                     _id: element._id,
                                                                     info: element.info,
+                                                                    grid,
                                                                 })
                                                                 if (res === 'OK') {
                                                                     showSnackBar('Успешно', 'success')
@@ -212,8 +224,18 @@ const Installments = React.memo((props) => {
                                                     }}>
                                                         <PaidIcon/>&nbsp;Платежи
                                                     </MenuItem>,
-                                                    data.edit&&'активна'===element.status?
+                                                    data.edit&&['активна', 'безнадежна'].includes(element.status)?
                                                         <MenuItem key='MenuItem3' onClick={async()=>{
+                                                            setMiniDialog('Добавить рассрочку', <AddInstallment idx={idx} list={list} setList={setList}/>)
+                                                            showMiniDialog(true)
+                                                            handleCloseQuick()
+                                                        }}>
+                                                            <TableViewIcon/>&nbsp;Перерасчет
+                                                        </MenuItem>
+                                                        :
+                                                        null,
+                                                    data.edit&&'активна'===element.status?
+                                                        <MenuItem key='MenuItem4' onClick={async()=>{
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                 let res = await setInstallment({
                                                                     _id: element._id,
@@ -235,7 +257,7 @@ const Installments = React.memo((props) => {
                                                         </MenuItem>
                                                         :
                                                         data.edit&&'безнадежна'===element.status?
-                                                            <MenuItem key='MenuItem3' onClick={async()=>{
+                                                            <MenuItem key='MenuItem4' onClick={async()=>{
                                                                 setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                     let res = await setInstallment({
                                                                         _id: element._id,
@@ -258,7 +280,7 @@ const Installments = React.memo((props) => {
                                                             :
                                                             null,
                                                     data.deleted&&['активна', 'безнадежна'].includes(element.status)?
-                                                        <MenuItem key='MenuItem3' onClick={async()=>{
+                                                        <MenuItem key='MenuItem5' onClick={async()=>{
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                 let res = await setInstallment({
                                                                     _id: element._id,
@@ -315,7 +337,7 @@ const Installments = React.memo((props) => {
                                         null
                                 }
                             </div>
-                            <div className={classes.tableCell} onClick={()=>{if(!showComment)setShowComment(true)}} style={{width: showComment?200:30, justifyContent: data.edit?'center':'start'}}>
+                            <div className={classes.tableCell} onClick={()=>{if(!showComment)setShowComment(true)}} style={{width: showComment?400:30, justifyContent: data.edit?'center':'start'}}>
                                 {
                                     showComment?
                                         data.edit&&['активна', 'безнадежна'].includes(element.status)?
@@ -351,7 +373,24 @@ const Installments = React.memo((props) => {
                                 {
                                     element.grid.map((grid, idx1)=>
                                         <div className={classes.column} key={`${element._id}${idx1}`} style={{width: 100, borderRight: 'solid 1px #00000040', padding: 5}}>
-                                            <div style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center', color: !grid.paid&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'black'}}>{pdDDMMYYYY(grid.month)}</div>
+                                            <div
+                                                onClick={()=>{
+                                                    if(data.edit&&['активна', 'безнадежна'].includes(element.status)) {
+                                                        let date = pdtDatePicker(grid.month)
+                                                        setMiniDialog('Месяц', <SetDate date={date} setDate={(date)=>{
+                                                            list[idx].unsaved = true
+                                                            unsaved.current[list[idx]._id] = true
+                                                            list[idx].grid[idx1].month = date
+                                                            setList([...list])
+                                                        }}/>)
+                                                        showMiniDialog(true)
+                                                    }
+                                                }}
+                                                style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center', color: !grid.paid&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'black'}}>
+                                                {
+                                                    pdDDMMYYYY(grid.month)
+                                                }
+                                            </div>
                                             <div style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>{grid.amount}</div>
                                             <div style={{height: 30, justifyContent: 'start', display: 'flex', alignItems: 'center'}}>{grid.paid}</div>
                                         </div>

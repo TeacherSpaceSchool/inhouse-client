@@ -39,6 +39,7 @@ const BuyBasket =  React.memo(
         let [date, setDate] = useState();
         let [geo, setGeo] = useState(client.geo);
         let [cpa, setCpa] = useState();
+        let [remainder, setRemainder] = useState(0);
         let [monthInstallment, setMonthInstallment] = useState('');
         let [paidInstallment, setPaidInstallment] = useState('');
         let [percentCpa, setPercentCpa] = useState(0);
@@ -58,10 +59,20 @@ const BuyBasket =  React.memo(
         }, [typePayment, discount, discountType]);
         useEffect(() => {
             monthInstallment = checkFloat(monthInstallment)
-            if(monthInstallment)
-                paidInstallment = checkFloat((amountEnd+(renew?installmentsDebt:0)-checkFloat(paid)-checkFloat(prepaid)) / monthInstallment)
+            remainder = 0
+            if(monthInstallment) {
+                let allAmount = amountEnd+(renew?installmentsDebt:0)-checkFloat(paid)-checkFloat(prepaid)
+                paidInstallment = checkFloat(allAmount / monthInstallment)
+                remainder = paidInstallment % (paidInstallment>=100?100:1)
+                remainder = Math.round(remainder * monthInstallment)
+                if (remainder) {
+                    allAmount -= remainder
+                    paidInstallment = checkFloat(allAmount / monthInstallment)
+                }
+            }
             else
                 paidInstallment = 0
+            setRemainder(remainder)
             setPaidInstallment(paidInstallment)
         }, [paid, amountEnd, monthInstallment, renew]);
         return (
@@ -97,8 +108,12 @@ const BuyBasket =  React.memo(
                                 </div>
                             </div>
                             <div className={classes.typeShow} onClick={()=>{
-                                discountType = discountType==='%'?'сом':'%'
-                                setDiscountType(discountType)
+                                if(discountType==='%')
+                                    discount = checkFloat(discount*amountStart/100)
+                                else
+                                    discount = checkFloat(discount*100/amountStart)
+                                setDiscount(discount)
+                                setDiscountType(discountType==='%'?'сом':'%')
                             }}>
                                 {discountType}
                             </div>
@@ -225,6 +240,21 @@ const BuyBasket =  React.memo(
                                     readOnly: true,
                                 }}
                             />
+                            {
+                                remainder?
+                                    <TextField
+                                        variant='standard'
+                                        label='Последний платеж'
+                                        value={paidInstallment+remainder}
+                                        className={classes.input}
+                                        inputProps={{
+                                            'aria-placeholder': 'description',
+                                            readOnly: true,
+                                        }}
+                                    />
+                                    :
+                                    null
+                            }
                         </div>
                         </>
                         :
@@ -388,6 +418,7 @@ const BuyBasket =  React.memo(
                                         if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
                                             const grid = []
                                             let month = new Date()
+                                            month.setHours(0, 0, 0, 0)
                                             grid.push({
                                                 month: new Date(month),
                                                 amount: paid,
@@ -403,7 +434,7 @@ const BuyBasket =  React.memo(
                                                 })
                                                 month.setMonth(month.getMonth() + 1)
                                             }
-
+                                            grid[grid.length-1].amount += remainder
                                             let _res = await addInstallment({
                                                 renew,
                                                 grid,
@@ -412,7 +443,7 @@ const BuyBasket =  React.memo(
                                                 amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
                                                 paid: 0,
                                                 sale: res,
-                                                datePaid: grid[1].month,
+                                                datePaid: grid[0].month,
                                                 store: profile.store,
                                                 currency
                                             })

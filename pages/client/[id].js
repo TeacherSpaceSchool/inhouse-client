@@ -437,7 +437,7 @@ const Client = React.memo((props) => {
                                                         if (passport!==data.object.passport) element.passport = passport
                                                         if (inn!==data.object.inn) element.inn = inn
                                                         if (level!==data.object.level) element.level = level
-                                                        if (pdDDMMYYYY(birthday)!==pdDDMMYYYY(data.object.birthday)) element.birthday = birthday
+                                                        if (birthday!==pdDatePicker(data.object.birthday)) element.birthday = birthday
                                                         if (JSON.stringify(geo)!==JSON.stringify(data.object.geo)) element.geo = geo
                                                         if (JSON.stringify(phones)!==JSON.stringify(data.object.phones)) element.phones = phones
                                                         if (JSON.stringify(emails)!==JSON.stringify(data.object.emails)) element.emails = emails

@@ -84,14 +84,14 @@ export const addBalanceItem = async({item, warehouse, amount})=>{
     }
 }
 
-export const setBalanceItem = async({item, warehouse, amount, type})=>{
+export const setBalanceItem = async({item, warehouse, amount, type, warehouse2})=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
-            variables: {item, warehouse, amount, type},
+            variables: {item, warehouse, amount, type, warehouse2},
             mutation : gql`
-                    mutation ($item: ID!, $warehouse: ID!, $amount: Float!, $type: String) {
-                        setBalanceItem(item: $item, warehouse: $warehouse, amount: $amount, type: $type)
+                    mutation ($item: ID!, $warehouse: ID!, $amount: Float!, $type: String, $warehouse2: String) {
+                        setBalanceItem(item: $item, warehouse: $warehouse, amount: $amount, type: $type, warehouse2: $warehouse2)
                     }`})
         return res.data.setBalanceItem
     } catch(err){

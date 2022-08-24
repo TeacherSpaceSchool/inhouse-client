@@ -61,6 +61,10 @@ const AutocomplectOnline = React.memo((props) => {
             setInputValue('')
         else if(typeof element === 'string'&&inputValue!==element)
             setInputValue(element)
+        else if(element&&element.name&&inputValue!==element.name)
+            setInputValue(element.name)
+        else if(element&&element.number&&inputValue!==element.number)
+            setInputValue(element.number)
     }, [element]);
     const handleChange = event => {
         setInputValue(event.target.value);
@@ -101,7 +105,7 @@ const AutocomplectOnline = React.memo((props) => {
                 }
             }}
             filterOptions={(options, params) => {
-                if (dialogAddElement&&params.inputValue.length>2) {
+                if (!options.length&&dialogAddElement&&params.inputValue.length>2) {
                     options.push({
                         inputValue: params.inputValue,
                         name: `Добавить ${params.inputValue}`
@@ -127,12 +131,13 @@ const AutocomplectOnline = React.memo((props) => {
                                        setFocus(true)
                                }}
                                onBlur={()=>{
-                                   if(focus)
+                                   if(focus) {
                                        setFocus(false)
-                                   if(!element||(element.name!==inputValue&&element.number!==inputValue&&element!==inputValue)) {
-                                       if(element)
-                                           setElement(null)
-                                       setInputValue('')
+                                       if (!element || (element.name !== inputValue && element.number !== inputValue && element !== inputValue)) {
+                                           if (element)
+                                               setElement(null)
+                                           setInputValue('')
+                                       }
                                    }
                                }}
                                InputProps={{

@@ -63,6 +63,7 @@ const Order = React.memo((props) => {
             amount = checkFloat(amount + itemsOrder[i].amount)
         }
         setAmount(amount)
+        setPaid(amount)
     },[itemsOrder])
     useEffect(()=>{
         if(!unsaved.current)
@@ -198,7 +199,7 @@ const Order = React.memo((props) => {
                                 <div className={classes.value}>{`${edit?amount:data.object.amount} сом`}</div>
                             </div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <TextField
                                         id='paid'
                                         variant='standard'
@@ -237,7 +238,7 @@ const Order = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsOrder.length}):</div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     itemsOrder.map((itemOrder, idx)=>
                                         <div className={classes.column} key={`itemsOrder${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -319,7 +320,7 @@ const Order = React.memo((props) => {
                                     )
                             }
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {

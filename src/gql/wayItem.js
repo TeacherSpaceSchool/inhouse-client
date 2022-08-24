@@ -50,6 +50,7 @@ export const getWayItems = async({skip, item, store, status, late, soon, today, 
                             amount
                             status
                             arrivalDate
+                            dispatchDate
                         }
                     }`,
         })
@@ -76,6 +77,7 @@ export const getWayItem = async({_id}, client)=>{
                             amount
                             status
                             arrivalDate
+                            dispatchDate
                         }
                     }`,
         })
@@ -108,8 +110,8 @@ export const setWayItem = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $bookings: [WayItemBookingInput], $amount: Float, $arrivalDate: Date, $status: String) {
-                        setWayItem(_id: $_id, bookings: $bookings, amount: $amount, arrivalDate: $arrivalDate, status: $status) 
+                    mutation ($_id: ID!, $bookings: [WayItemBookingInput], $amount: Float, $arrivalDate: Date, $dispatchDate: Date, $status: String) {
+                        setWayItem(_id: $_id, bookings: $bookings, amount: $amount, arrivalDate: $arrivalDate, dispatchDate: $dispatchDate, status: $status) 
                     }`})
         return res.data.setWayItem
     } catch(err){
@@ -123,8 +125,8 @@ export const addWayItem = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($item: ID!, $store: ID!, $bookings: [WayItemBookingInput]!, $amount: Float!, $arrivalDate: Date) {
-                        addWayItem(item: $item, store: $store, bookings: $bookings, amount: $amount, arrivalDate: $arrivalDate) {
+                    mutation ($item: ID!, $store: ID!, $bookings: [WayItemBookingInput]!, $amount: Float!, $arrivalDate: Date, $dispatchDate: Date) {
+                        addWayItem(item: $item, store: $store, bookings: $bookings, amount: $amount, arrivalDate: $arrivalDate, dispatchDate: $dispatchDate) {
                             _id
                             createdAt
                             store {_id name}
@@ -133,6 +135,7 @@ export const addWayItem = async(variables)=>{
                             amount
                             status
                             arrivalDate
+                            dispatchDate
                         }
                     }`})
         return res.data.addWayItem

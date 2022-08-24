@@ -1,6 +1,27 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getMoneyArticleByName = async(name, client)=>{
+    try{
+        client = client? client : getClientGql()
+        let res = await client
+            .query({
+                variables: {name},
+                query: gql`
+                    query ($name: String) {
+                        moneyArticleByName(name: $name) {
+                            _id
+                            createdAt
+                            name
+                        }
+                    }`,
+            })
+        return res.data.moneyArticleByName
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getMoneyArticlesCount = async({search}, client)=>{
     try{
         client = client? client : getClientGql()

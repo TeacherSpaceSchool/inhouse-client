@@ -4,7 +4,7 @@ import App from '../layouts/App';
 import { connect } from 'react-redux'
 import {getMoneyFlows, getMoneyFlowsCount, setMoneyFlow, addMoneyFlow, deleteMoneyFlow, getPKO, getRKO, uploadMoneyFlow, getUnloadMoneyFlows} from '../src/gql/moneyFlow'
 import {getCashboxes} from '../src/gql/cashbox'
-import {getMoneyArticles} from '../src/gql/moneyArticle'
+import {getMoneyArticles, getMoneyArticleByName} from '../src/gql/moneyArticle'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -48,6 +48,7 @@ const MoneyFlows = React.memo((props) => {
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { filter, search } = props.app;
+    const { profile } = props.user;
     const { showLoad } = props.appActions;
     //настройка
     const unsaved = useRef({});
@@ -58,7 +59,9 @@ const MoneyFlows = React.memo((props) => {
         operation: 'приход',
         currency: 'сом',
         typeClientOperation: 'Продажа',
-        info: ''
+        info: '',
+        moneyArticle: data.defaultMoneyArticle['Не указано'],
+        cashbox: profile.cashbox
     });
     //получение данных
     let [list, setList] = useState(data.list);
@@ -172,16 +175,16 @@ const MoneyFlows = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                             Дата
                         </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Касса
+                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                            Касса/Банк
                         </div>
                         <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                             Получатель
                         </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 250, justifyContent: data.edit?'center':'start'}}>
                             Статья
                         </div>
-                        <div className={classes.tableCell} style={{width: 120, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
                             Операция
                         </div>
                         <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
@@ -190,8 +193,8 @@ const MoneyFlows = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
                             Валюта
                         </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Коментарий
+                        <div className={classes.tableCell} style={{width: 400, justifyContent: data.edit?'center':'start'}}>
+                            Комментарий
                         </div>
                     </div>
                     {
@@ -232,7 +235,8 @@ const MoneyFlows = React.memo((props) => {
                                                                 currency: 'сом',
                                                                 info: '',
                                                                 amount: '',
-                                                                moneyArticle: null
+                                                                cashbox: profile.cashbox,
+                                                                moneyArticle: data.defaultMoneyArticle['Не указано']
                                                             })
                                                             delete unsaved.current['new']
                                                             setCount(++count)
@@ -274,8 +278,9 @@ const MoneyFlows = React.memo((props) => {
                                         }}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: 150}}>
+                                <div className={classes.tableCell} style={{width: 200}}>
                                     <AutocomplectOnline
+                                        defaultValue={newElement.cashbox}
                                         minLength={0}
                                         element={newElement.cashbox}
                                         error={!newElement.cashbox&&newElement.unsaved}
@@ -288,25 +293,39 @@ const MoneyFlows = React.memo((props) => {
                                         getElements={async (search)=>{
                                             return await getCashboxes({search, ...filter.store?{store: filter.store._id}:{}})
                                         }}
-                                        placeholder={'Касса'}
+                                        placeholder={'Касса/Банк'}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: 200, justifyContent: !newElement.recipient?'center':'start', color: !newElement.recipient||(newElement.typeRecipient==='Касса'&&newElement.cashbox&&newElement.cashbox._id===newElement.recipient._id)?'red':'black'}} onClick={()=>{
-                                    setMiniDialog('Получатель', <SetRecipient unsaved={unsaved} newElement={newElement} setNewElement={setNewElement}/>)
+                                <div className={classes.tableCell} style={{width: 200, flexDirection: 'column', justifyContent: !newElement.recipient?'center':'start', color: !newElement.recipient||(newElement.typeRecipient==='Касса'&&newElement.cashbox&&newElement.cashbox._id===newElement.recipient._id)?'red':'black'}} onClick={()=>{
+                                    setMiniDialog('Получатель', <SetRecipient defaultMoneyArticle={data.defaultMoneyArticle} unsaved={unsaved} newElement={newElement} setNewElement={setNewElement}/>)
                                     showMiniDialog(true)
                                 }}>
                                     {
                                         newElement.recipient?newElement.recipient.name:'не указан'
                                     }
                                     {
-                                        newElement.clientOperation?<><br/>{newElement.typeClientOperation} №{newElement.clientOperation.number}</>:null
+                                        newElement.clientOperation?
+                                            <span style={{color: !newElement.installmentMonth&&newElement.typeClientOperation==='Рассрочка'?'red':'black'}}>
+                                                {newElement.typeClientOperation} №{newElement.clientOperation.number}
+                                            </span>
+                                            :
+                                            null
                                     }
                                     {
-                                        newElement.installmentMonth?<><br/>{pdDDMMYYYY(newElement.installmentMonth)}</>:null
+                                        newElement.installment?
+                                            <span>
+                                                Рассрочка №{newElement.installment.number}
+                                            </span>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        newElement.installmentMonth?pdDDMMYYYY(newElement.installmentMonth):null
                                     }
                                 </div>
-                                <div className={classes.tableCell} style={{width: 200}}>
+                                <div className={classes.tableCell} style={{width: 250}}>
                                     <AutocomplectOnline
+                                        defaultValue={newElement.moneyArticle}
                                         minLength={0}
                                         element={newElement.moneyArticle}
                                         error={!newElement.moneyArticle&&newElement.unsaved}
@@ -322,17 +341,22 @@ const MoneyFlows = React.memo((props) => {
                                         placeholder={'Статья'}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: 120}}>
-                                    <Select className={classes.input} error={!newElement.operation&&newElement.unsaved} variant='standard' value={newElement.operation} onChange={(event) => {
-                                        newElement.unsaved = true
-                                        unsaved.current['new'] = true
-                                        newElement.operation = event.target.value
-                                        setNewElement({...newElement})
-                                    }}>
-                                        {operations.map((element)=>
-                                            <MenuItem key={element} value={element}>{element}</MenuItem>
-                                        )}
-                                    </Select>
+                                <div className={classes.tableCell} style={{width: 115}}>
+                                    {
+                                        newElement.clientOperation?
+                                            newElement.operation
+                                            :
+                                            <Select className={classes.input} error={!newElement.operation&&newElement.unsaved} variant='standard' value={newElement.operation} onChange={(event) => {
+                                                newElement.unsaved = true
+                                                unsaved.current['new'] = true
+                                                newElement.operation = event.target.value
+                                                setNewElement({...newElement})
+                                            }}>
+                                                {operations.map((element)=>
+                                                    <MenuItem key={element} value={element}>{element}</MenuItem>
+                                                )}
+                                            </Select>
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150}}>
                                     <Input
@@ -366,7 +390,7 @@ const MoneyFlows = React.memo((props) => {
                                             newElement.currency
                                     }
                                 </div>
-                                <div className={classes.tableCell} style={{width: 200}}>
+                                <div className={classes.tableCell} style={{width: 400}}>
                                     <Input
                                         placeholder='Комментарий'
                                         multiline={true}
@@ -395,9 +419,14 @@ const MoneyFlows = React.memo((props) => {
                                             setMenuItems(
                                                 [
                                                     <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
-                                                        if(element.amount) {
+                                                        if(element.amount&&element.moneyArticle) {
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await setMoneyFlow({_id: element._id, amount: checkFloat(element.amount), info: element.info})
+                                                                let res = await setMoneyFlow({
+                                                                    _id: element._id,
+                                                                    amount: checkFloat(element.amount),
+                                                                    moneyArticle: element.moneyArticle._id,
+                                                                    info: element.info
+                                                                })
                                                                 if(res==='OK') {
                                                                     showSnackBar('Успешно', 'success')
                                                                     list[idx].unsaved = false
@@ -473,7 +502,7 @@ const MoneyFlows = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 135}}>
                                 {pdDDMMYY(element.date)}/{element.number}
                             </div>
-                            <div className={classes.tableCell} style={{width: 150}}>
+                            <div className={classes.tableCell} style={{width: 200}}>
                                 {
                                     element.cashbox.name
                                 }
@@ -539,10 +568,30 @@ const MoneyFlows = React.memo((props) => {
                                         null
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{width: 200}}>
-                                {element.moneyArticle.name}
+                            <div className={classes.tableCell} style={{width: 250}}>
+                                {
+                                    data.edit?
+                                        <AutocomplectOnline
+                                            defaultValue={element.moneyArticle}
+                                            minLength={0}
+                                            element={element.moneyArticle}
+                                            error={!element.moneyArticle&&element.unsaved}
+                                            setElement={(moneyArticle)=>{
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].moneyArticle = moneyArticle
+                                                setList([...list])
+                                            }}
+                                            getElements={async (search)=>{
+                                                return await getMoneyArticles({search})
+                                            }}
+                                            placeholder={'Статья'}
+                                        />
+                                        :
+                                        element.moneyArticle.name
+                                }
                             </div>
-                            <div className={classes.tableCell} style={{width: 120}}>
+                            <div className={classes.tableCell} style={{width: 115}}>
                                 {element.operation}
                             </div>
                             <div className={classes.tableCell} style={{width: 150}}>
@@ -568,7 +617,7 @@ const MoneyFlows = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 115}}>
                                 {element.currency}
                             </div>
-                            <div className={classes.tableCell} style={{width: 200}}>
+                            <div className={classes.tableCell} style={{width: 400}}>
                                 {
                                     data.edit?
                                         <Input
@@ -621,6 +670,10 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
     store.getState().app.sort = 'amount'
     return {
         data: {
+            defaultMoneyArticle: {
+                'Зарплата': await getMoneyArticleByName('Зарплата', ctx.req?await getClientGqlSsr(ctx.req):undefined),
+                'Не указано': await getMoneyArticleByName('Не указано', ctx.req?await getClientGqlSsr(ctx.req):undefined)
+            },
             edit: store.getState().user.profile.edit&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin', 'кассир'].includes(store.getState().user.profile.role),
@@ -632,7 +685,7 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 ...ctx.query.order?{order: ctx.query.order}:{},
                 ...ctx.query.refund?{refund: ctx.query.refund}:{},
                 skip: 0
-            },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getMoneyFlowsCount({
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
                 ...ctx.query.sale?{sale: ctx.query.sale}:{},
@@ -653,6 +706,7 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
 function mapStateToProps (state) {
     return {
         app: state.app,
+        user: state.user
     }
 }
 

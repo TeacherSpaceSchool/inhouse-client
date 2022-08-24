@@ -38,7 +38,7 @@ import Link from 'next/link';
 import Button from '@mui/material/Button';
 import UnloadUpload from '../components/app/UnloadUpload';
 
-const uploadText = 'Формат xlsx:\n_id в пути (если требуется обновить);\n_id модели;\n_id магазина;\nколичество;\nприбытие (ДД.ММ.ГГГГ);\nбронь (через запятую с пробелом. Пример: _id менеджер1: количество1, _id менеджер2: количество2).'
+const uploadText = 'Формат xlsx:\n_id в пути (если требуется обновить);\n_id модели;\n_id магазина;\nколичество;\nотправлен (ДД.ММ.ГГГГ);\nприбытие (ДД.ММ.ГГГГ);\nбронь (через запятую с пробелом. Пример: _id менеджер1: количество1, _id менеджер2: количество2).'
 const status = ['все', 'в пути', 'прибыл', 'отмена']
 const colors = {
     'в пути': 'blue',
@@ -73,9 +73,13 @@ const WayItems = React.memo((props) => {
             ...filter.status?{status: filter.status}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
         }))
-        for(let i=0; i<list.length; i++)
-            if(list[i].arrivalDate)
-                list[i].arrivalDate = pdDatePicker(list[i].arrivalDate)
+        if(data.edit)
+            for(let i=0; i<list.length; i++) {
+                if(list[i].arrivalDate)
+                    list[i].arrivalDate = pdDatePicker(list[i].arrivalDate)
+                if(list[i].dispatchDate)
+                    list[i].dispatchDate = pdDatePicker(list[i].dispatchDate)
+            }
         setList(list);
         setCount(await getWayItemsCount({
             ...filter.date?{date: filter.date}:{},
@@ -112,9 +116,13 @@ const WayItems = React.memo((props) => {
                 ...filter.status?{status: filter.status}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
-            for(let i=0; i<addedList.length; i++)
-                if(addedList[i].arrivalDate)
-                    addedList[i].arrivalDate = pdDatePicker(addedList[i].arrivalDate)
+            if(data.edit)
+                for(let i=0; i<addedList.length; i++) {
+                    if(addedList[i].arrivalDate)
+                        addedList[i].arrivalDate = pdDatePicker(addedList[i].arrivalDate)
+                    if(addedList[i].dispatchDate)
+                        addedList[i].dispatchDate = pdDatePicker(addedList[i].dispatchDate)
+                }
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -146,19 +154,25 @@ const WayItems = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Статус
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
                             Модель
                         </div>
                         <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                             Магазин
                         </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Количество
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                            Свободно
+                        </div>
+                        <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
+                            Отправлен
                         </div>
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                             Прибытие
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
                             Бронь
                         </div>
                     </div>
@@ -188,10 +202,13 @@ const WayItems = React.memo((props) => {
                                                                 showSnackBar('Успешно', 'success')
                                                                 if(res.arrivalDate)
                                                                     res.arrivalDate = pdDatePicker(res.arrivalDate)
+                                                                if(res.dispatchDate)
+                                                                    res.dispatchDate = pdDatePicker(res.dispatchDate)
                                                                 setList([res, ...list])
                                                                 setNewElement({
                                                                     amount: '',
                                                                     arrivalDate: '',
+                                                                    dispatchDate: '',
                                                                     bookings: []
                                                                 })
                                                                 delete unsaved.current['new']
@@ -222,7 +239,7 @@ const WayItems = React.memo((props) => {
                                     </IconButton>
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100}}/>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
                                     <AutocomplectOnline
                                         element={newElement.item}
                                         error={!newElement.item&&newElement.unsaved}
@@ -255,7 +272,7 @@ const WayItems = React.memo((props) => {
                                         minLength={0}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: 150}}>
+                                <div className={classes.tableCell} style={{width: 100}}>
                                     <Input
                                         placeholder='Количество'
                                         error={!newElement.amount&&newElement.unsaved}
@@ -266,6 +283,22 @@ const WayItems = React.memo((props) => {
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
                                             newElement.amount = inputFloat(event.target.value)
+                                            setNewElement({...newElement})
+                                        }}
+                                    />
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100}}/>
+                                <div className={classes.tableCell} style={{width: 135}}>
+                                    <Input
+                                        type='date'
+                                        placeholder='Отправлен'
+                                        variant='standard'
+                                        className={classes.input}
+                                        value={newElement.dispatchDate}
+                                        onChange={(event) => {
+                                            newElement.unsaved = true
+                                            unsaved.current['new'] = true
+                                            newElement.dispatchDate = event.target.value
                                             setNewElement({...newElement})
                                         }}
                                     />
@@ -285,7 +318,7 @@ const WayItems = React.memo((props) => {
                                         }}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
                                     setMiniDialog('Бронь', <SetBookings edit={data.edit} element={newElement} setElement={(bookings)=>{
                                         newElement.unsaved = true
                                         unsaved.current['new'] = true
@@ -321,8 +354,12 @@ const WayItems = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) =>
-                        <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    {list.map((element, idx) => {
+                        let used = 0
+                        for(let i=0; i<element.bookings.length; i++)
+                            used += element.bookings[i].amount
+                        const free = checkFloat(element.amount - used)
+                        return <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -349,7 +386,8 @@ const WayItems = React.memo((props) => {
                                                                             let res = await setWayItem({
                                                                                 _id: element._id,
                                                                                 bookings,
-                                                                                arrivalDate: element.arrivalDate,
+                                                                                arrivalDate: element.arrivalDate?element.arrivalDate:null,
+                                                                                dispatchDate: element.dispatchDate?element.dispatchDate:null,
                                                                                 amount: checkFloat(element.amount),
                                                                             })
                                                                             if (res === 'OK') {
@@ -433,7 +471,7 @@ const WayItems = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 100, fontWeight: 'bold', color: colors[element.status], justifyContent: data.edit?'center':'start'}}>
                                 {element.status}
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
                                 {
                                     element.item.name
                                 }
@@ -443,7 +481,7 @@ const WayItems = React.memo((props) => {
                                     element.store.name
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                 {
                                     data.edit&&['обработка', 'в пути'].includes(element.status)?
                                         <Input
@@ -461,6 +499,32 @@ const WayItems = React.memo((props) => {
                                         />
                                         :
                                         <>{element.amount} {element.item.unit}</>
+                                }
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                                {free} {element.item.unit}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
+                                {
+                                    data.edit&&['обработка', 'в пути'].includes(element.status)?
+                                        <Input
+                                            type='date'
+                                            placeholder='Отправлен'
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.dispatchDate}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].dispatchDate = inputFloat(event.target.value)
+                                                setList([...list])
+                                            }}
+                                        />
+                                        :
+                                        element.dispatchDate?
+                                            pdDDMMYYYY(element.dispatchDate)
+                                            :
+                                            null
                                 }
                             </div>
                             <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start', color: element.arrivalDate&&['обработка', 'в пути'].includes(element.status)&&new Date(element.arrivalDate)<today?'red':'black'}}>
@@ -487,7 +551,7 @@ const WayItems = React.memo((props) => {
                                             null
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?575:535}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
+                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
                                 setMiniDialog('Бронь', <SetBookings edit={data.edit} element={element} setElement={(bookings)=>{
                                     list[idx].unsaved = true
                                     unsaved.current[list[idx]._id] = true
@@ -518,7 +582,7 @@ const WayItems = React.memo((props) => {
                                 }
                             </div>
                         </div>
-                    )}
+                    })}
                 </div>
             </Card>
             {
@@ -557,12 +621,16 @@ WayItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             skip: 0,
             ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
         },  ctx.req?await getClientGqlSsr(ctx.req):undefined))
-    for(let i=0; i<list.length; i++)
+    const edit = store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role)
+    for(let i=0; i<list.length; i++) {
         if(list[i].arrivalDate)
             list[i].arrivalDate = pdDatePicker(list[i].arrivalDate)
+        if(list[i].dispatchDate)
+            list[i].dispatchDate = pdDatePicker(list[i].dispatchDate)
+    }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
+            edit,
             add: store.getState().user.profile.add&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             list,

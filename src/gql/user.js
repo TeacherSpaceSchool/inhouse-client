@@ -116,6 +116,7 @@ export const getUser = async({_id}, client)=>{
                             device
                             notification
                             store {_id name}
+                            cashbox {_id name}
                             department
                             position
                             startWork
@@ -152,8 +153,8 @@ export const addUser = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($add: Boolean!, $edit: Boolean!, $deleted: Boolean!, $login: String!, $password: String!, $role: String!, $name: String!, $phones: [String]!, $store: ID, $department: String!, $position: String!, $startWork: Date) {
-                        addUser(add: $add, edit: $edit, deleted: $deleted, login: $login, password: $password, role: $role, name: $name, phones: $phones, store: $store, department: $department, position: $position, startWork: $startWork)
+                    mutation ($add: Boolean!, $cashbox: ID, $edit: Boolean!, $deleted: Boolean!, $login: String!, $password: String!, $role: String!, $name: String!, $phones: [String]!, $store: ID, $department: String!, $position: String!, $startWork: Date) {
+                        addUser(add: $add, cashbox: $cashbox, edit: $edit, deleted: $deleted, login: $login, password: $password, role: $role, name: $name, phones: $phones, store: $store, department: $department, position: $position, startWork: $startWork)
                     }`})
         return res.data.addUser
     } catch(err){
@@ -167,8 +168,8 @@ export const setUser = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($add: Boolean, $edit: Boolean, $deleted: Boolean, $_id: ID!, $status: String, , $login: String, $password: String, $name: String, $phones: [String], $store: ID, $department: String, $position: String, $startWork: Date) {
-                        setUser(add: $add, edit: $edit, deleted: $deleted, _id: $_id, status: $status, login: $login, password: $password, name: $name, phones: $phones, store: $store, department: $department, position: $position, startWork: $startWork)
+                    mutation ($add: Boolean, $cashbox: ID, $edit: Boolean, $deleted: Boolean, $_id: ID!, $status: String, , $login: String, $password: String, $name: String, $phones: [String], $store: ID, $department: String, $position: String, $startWork: Date) {
+                        setUser(add: $add, cashbox: $cashbox, edit: $edit, deleted: $deleted, _id: $_id, status: $status, login: $login, password: $password, name: $name, phones: $phones, store: $store, department: $department, position: $position, startWork: $startWork)
                     }`})
         return res.data.setUser
     } catch(err){

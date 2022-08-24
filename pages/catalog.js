@@ -137,7 +137,6 @@ const Catalog = React.memo((props) => {
                 <meta property='og:image' content={`${urlMain}/static/512x512.png`} />
                 <meta property='og:url' content={`${urlMain}/catalog`} />
                 <link rel='canonical' href={`${urlMain}/catalog`}/>
-                <meta name='viewport' content='maximum-scale=1, minimum-scale=1, user-scalable=no, initial-scale=1, width=device-width, shrink-to-fit=no' />
             </Head>
             <Card className={classes.page} style={{margin: 0, width: '100%'}}>
                 <CardContent className={classes.column} style={{maxWidth: 600, padding: 10}}>

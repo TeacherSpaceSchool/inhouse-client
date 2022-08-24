@@ -227,7 +227,7 @@ const Reservation = React.memo((props) => {
                                 <div className={classes.value}>{`${edit?amount:data.object.amount} сом`}</div>
                             </div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <TextField
                                         id='paid'
                                         variant='standard'
@@ -266,7 +266,7 @@ const Reservation = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsReservation.length}):</div>
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     itemsReservation.map((itemReservation, idx)=>
                                         <div className={classes.column} key={`itemsReservation${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -348,7 +348,7 @@ const Reservation = React.memo((props) => {
                                     )
                             }
                             {
-                                edit&&!data.object.paymentConfirmation?
+                                edit?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
@@ -515,7 +515,7 @@ const Reservation = React.memo((props) => {
 
 Reservation.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

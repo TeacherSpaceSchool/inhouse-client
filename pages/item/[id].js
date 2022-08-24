@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useRef, useEffect } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getItem, setItem, addItem, deleteItem } from '../../src/gql/item'
+import { getItem, setItem, addItem, deleteItem, getTypeItems } from '../../src/gql/item'
 import { getCategorys } from '../../src/gql/category'
 import { getFactorys } from '../../src/gql/factory'
 import { getCharacteristics } from '../../src/gql/characteristic'
@@ -51,6 +51,7 @@ const Item = React.memo((props) => {
     let [name, setName] = useState(data.object?data.object.name:'');
     let [art, setArt] = useState(data.object?data.object.art:'');
     let [category, setCategory] = useState(data.object?data.object.category:null);
+    let [type, setType] = useState(data.object?data.object.type:'');
     let [ID, setID] = useState(data.object?data.object.ID:'');
     const checkIDTimeout = useRef(false);
     let [errorID, setErrorID] = useState(false);
@@ -88,7 +89,7 @@ const Item = React.memo((props) => {
                 priceAfterDiscountKGS = priceKGS - discount
             setPriceAfterDiscountKGS(priceAfterDiscountKGS>0?checkFloat(priceAfterDiscountKGS):0)
         })()
-    }, [priceKGS, discount, typeDiscount])
+    }, [priceKGS, discount])
     useEffect(()=>{
         if(!unsaved.current)
             unsaved.current = {}
@@ -106,7 +107,6 @@ const Item = React.memo((props) => {
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
                 <meta property='og:url' content={`${urlMain}/item/${router.query.id}`} />
                 <link rel='canonical' href={`${urlMain}/item/${router.query.id}`}/>
-                <meta name='viewport' content='maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, initial-scale=1.0, width=device-width, shrink-to-fit=no' />
             </Head>
             <Card className={classes.page}>
                 <CardContent className={classes.column} style={isMobileApp?{}:{justifyContent: 'start', alignItems: 'flex-start'}}>
@@ -202,6 +202,23 @@ const Item = React.memo((props) => {
                                         />
                                     </FormControl>
                                     <AutocomplectOnline
+                                        element={type}
+                                        error={!type}
+                                        freeSolo
+                                        setElement={(type)=>{
+                                            if(type)
+                                                setType(type.name)
+                                            else
+                                                setType('')
+                                        }}
+                                        defaultValue={{name: type}}
+                                        getElements={async (search)=>{
+                                            return await getTypeItems({search})
+                                        }}
+                                        minLength={0}
+                                        label={'Тип товара'}
+                                    />
+                                    <AutocomplectOnline
                                         element={category}
                                         setElement={(category)=>{
                                             setCategory(category)
@@ -276,7 +293,14 @@ const Item = React.memo((props) => {
                                                 onChange={(event)=>setDiscount(inputFloat(event.target.value))}
                                                 endAdornment={
                                                     <InputAdornment position='end'>
-                                                        <IconButton onClick={()=>setTypeDiscount(typeDiscount==='%'?'сом':'%')}>
+                                                        <IconButton onClick={()=>{
+                                                            if(typeDiscount==='%')
+                                                                discount = checkFloat(discount*priceKGS/100)
+                                                            else
+                                                                discount = checkFloat(discount*100/priceKGS)
+                                                            setDiscount(discount)
+                                                            setTypeDiscount(typeDiscount==='%'?'сом':'%')
+                                                        }}>
                                                             {typeDiscount}
                                                         </IconButton>
                                                     </InputAdornment>
@@ -402,6 +426,19 @@ const Item = React.memo((props) => {
                                             {ID}
                                         </div>
                                     </div>
+                                    {
+                                        category?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Тип товара:&nbsp;
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {type}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     {
                                         category?
                                             <div className={classes.row}>
@@ -576,7 +613,7 @@ const Item = React.memo((props) => {
                                                     break
                                                 }
                                             }
-                                            if (checkCharacteristics&&name&&!errorID&&priceUSD&&priceKGS&&unit) {
+                                            if (checkCharacteristics&&category&&type&&name&&!errorID&&priceUSD&&priceKGS&&unit) {
                                                 const action = async() => {
                                                     if(router.query.id==='new') {
                                                         res = await addItem({
@@ -584,6 +621,7 @@ const Item = React.memo((props) => {
                                                             name,
                                                             art,
                                                             uploads,
+                                                            type,
                                                             priceUSD: checkFloat(priceUSD),
                                                             primeCostUSD: checkFloat(primeCostUSD),
                                                             priceKGS: checkFloat(priceKGS),
@@ -611,6 +649,7 @@ const Item = React.memo((props) => {
                                                         if (typeDiscount!==data.object.typeDiscount) element.typeDiscount = typeDiscount
                                                         if (ID!==data.object.ID) element.ID = ID
                                                         if (name!==data.object.name) element.name = name
+                                                        if (type!==data.object.type) element.type = type
                                                         if (art!==data.object.art) element.art = art
                                                         if (priceUSD!=data.object.priceUSD) element.priceUSD = checkFloat(priceUSD)
                                                         if (primeCostUSD!=data.object.primeCostUSD) element.primeCostUSD = checkFloat(primeCostUSD)
@@ -712,6 +751,7 @@ Item.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                     name: '',
                     art: '',
                     category: null,
+                    type: '',
                     ID: '',
                     images: [],
                     priceUSD: '',
