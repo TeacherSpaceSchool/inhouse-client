@@ -174,8 +174,8 @@ export const setSale = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $deliverymans: [ID], $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
-                        setSale(_id: $_id, deliverymans: $deliverymans, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
+                    mutation ($_id: ID!, $bonusManager: Float, $deliverymans: [ID], $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
+                        setSale(_id: $_id, bonusManager: $bonusManager, deliverymans: $deliverymans, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
                     }`})
         return res.data.setSale
     } catch(err){
@@ -189,8 +189,8 @@ export const addSale = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($client: ID!, $prepaid: Float, $promotion: ID, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $percentCpa: Float, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date, $orders: [ID], $reservations: [ID]!) {
-                        addSale(client: $client, geo: $geo, prepaid: $prepaid, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, orders: $orders, reservations: $reservations) 
+                    mutation ($client: ID!, $prepaid: Float, $promotion: ID, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date, $orders: [ID], $reservations: [ID]!) {
+                        addSale(client: $client, geo: $geo, prepaid: $prepaid, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, orders: $orders, reservations: $reservations) 
                     }`})
         return res.data.addSale
     } catch(err){

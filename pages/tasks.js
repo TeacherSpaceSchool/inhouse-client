@@ -42,8 +42,17 @@ const Tasks = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
-        setList(cloneObject(await getTasks({search, skip: 0, ...filter.status?{status: filter.status}:{}})));
-        setCount(await getTasksCount({search, ...filter.status?{status: filter.status}:{}}));
+        setList(cloneObject(await getTasks({
+            search,
+            skip: 0,
+            ...filter.status?{status: filter.status}:{},
+            ...filter.user?{employment: filter.user._id}:{}
+        })));
+        setCount(await getTasksCount({
+            search,
+            ...filter.status?{status: filter.status}:{},
+            ...filter.user?{employment: filter.user._id}:{}
+        }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
@@ -75,7 +84,12 @@ const Tasks = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getTasks({skip: list.length, search, ...filter.status?{status: filter.status}:{}}))
+            let addedList = cloneObject(await getTasks({
+                skip: list.length,
+                search,
+                ...filter.status?{status: filter.status}:{},
+                ...filter.user?{employment: filter.user._id}:{}
+            }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -84,7 +98,7 @@ const Tasks = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
+        <App filterShow={{status, user: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
             <Head>
                 <title>Задачи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -188,11 +202,13 @@ Tasks.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 skip: 0,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
+                ...store.getState().app.filter.user?{employment: store.getState().app.filter.user._id}:{},
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getTasksCount({
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
+                ...store.getState().app.filter.user?{employment: store.getState().app.filter.user._id}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

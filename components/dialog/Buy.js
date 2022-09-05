@@ -44,7 +44,6 @@ const BuyBasket =  React.memo(
         let [remainder, setRemainder] = useState(0);
         let [monthInstallment, setMonthInstallment] = useState('');
         let [paidInstallment, setPaidInstallment] = useState('');
-        let [percentCpa, setPercentCpa] = useState(0);
         let [address, setAddress] = useState(client.address);
         let [addressInfo, setAddressInfo] = useState('');
         let [comment, setComment] = useState('');
@@ -96,6 +95,10 @@ const BuyBasket =  React.memo(
                                     value={discount}
                                     onChange={(event) => {
                                         discount = inputFloat(event.target.value)
+                                        if(discountType==='%'&&discount>100)
+                                            discount = 100
+                                        else if(discountType!=='%'&&discount>amountStart)
+                                            discount = amountStart
                                         setDiscount(discount)
                                     }}
                                     onFocus={()=>{
@@ -105,6 +108,10 @@ const BuyBasket =  React.memo(
                                 />
                                 <div className={classes.counterbtn} onClick={() => {
                                     discount = checkFloat(checkFloat(discount) + 1)
+                                    if(discountType==='%'&&discount>100)
+                                        discount = 100
+                                    else if(discountType!=='%'&&discount>amountStart)
+                                        discount = amountStart
                                     setDiscount(discount)
                                 }}>+
                                 </div>
@@ -321,10 +328,6 @@ const BuyBasket =  React.memo(
                         <AutocomplectOnline
                             element={cpa}
                             setElement={async (cpa)=>{
-                                if(cpa)
-                                    setPercentCpa(cpa.percent)
-                                else
-                                    setPercentCpa(0)
                                 setCpa(cpa)
                             }}
                             getElements={async (search)=>{
@@ -332,14 +335,6 @@ const BuyBasket =  React.memo(
                             }}
                             minLength={0}
                             label={'Дизайнер'}
-                        />
-                        <TextField
-                            id='percentCpa'
-                            variant='standard'
-                            label='Процент дизайнера'
-                            value={percentCpa}
-                            onChange={(event) => setPercentCpa(inputFloat(event.target.value))}
-                            className={classes.input}
                         />
                         </>
                         :
@@ -413,7 +408,6 @@ const BuyBasket =  React.memo(
                                         discount: checkFloat(amountStart - amountEnd),
                                         cpa: cpa ? cpa._id : null,
                                         promotion: promotion ? promotion._id : null,
-                                        percentCpa: checkFloat(percentCpa),
                                         amountStart: checkFloat(amountStart),
                                         amountEnd,
                                         typePayment,

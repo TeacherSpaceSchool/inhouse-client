@@ -73,6 +73,8 @@ const Sale = React.memo((props) => {
     let [discount, setDiscount] = useState(data.object.discount);
     let [discountType, setDiscountType] = useState('сом');
     let [paid, setPaid] = useState(data.object.paid);
+    let [bonusManager, setBonusManager] = useState('');
+    let [percentCpa, setPercentCpa] = useState('');
     let [geo, setGeo] = useState(data.object?cloneObject(data.object.geo):null);
     let [newItem, setNewItem] = useState(null);
     let [amountStart, setAmountStart] = useState(data.object.amountStart);
@@ -290,6 +292,24 @@ const Sale = React.memo((props) => {
                                     null
                             }
                             {
+                                edit&&profile.role==='admin'&&data.object.status==='обработка'?
+                                    <TextField
+                                        id='percentManager'
+                                        variant='standard'
+                                        label='Новый процент менеджера'
+                                        value={bonusManager}
+                                        onChange={(event) => {
+                                            bonusManager = inputFloat(event.target.value)
+                                            if(bonusManager>=100)
+                                                bonusManager = ''
+                                            setBonusManager(bonusManager)
+                                        }}
+                                        className={classes.input}
+                                    />
+                                    :
+                                    null
+                            }
+                            {
                                 edit?
                                     <>
                                     <br/>
@@ -415,6 +435,7 @@ const Sale = React.memo((props) => {
                             </div>
                             {
                                 data.object.cpa?
+                                    <>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Дизайнер:
@@ -425,6 +446,29 @@ const Sale = React.memo((props) => {
                                             </div>
                                         </Link>
                                     </div>
+                                    {
+                                        edit&&profile.role==='admin'&&data.object.status==='обработка'?
+                                            <>
+                                            <TextField
+                                                style={{marginTop: '0px!important'}}
+                                                id='percentCpa'
+                                                variant='standard'
+                                                label='Новый процент дизайнера'
+                                                value={percentCpa}
+                                                onChange={(event) => {
+                                                    percentCpa = inputFloat(event.target.value)
+                                                    if(percentCpa>=100)
+                                                        percentCpa = ''
+                                                    setPercentCpa(percentCpa)
+                                                }}
+                                                className={classes.input}
+                                            />
+                                            <br/>
+                                            </>
+                                            :
+                                            null
+                                    }
+                                    </>
                                     :
                                     null
                             }
@@ -773,6 +817,8 @@ const Sale = React.memo((props) => {
                                                             if (paid <= amountEnd) {
                                                                 const action = async () => {
                                                                     let element = {_id: router.query.id}
+                                                                    if(percentCpa.length) element.percentCpa = checkFloat(percentCpa)
+                                                                    if(bonusManager.length) element.bonusManager = checkFloat(bonusManager)
                                                                     if (address !== data.object.address) element.address = address
                                                                     if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
                                                                     if (comment !== data.object.comment) element.comment = comment

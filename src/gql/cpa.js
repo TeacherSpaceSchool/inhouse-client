@@ -15,7 +15,6 @@ export const getCpa = async({_id}, client)=>{
                             name
                             emails
                             phones
-                            percent
                             info
                         }
                     }`,
@@ -38,7 +37,6 @@ export const getCpas = async({search, skip, limit}, client)=>{
                             _id
                             createdAt
                             name
-                            percent
                         }
                     }`,
             })
@@ -86,8 +84,8 @@ export const setCpa = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $name: String, $emails: [String], $phones: [String], $info: String, $percent: Float) {
-                        setCpa(_id: $_id, name: $name, emails: $emails, phones: $phones, info: $info, percent: $percent) 
+                    mutation ($_id: ID!, $name: String, $emails: [String], $phones: [String], $info: String) {
+                        setCpa(_id: $_id, name: $name, emails: $emails, phones: $phones, info: $info) 
                     }`})
         return res.data.setCpa
     } catch(err){
@@ -101,8 +99,8 @@ export const addCpa = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($name: String!, $emails: [String]!, $phones: [String]!, $info: String!, $percent: Float!) {
-                        addCpa(name: $name, emails: $emails, phones: $phones, info: $info, percent: $percent) 
+                    mutation ($name: String!, $emails: [String]!, $phones: [String]!, $info: String!) {
+                        addCpa(name: $name, emails: $emails, phones: $phones, info: $info) 
                     }`})
         return res.data.addCpa
     } catch(err){

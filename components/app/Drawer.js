@@ -43,7 +43,7 @@ const MyDrawer = React.memo((props) => {
         ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
         router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
         router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
-        router.pathname.includes('cpa')||
+        router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname||
         router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||
         router.pathname.includes('user')?
             'Данные'
@@ -55,7 +55,7 @@ const MyDrawer = React.memo((props) => {
             router.pathname.includes('sale')?
                 'Операции'
                 :
-                ['/bonusmanagers', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
+                ['/bonusmanagers', '/bonuscpas', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
                     'Бухгалтерия'
                     :
                     ['/consultations', '/statisticcpa'].includes(router.pathname)?
@@ -120,7 +120,7 @@ const MyDrawer = React.memo((props) => {
                                 ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
                                 router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
                                 router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
-                                router.pathname.includes('cpa')||
+                                router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname||
                                 router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||
                                 router.pathname.includes('user')?
                                     'rgba(24, 59, 55, .1)'
@@ -192,7 +192,7 @@ const MyDrawer = React.memo((props) => {
                         {
                             ['admin', ', менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                                 <>
-                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('cpa')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)
                                     if(!unsaved||JSON.stringify(unsaved.current)==='{}')
                                         Router.push('/cpas')
@@ -427,7 +427,7 @@ const MyDrawer = React.memo((props) => {
                         <>
                         <ListItem style={{
                             background:
-                                ['/bonusmanagers', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
+                                ['/bonusmanagers', '/bonuscpas', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
                                     'rgba(24, 59, 55, .1)'
                                     :
                                     '#ffffff'
@@ -504,7 +504,24 @@ const MyDrawer = React.memo((props) => {
                                     else
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
-                                    <ListItemText primary='Ставки' />
+                                    <ListItemText primary='Бонус менеджера' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/bonuscpas'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/bonuscpas')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Бонус дизайнера' />
                                 </ListItem>
                                 <Divider/>
                                 </>

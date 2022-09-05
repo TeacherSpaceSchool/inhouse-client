@@ -20,7 +20,7 @@ import Link from 'next/link';
 import Fab from '@mui/material/Fab';
 
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id или текущее имя дизайнера (если требуется обновить);\nФИО;\nпроцент;\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
+const uploadText = 'Формат xlsx:\n_id или текущее имя дизайнера (если требуется обновить);\nФИО;\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
 
 const Cpas = React.memo((props) => {
     const {classes} = pageListStyle();

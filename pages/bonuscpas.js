@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBonusManagers, getBonusManagersCount, setBonusManager, addBonusManager, getStoreForBonusManagers, deleteBonusManager, uploadBonusManager, getUnloadBonusManagers} from '../src/gql/bonusManager'
+import {getBonusCpas, getBonusCpasCount, setBonusCpa, addBonusCpa, getStoreForBonusCpas, deleteBonusCpa, uploadBonusCpa, getUnloadBonusCpas} from '../src/gql/bonusCpa'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -41,12 +41,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 const uploadText = 'Формат xlsx:' +
     '\nназвание магазина;' +
     '\nпродажа (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nрассрочка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
     '\nна заказ (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nна заказ рассрочка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nакция (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%).'
+    '\nрассрочка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%).'
 
-const BonusManagers = React.memo((props) => {
+const BonusCpas = React.memo((props) => {
     const {classes} = pageListStyle();
     //props
     const { data } = props;
@@ -58,17 +56,15 @@ const BonusManagers = React.memo((props) => {
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
         sale: [],
-        saleInstallment: [],
         order: [],
-        orderInstallment: [],
-        promotion: []
+        installment: [],
     });
     //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
-        setList(cloneObject(await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: 0})));
-        setCount(await getBonusManagersCount({...filter.store?{store: filter.store._id}:{}}));
+        setList(cloneObject(await getBonusCpas({...filter.store?{store: filter.store._id}:{}, skip: 0})));
+        setCount(await getBonusCpasCount({...filter.store?{store: filter.store._id}:{}}));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
@@ -86,7 +82,7 @@ const BonusManagers = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: list.length}))
+            let addedList = cloneObject(await getBonusCpas({...filter.store?{store: filter.store._id}:{}, skip: list.length}))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -100,16 +96,16 @@ const BonusManagers = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} pageName='Бонус менеджера' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} pageName='Бонус дизайнера' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
-                <title>Бонус менеджера</title>
+                <title>Бонус дизайнера</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content='Бонус менеджера' />
+                <meta property='og:title' content='Бонус дизайнера' />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
-                <meta property='og:url' content={`${urlMain}/bonusmanagers`} />
-                <link rel='canonical' href={`${urlMain}/bonusmanagers`}/>
+                <meta property='og:url' content={`${urlMain}/bonuscpas`} />
+                <link rel='canonical' href={`${urlMain}/bonuscpas`}/>
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
@@ -140,8 +136,8 @@ const BonusManagers = React.memo((props) => {
                                                         break
                                                     }
                                                 if(checkBonus) {
-                                                    for (let i = 0; i < newElement.saleInstallment.length; i++)
-                                                        if (!newElement.saleInstallment[i][0] || !newElement.saleInstallment[i][1]) {
+                                                    for (let i = 0; i < newElement.installment.length; i++)
+                                                        if (!newElement.installment[i][0] || !newElement.installment[i][1]) {
                                                             checkBonus = false
                                                             break
                                                         }
@@ -153,49 +149,27 @@ const BonusManagers = React.memo((props) => {
                                                             break
                                                         }
                                                 }
-                                                if(checkBonus) {
-                                                    for (let i = 0; i < newElement.orderInstallment.length; i++)
-                                                        if (!newElement.orderInstallment[i][0] || !newElement.orderInstallment[i][1]) {
-                                                            checkBonus = false
-                                                            break
-                                                        }
-                                                }
-                                                if(checkBonus) {
-                                                    for (let i = 0; i < newElement.promotion.length; i++)
-                                                        if (!newElement.promotion[i][0] || !newElement.promotion[i][1]) {
-                                                            checkBonus = false
-                                                            break
-                                                        }
-                                                }
                                                 if(checkBonus&&newElement.store) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
                                                         for(let i = 0; i <newElement.sale.length; i++)
                                                             newElement.sale[i] = [checkFloat(newElement.sale[i][0]), checkFloat(newElement.sale[i][1])]
-                                                        for(let i = 0; i <newElement.saleInstallment.length; i++)
-                                                            newElement.saleInstallment[i] = [checkFloat(newElement.saleInstallment[i][0]), checkFloat(newElement.saleInstallment[i][1])]
                                                         for(let i = 0; i <newElement.order.length; i++)
                                                             newElement.order[i] = [checkFloat(newElement.order[i][0]), checkFloat(newElement.order[i][1])]
-                                                        for(let i = 0; i <newElement.orderInstallment.length; i++)
-                                                            newElement.orderInstallment[i] = [checkFloat(newElement.orderInstallment[i][0]), checkFloat(newElement.orderInstallment[i][1])]
-                                                        for(let i = 0; i <newElement.promotion.length; i++)
-                                                            newElement.promotion[i] = [checkFloat(newElement.promotion[i][0]), checkFloat(newElement.promotion[i][1])]
-                                                        let res = await addBonusManager({
+                                                        for(let i = 0; i <newElement.installment.length; i++)
+                                                            newElement.installment[i] = [checkFloat(newElement.installment[i][0]), checkFloat(newElement.installment[i][1])]
+                                                        let res = await addBonusCpa({
                                                             store: newElement.store._id,
                                                             sale: newElement.sale,
-                                                            saleInstallment: newElement.saleInstallment,
                                                             order: newElement.order,
-                                                            orderInstallment: newElement.orderInstallment,
-                                                            promotion: newElement.promotion
+                                                            installment: newElement.installment
                                                         })
                                                         if(res&&res._id!=='ERROR') {
                                                             showSnackBar('Успешно', 'success')
                                                             setList([res, ...list])
                                                             setNewElement({
                                                                 sale: [],
-                                                                saleInstallment: [],
-                                                                order: [],
-                                                                orderInstallment: [],
-                                                                promotion: []
+                                                                installment: [],
+                                                                order: []
                                                             })
                                                             delete unsaved.current['new']
                                                             setCount(++count)
@@ -232,7 +206,7 @@ const BonusManagers = React.memo((props) => {
                                             setNewElement({...newElement})
                                         }}
                                         getElements={async (search)=>{
-                                            return await getStoreForBonusManagers({search})
+                                            return await getStoreForBonusCpas({search})
                                         }}
                                         placeholder={'Магазин'}
                                         minLength={0}
@@ -306,65 +280,6 @@ const BonusManagers = React.memo((props) => {
                                     <Accordion style={{width: '100%'}}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon />}
-                                            aria-controls='saleInstallment-newelement-content'
-                                            id='saleInstallment-newelement-header'
-                                        >
-                                            <Typography style={{color: newElement.saleInstallment.length?'black':'red'}}>Рассрочка {newElement.saleInstallment.length}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            {newElement.saleInstallment.map((element1, idx1)=>
-                                                <div className={classes.rowCenter} key={`newElement${idx1}`}>
-                                                    <Input
-                                                        placeholder='Скидка'
-                                                        error={!element1[0]&&newElement.unsaved}
-                                                        variant='standard'
-                                                        className={classes.inputHalf}
-                                                        value={element1[0]}
-                                                        onChange={(event) => {
-                                                            newElement.unsaved = true
-                                                            unsaved.current['new'] = true
-                                                            newElement.saleInstallment[idx1][0] = inputFloat(event.target.value)
-                                                            setNewElement({...newElement})
-                                                        }}
-                                                    />
-                                                    <Input
-                                                        placeholder='Бонус'
-                                                        error={!element1[1]&&newElement.unsaved}
-                                                        variant='standard'
-                                                        className={classes.inputHalf}
-                                                        value={element1[1]}
-                                                        onChange={(event) => {
-                                                            newElement.unsaved = true
-                                                            unsaved.current['new'] = true
-                                                            newElement.saleInstallment[idx1][1] = inputFloat(event.target.value)
-                                                            setNewElement({...newElement})
-                                                        }}
-                                                    />
-                                                    <IconButton onClick={()=>{
-                                                        newElement.unsaved = true
-                                                        unsaved.current['new'] = true
-                                                        newElement.saleInstallment.splice(idx1, 1)
-                                                        setNewElement({...newElement})
-                                                    }}>
-                                                        <CloseIcon style={{color: 'red'}}/>
-                                                    </IconButton>
-                                                </div>
-                                            )}
-                                            <center style={{width: '100%'}}>
-                                                <Button onClick={async()=>{
-                                                    newElement.unsaved = true
-                                                    unsaved.current['new'] = true
-                                                    newElement.saleInstallment = [...newElement.saleInstallment, ['', '']]
-                                                    setNewElement({...newElement})
-                                                }} size='small'>
-                                                    Добавить ставку
-                                                </Button>
-                                            </center>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                    <Accordion style={{width: '100%'}}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon />}
                                             aria-controls='order-newelement-content'
                                             id='order-newelement-header'
                                         >
@@ -424,13 +339,13 @@ const BonusManagers = React.memo((props) => {
                                     <Accordion style={{width: '100%'}}>
                                         <AccordionSummary
                                             expandIcon={<ExpandMoreIcon />}
-                                            aria-controls='orderInstallment-newelement-content'
-                                            id='orderInstallment-newelement-header'
+                                            aria-controls='installment-newelement-content'
+                                            id='installment-newelement-header'
                                         >
-                                            <Typography style={{color: newElement.orderInstallment.length?'black':'red'}}>На заказ рассрочка {newElement.orderInstallment.length}</Typography>
+                                            <Typography style={{color: newElement.installment.length?'black':'red'}}>Рассрочка {newElement.installment.length}</Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                            {newElement.orderInstallment.map((element1, idx1)=>
+                                            {newElement.installment.map((element1, idx1)=>
                                                 <div className={classes.rowCenter} key={`newElement${idx1}`}>
                                                     <Input
                                                         placeholder='Скидка'
@@ -441,7 +356,7 @@ const BonusManagers = React.memo((props) => {
                                                         onChange={(event) => {
                                                             newElement.unsaved = true
                                                             unsaved.current['new'] = true
-                                                            newElement.orderInstallment[idx1][0] = inputFloat(event.target.value)
+                                                            newElement.installment[idx1][0] = inputFloat(event.target.value)
                                                             setNewElement({...newElement})
                                                         }}
                                                     />
@@ -454,14 +369,14 @@ const BonusManagers = React.memo((props) => {
                                                         onChange={(event) => {
                                                             newElement.unsaved = true
                                                             unsaved.current['new'] = true
-                                                            newElement.orderInstallment[idx1][1] = inputFloat(event.target.value)
+                                                            newElement.installment[idx1][1] = inputFloat(event.target.value)
                                                             setNewElement({...newElement})
                                                         }}
                                                     />
                                                     <IconButton onClick={()=>{
                                                         newElement.unsaved = true
                                                         unsaved.current['new'] = true
-                                                        newElement.orderInstallment.splice(idx1, 1)
+                                                        newElement.installment.splice(idx1, 1)
                                                         setNewElement({...newElement})
                                                     }}>
                                                         <CloseIcon style={{color: 'red'}}/>
@@ -472,66 +387,7 @@ const BonusManagers = React.memo((props) => {
                                                 <Button onClick={async()=>{
                                                     newElement.unsaved = true
                                                     unsaved.current['new'] = true
-                                                    newElement.orderInstallment = [...newElement.orderInstallment, ['', '']]
-                                                    setNewElement({...newElement})
-                                                }} size='small'>
-                                                    Добавить ставку
-                                                </Button>
-                                            </center>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                    <Accordion style={{width: '100%'}}>
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon />}
-                                            aria-controls='promotion-newelement-content'
-                                            id='promotion-newelement-header'
-                                        >
-                                            <Typography style={{color: newElement.promotion.length?'black':'red'}}>Акция {newElement.promotion.length}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            {newElement.promotion.map((element1, idx1)=>
-                                                <div className={classes.rowCenter} key={`newElement${idx1}`}>
-                                                    <Input
-                                                        placeholder='Скидка'
-                                                        error={!element1[0]&&newElement.unsaved}
-                                                        variant='standard'
-                                                        className={classes.inputHalf}
-                                                        value={element1[0]}
-                                                        onChange={(event) => {
-                                                            newElement.unsaved = true
-                                                            unsaved.current['new'] = true
-                                                            newElement.promotion[idx1][0] = inputFloat(event.target.value)
-                                                            setNewElement({...newElement})
-                                                        }}
-                                                    />
-                                                    <Input
-                                                        placeholder='Бонус'
-                                                        error={!element1[1]&&newElement.unsaved}
-                                                        variant='standard'
-                                                        className={classes.inputHalf}
-                                                        value={element1[1]}
-                                                        onChange={(event) => {
-                                                            newElement.unsaved = true
-                                                            unsaved.current['new'] = true
-                                                            newElement.promotion[idx1][1] = inputFloat(event.target.value)
-                                                            setNewElement({...newElement})
-                                                        }}
-                                                    />
-                                                    <IconButton onClick={()=>{
-                                                        newElement.unsaved = true
-                                                        unsaved.current['new'] = true
-                                                        newElement.promotion.splice(idx1, 1)
-                                                        setNewElement({...newElement})
-                                                    }}>
-                                                        <CloseIcon style={{color: 'red'}}/>
-                                                    </IconButton>
-                                                </div>
-                                            )}
-                                            <center style={{width: '100%'}}>
-                                                <Button onClick={async()=>{
-                                                    newElement.unsaved = true
-                                                    unsaved.current['new'] = true
-                                                    newElement.promotion = [...newElement.promotion, ['', '']]
+                                                    newElement.installment = [...newElement.installment, ['', '']]
                                                     setNewElement({...newElement})
                                                 }} size='small'>
                                                     Добавить ставку
@@ -560,8 +416,8 @@ const BonusManagers = React.memo((props) => {
                                                                 break
                                                             }
                                                         if(checkBonus) {
-                                                            for (let i = 0; i < element.saleInstallment.length; i++)
-                                                                if (!element.saleInstallment[i][0] || !element.saleInstallment[i][1]) {
+                                                            for (let i = 0; i < element.installment.length; i++)
+                                                                if (!element.installment[i][0] || !element.installment[i][1]) {
                                                                     checkBonus = false
                                                                     break
                                                                 }
@@ -574,37 +430,17 @@ const BonusManagers = React.memo((props) => {
                                                                 }
                                                         }
                                                         if(checkBonus) {
-                                                            for (let i = 0; i < element.orderInstallment.length; i++)
-                                                                if (!element.orderInstallment[i][0] || !element.orderInstallment[i][1]) {
-                                                                    checkBonus = false
-                                                                    break
-                                                                }
-                                                        }
-                                                        if(checkBonus) {
-                                                            for (let i = 0; i < element.promotion.length; i++)
-                                                                if (!element.promotion[i][0] || !element.promotion[i][1]) {
-                                                                    checkBonus = false
-                                                                    break
-                                                                }
-                                                        }
-                                                        if(checkBonus) {
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                                                                 for(let i = 0; i <element.sale.length; i++)
                                                                     element.sale[i] = [checkFloat(element.sale[i][0]), checkFloat(element.sale[i][1])]
-                                                                for(let i = 0; i <element.saleInstallment.length; i++)
-                                                                    element.saleInstallment[i] = [checkFloat(element.saleInstallment[i][0]), checkFloat(element.saleInstallment[i][1])]
+                                                                for(let i = 0; i <element.installment.length; i++)
+                                                                    element.installment[i] = [checkFloat(element.installment[i][0]), checkFloat(element.installment[i][1])]
                                                                 for(let i = 0; i <element.order.length; i++)
                                                                     element.order[i] = [checkFloat(element.order[i][0]), checkFloat(element.order[i][1])]
-                                                                for(let i = 0; i <element.orderInstallment.length; i++)
-                                                                    element.orderInstallment[i] = [checkFloat(element.orderInstallment[i][0]), checkFloat(element.orderInstallment[i][1])]
-                                                                for(let i = 0; i <element.promotion.length; i++)
-                                                                    element.promotion[i] = [checkFloat(element.promotion[i][0]), checkFloat(element.promotion[i][1])]
-                                                                let res = await setBonusManager({
+                                                                let res = await setBonusCpa({
                                                                     sale: element.sale,
-                                                                    saleInstallment: element.saleInstallment,
+                                                                    installment: element.installment,
                                                                     order: element.order,
-                                                                    orderInstallment: element.orderInstallment,
-                                                                    promotion: element.promotion,
                                                                     _id: element._id
                                                                 })
                                                                 if(res==='OK') {
@@ -636,7 +472,7 @@ const BonusManagers = React.memo((props) => {
                                                     data.deleted?
                                                         <MenuItem key='MenuItem3' onClick={async()=>{
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await deleteBonusManager(element._id)
+                                                                let res = await deleteBonusCpa(element._id)
                                                                 if(res==='OK'){
                                                                     showSnackBar('Успешно', 'success')
                                                                     delete unsaved.current[list[idx]._id]
@@ -745,72 +581,6 @@ const BonusManagers = React.memo((props) => {
                                 <Accordion style={{width: '100%'}}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
-                                        aria-controls='saleInstallment-element-content'
-                                        id='saleInstallment-element-header'
-                                    >
-                                        <Typography style={{color: element.saleInstallment.length?'black':'red'}}>Рассрочка {element.saleInstallment.length}</Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        {element.saleInstallment.map((element1, idx1)=>
-                                            <div className={classes.rowCenter} key={`newElement${idx1}`}>
-                                                <Input
-                                                    placeholder='Скидка'
-                                                    error={!element1[0]&&element.unsaved}
-                                                    variant='standard'
-                                                    className={classes.inputHalf}
-                                                    value={element1[0]}
-                                                    inputProps={{readOnly: !data.edit}}
-                                                    onChange={(event) => {
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.saleInstallment[idx1][0] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
-                                                    }}
-                                                />
-                                                <Input
-                                                    placeholder='Бонус'
-                                                    error={!element1[1]&&element.unsaved}
-                                                    variant='standard'
-                                                    className={classes.inputHalf}
-                                                    value={element1[1]}
-                                                    inputProps={{readOnly: !data.edit}}
-                                                    onChange={(event) => {
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.saleInstallment[idx1][1] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
-                                                    }}
-                                                />
-                                                <IconButton onClick={()=>{
-                                                    element.unsaved = true
-                                                    unsaved.current[element._id] = true
-                                                    element.saleInstallment.splice(idx1, 1)
-                                                    setNewElement({...element})
-                                                }}>
-                                                    <CloseIcon style={{color: 'red'}}/>
-                                                </IconButton>
-                                            </div>
-                                        )}
-                                        {
-                                            data.edit?
-                                                <center style={{width: '100%'}}>
-                                                    <Button onClick={async()=>{
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.saleInstallment = [...element.saleInstallment, ['', '']]
-                                                        setNewElement({...element})
-                                                    }} size='small'>
-                                                        Добавить ставку
-                                                    </Button>
-                                                </center>
-                                                :
-                                                null
-                                        }
-                                    </AccordionDetails>
-                                </Accordion>
-                                <Accordion style={{width: '100%'}}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
                                         aria-controls='order-element-content'
                                         id='order-element-header'
                                     >
@@ -877,13 +647,13 @@ const BonusManagers = React.memo((props) => {
                                 <Accordion style={{width: '100%'}}>
                                     <AccordionSummary
                                         expandIcon={<ExpandMoreIcon />}
-                                        aria-controls='orderInstallment-element-content'
-                                        id='orderInstallment-element-header'
+                                        aria-controls='installment-element-content'
+                                        id='installment-element-header'
                                     >
-                                        <Typography style={{color: element.orderInstallment.length?'black':'red'}}>На заказ рассрочка {element.orderInstallment.length}</Typography>
+                                        <Typography style={{color: element.installment.length?'black':'red'}}>Рассрочка {element.installment.length}</Typography>
                                     </AccordionSummary>
                                     <AccordionDetails>
-                                        {element.orderInstallment.map((element1, idx1)=>
+                                        {element.installment.map((element1, idx1)=>
                                             <div className={classes.rowCenter} key={`newElement${idx1}`}>
                                                 <Input
                                                     placeholder='Скидка'
@@ -895,7 +665,7 @@ const BonusManagers = React.memo((props) => {
                                                     onChange={(event) => {
                                                         element.unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.orderInstallment[idx1][0] = inputFloat(event.target.value)
+                                                        element.installment[idx1][0] = inputFloat(event.target.value)
                                                         setNewElement({...element})
                                                     }}
                                                 />
@@ -909,14 +679,14 @@ const BonusManagers = React.memo((props) => {
                                                     onChange={(event) => {
                                                         element.unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.orderInstallment[idx1][1] = inputFloat(event.target.value)
+                                                        element.installment[idx1][1] = inputFloat(event.target.value)
                                                         setNewElement({...element})
                                                     }}
                                                 />
                                                 <IconButton onClick={()=>{
                                                     element.unsaved = true
                                                     unsaved.current[element._id] = true
-                                                    element.orderInstallment.splice(idx1, 1)
+                                                    element.installment.splice(idx1, 1)
                                                     setNewElement({...element})
                                                 }}>
                                                     <CloseIcon style={{color: 'red'}}/>
@@ -929,73 +699,7 @@ const BonusManagers = React.memo((props) => {
                                                     <Button onClick={async()=>{
                                                         element.unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.orderInstallment = [...element.orderInstallment, ['', '']]
-                                                        setNewElement({...element})
-                                                    }} size='small'>
-                                                        Добавить ставку
-                                                    </Button>
-                                                </center>
-                                                :
-                                                null
-                                        }
-                                    </AccordionDetails>
-                                </Accordion>
-                                <Accordion style={{width: '100%'}}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls='promotion-element-content'
-                                        id='promotion-element-header'
-                                    >
-                                        <Typography style={{color: element.promotion.length?'black':'red'}}>Акция {element.promotion.length}</Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                        {element.promotion.map((element1, idx1)=>
-                                            <div className={classes.rowCenter} key={`newElement${idx1}`}>
-                                                <Input
-                                                    placeholder='Скидка'
-                                                    error={!element1[0]&&element.unsaved}
-                                                    variant='standard'
-                                                    className={classes.inputHalf}
-                                                    value={element1[0]}
-                                                    inputProps={{readOnly: !data.edit}}
-                                                    onChange={(event) => {
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.promotion[idx1][0] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
-                                                    }}
-                                                />
-                                                <Input
-                                                    placeholder='Бонус'
-                                                    error={!element1[1]&&element.unsaved}
-                                                    variant='standard'
-                                                    className={classes.inputHalf}
-                                                    value={element1[1]}
-                                                    inputProps={{readOnly: !data.edit}}
-                                                    onChange={(event) => {
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.promotion[idx1][1] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
-                                                    }}
-                                                />
-                                                <IconButton onClick={()=>{
-                                                    element.unsaved = true
-                                                    unsaved.current[element._id] = true
-                                                    element.promotion.splice(idx1, 1)
-                                                    setNewElement({...element})
-                                                }}>
-                                                    <CloseIcon style={{color: 'red'}}/>
-                                                </IconButton>
-                                            </div>
-                                        )}
-                                        {
-                                            data.edit?
-                                                <center style={{width: '100%'}}>
-                                                    <Button onClick={async()=>{
-                                                        element.unsaved = true
-                                                        unsaved.current[element._id] = true
-                                                        element.promotion = [...element.promotion, ['', '']]
+                                                        element.installment = [...element.installment, ['', '']]
                                                         setNewElement({...element})
                                                     }} size='small'>
                                                         Добавить ставку
@@ -1016,7 +720,7 @@ const BonusManagers = React.memo((props) => {
             </div>
             {
                 data.add||data.edit?
-                    <UnloadUpload upload={uploadBonusManager} uploadText={uploadText} unload={()=>getUnloadBonusManagers({...filter.store?{store: filter.store._id}:{}})}/>
+                    <UnloadUpload upload={uploadBonusCpa} uploadText={uploadText} unload={()=>getUnloadBonusCpas({...filter.store?{store: filter.store._id}:{}})}/>
                     :
                     null
             }
@@ -1024,7 +728,7 @@ const BonusManagers = React.memo((props) => {
     )
 })
 
-BonusManagers.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
+BonusCpas.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
     if(!['admin',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
@@ -1041,11 +745,11 @@ BonusManagers.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) 
             edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
-            list: cloneObject(await getBonusManagers({
+            list: cloneObject(await getBonusCpas({
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
                 skip: 0
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getBonusManagersCount({
+            count: await getBonusCpasCount({
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
@@ -1065,4 +769,4 @@ function mapDispatchToProps(dispatch) {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(BonusManagers);
+export default connect(mapStateToProps, mapDispatchToProps)(BonusCpas);

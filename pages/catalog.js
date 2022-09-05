@@ -433,7 +433,6 @@ const Catalog = React.memo((props) => {
                                     prepaid = checkFloat(prepaid + orders[i].paid)
                                     _orders[i] = orders[i]._id
                                 }
-
                                 setMiniDialog('Оформление', <Buy client={client} installmentsDebt={installmentsDebt}
                                                                  items={items} type={data.type} prepaid={prepaid}
                                                                  amountStart={amountStart} orders={_orders}

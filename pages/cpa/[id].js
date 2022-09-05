@@ -38,7 +38,6 @@ const Cpa = React.memo((props) => {
     const unsaved = useRef();
     let [name, setName] = useState(data.object?data.object.name:'');
     let [info, setInfo] = useState(data.object?data.object.info:'');
-    let [percent, setPercent] = useState(data.object?data.object.percent:'');
     let [emails, setEmails] = useState(data.object&&data.object.emails?cloneObject(data.object.emails):[]);
     let addEmails = ()=>{
         emails = [...emails, '']
@@ -72,7 +71,7 @@ const Cpa = React.memo((props) => {
             unsaved.current = {}
         else
             unsaved.current[router.query.id] = true
-    },[name,  info, percent, emails, phones])
+    },[name,  info, emails, phones])
     return (
         <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':data.object.name:'Ничего не найдено'}>
             <Head>
@@ -110,15 +109,6 @@ const Cpa = React.memo((props) => {
                                                label='ФИО'
                                                value={name}
                                                onChange={(event) => setName(event.target.value)}
-                                               className={classes.input}
-                                    />
-                                    <TextField variant='standard'
-                                               id='percent'
-                                               type={isMobileApp?'number':'text'}
-                                               label='Процент'
-                                               error={percent>100}
-                                               onChange={(event) => setPercent(inputFloat(event.target.value))}
-                                               value={percent}
                                                className={classes.input}
                                     />
                                     <br/>
@@ -204,14 +194,6 @@ const Cpa = React.memo((props) => {
                                             {name}
                                         </div>
                                     </div>
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField}>
-                                            Процент:&nbsp;
-                                        </div>
-                                        <div className={classes.value}>
-                                            {percent}
-                                        </div>
-                                    </div>
                                     {
                                         phones.length?
                                             <div className={classes.row}>
@@ -261,10 +243,10 @@ const Cpa = React.memo((props) => {
                                             let checkPhones = !phones.length||validPhones1(phones)
                                             let checkMail = !emails.length||validMails(emails)
                                             let res
-                                            if (name.length&&checkPhones&&checkMail&&percent<101) {
+                                            if (name.length&&checkPhones&&checkMail) {
                                                 const action = async() => {
                                                     if(router.query.id==='new') {
-                                                        res = await addCpa({name, emails, phones, info, percent: checkFloat(percent)})
+                                                        res = await addCpa({name, emails, phones, info})
                                                         if(res&&res!=='ERROR') {
                                                             unsaved.current = {}
                                                             showSnackBar('Успешно', 'success')
@@ -276,7 +258,6 @@ const Cpa = React.memo((props) => {
                                                     else {
                                                         let element = {_id: router.query.id}
                                                         if (name!==data.object.name) element.name = name
-                                                        if (percent!=data.object.percent) element.percent = checkFloat(percent)
                                                         if (info!==data.object.info) element.info = info
                                                         if (JSON.stringify(phones)!==JSON.stringify(data.object.phones)) element.phones = phones
                                                         if (JSON.stringify(emails)!==JSON.stringify(data.object.emails)) element.emails = emails
@@ -353,7 +334,6 @@ Cpa.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                     name: '',
                     emails: [],
                     phones: [],
-                    percent: '',
                     info: ''
                 }
         }

@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getStoreForBonusManagers = async({search, store}, client)=>{
+export const getStoreForBonusCpas = async({search, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
@@ -9,19 +9,19 @@ export const getStoreForBonusManagers = async({search, store}, client)=>{
                 variables: {search, store},
                 query: gql`
                     query ($search: String, $store: ID) {
-                        storeForBonusManagers(search: $search, store: $store) {
+                        storeForBonusCpas(search: $search, store: $store) {
                             _id
                             name
                         }
                     }`,
             })
-        return res.data.storeForBonusManagers
+        return res.data.storeForBonusCpas
     } catch(err){
         console.error(err)
     }
 }
 
-export const getBonusManagers = async({skip, store}, client)=>{
+export const getBonusCpas = async({skip, store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
@@ -29,25 +29,23 @@ export const getBonusManagers = async({skip, store}, client)=>{
                 variables: {skip, store},
                 query: gql`
                     query ($skip: Int, $store: ID) {
-                        bonusManagers(skip: $skip, store: $store) {
+                        bonusCpas(skip: $skip, store: $store) {
                             _id
                             createdAt
                             store {_id name}
                             sale
-                            saleInstallment
                             order
-                            orderInstallment
-                            promotion
+                            installment
                         }
                     }`,
             })
-        return res.data.bonusManagers
+        return res.data.bonusCpas
     } catch(err){
         console.error(err)
     }
 }
 
-export const getBonusManagersCount = async({store}, client)=>{
+export const getBonusCpasCount = async({store}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
@@ -55,70 +53,68 @@ export const getBonusManagersCount = async({store}, client)=>{
                 variables: {store},
                 query: gql`
                     query ($store: ID) {
-                        bonusManagersCount(store: $store)
+                        bonusCpasCount(store: $store)
                     }`,
             })
-        return res.data.bonusManagersCount
+        return res.data.bonusCpasCount
     } catch(err){
         console.error(err)
     }
 }
 
-export const deleteBonusManager = async(_id)=>{
+export const deleteBonusCpa = async(_id)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
             variables: {_id},
             mutation : gql`
                     mutation ($_id: ID!) {
-                        deleteBonusManager(_id: $_id)
+                        deleteBonusCpa(_id: $_id)
                     }`})
-        return res.data.deleteBonusManager
+        return res.data.deleteBonusCpa
     } catch(err){
         console.error(err)
     }
 }
 
-export const addBonusManager = async(variables)=>{
+export const addBonusCpa = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($store: ID!, $sale: [[Float]]!, $saleInstallment: [[Float]]!, $order: [[Float]]!, $orderInstallment: [[Float]]!, $promotion: [[Float]]!) {
-                        addBonusManager(store: $store, sale: $sale, saleInstallment: $saleInstallment, order: $order, orderInstallment: $orderInstallment, promotion: $promotion){
+                    mutation ($store: ID!, $sale: [[Float]]!, $order: [[Float]]!, $installment: [[Float]]!) {
+                        addBonusCpa(store: $store, sale: $sale, order: $order, installment: $installment){
                             _id
                             createdAt
                             store {_id name}
                             sale
-                            saleInstallment
                             order
-                            orderInstallment
-                            promotion
+                            installment
                         }
                     }`})
-        return res.data.addBonusManager
+        return res.data.addBonusCpa
     } catch(err){
         console.error(err)
     }
 }
 
-export const setBonusManager = async(variables)=>{
+export const setBonusCpa = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $sale: [[Float]], $saleInstallment: [[Float]], $order: [[Float]], $orderInstallment: [[Float]], $promotion: [[Float]]) {
-                        setBonusManager(_id: $_id, sale: $sale, saleInstallment: $saleInstallment, order: $order, orderInstallment: $orderInstallment, promotion: $promotion)
+                    mutation ($_id: ID!, $sale: [[Float]], $order: [[Float]], $installment: [[Float]]) {
+                        setBonusCpa(_id: $_id, sale: $sale, order: $order, installment: $installment)
                     }`})
-        return res.data.setBonusManager
+        return res.data.setBonusCpa
     } catch(err){
         console.error(err)
     }
 }
 
-export const getUnloadBonusManagers = async({store}, client)=>{
+export const getUnloadBonusCpas = async({store}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
@@ -126,25 +122,25 @@ export const getUnloadBonusManagers = async({store}, client)=>{
             variables: {store},
             query: gql`
                     query ($store: ID) {
-                        unloadBonusManagers(store: $store)
+                        unloadBonusCpas(store: $store)
                     }`,
         })
-        return res.data.unloadBonusManagers
+        return res.data.unloadBonusCpas
     } catch(err){
         console.error(err)
     }
 }
 
-export const uploadBonusManager = async(variables)=>{
+export const uploadBonusCpa = async(variables)=>{
     try{
         const client = getClientGql()
         let res = await client.mutate({
             variables,
             mutation : gql`
                     mutation ($document: Upload!) {
-                        uploadBonusManager(document: $document) 
+                        uploadBonusCpa(document: $document) 
                     }`})
-        return res.data.uploadBonusManager
+        return res.data.uploadBonusCpa
     } catch(err){
         console.error(err)
     }
