@@ -6,6 +6,7 @@ import { getStores } from '../../src/gql/store'
 import { getPositions, getDepartments } from '../../src/gql/user'
 import { getFactorys } from '../../src/gql/factory'
 import { getCategorys } from '../../src/gql/category'
+import { getPromotions } from '../../src/gql/promotion'
 import { getItems, getTypeItems } from '../../src/gql/item'
 import { getWarehouses } from '../../src/gql/warehouse'
 import * as appActions from '../../src/redux/actions/app'
@@ -27,11 +28,13 @@ import {getCpas} from '../../src/gql/cpa';
 import {getMoneyArticles} from '../../src/gql/moneyArticle';
 import {getMoneyRecipients} from '../../src/gql/moneyRecipient';
 import TextField from '@mui/material/TextField';
+import { pdDatePicker, pdDDMMYYYY } from '../../src/lib'
 
 const roles = ['все', 'менеджер', 'завсклад', 'кассир', 'доставщик', 'менеджер/завсклад', 'управляющий', 'юрист', 'сотрудник']
 const levels = ['Все', 'Бронза', 'Серебро', 'Золото', 'Платина']
 const operations = ['все', 'приход', 'расход']
 const currencies = ['все', 'сом', 'доллар', 'рубль', 'тенге', 'юань']
+const statusClients = ['холодный', 'теплый', 'горячий']
 
 const Filter =  React.memo(
     (props) =>{
@@ -49,6 +52,9 @@ const Filter =  React.memo(
         let handleRole = (event) => {
             let role = event.target.value!=='все'?event.target.value:null
             setFilter({...filter, role})
+        };
+        let handleStatusClient = (event) => {
+            setFilter({...filter, statusClient: event.target.value})
         };
         let handleLevel = (event) => {
             let level = event.target.value!=='Все'?event.target.value:null
@@ -104,6 +110,68 @@ const Filter =  React.memo(
                         null
                 }
                 {
+                    filterShow.period?
+                        <div className={classes.row}>
+                            <TextField
+                                id='date'
+                                type='date'
+                                variant='standard'
+                                value={filter.dateStart}
+                                onChange={(event) => {
+                                    let dateStart = ''
+                                    let dateEnd = filter.dateEnd
+                                    if(event.target.value) {
+                                        dateStart = new Date(event.target.value)
+                                        if(dateEnd) {
+                                            dateEnd = new Date(dateEnd)
+                                            if (dateEnd < dateStart || pdDDMMYYYY(dateEnd) === pdDDMMYYYY(dateStart))
+                                                dateEnd.setDate(dateStart.getDate() + 1)
+                                            dateEnd = pdDatePicker(dateEnd)
+                                        }
+                                        dateStart = pdDatePicker(dateStart)
+                                    }
+                                    else
+                                        dateEnd = ''
+                                    setFilter({
+                                        ...filter,
+                                        dateStart,
+                                        dateEnd
+                                    })
+                                }}
+                                style={{marginRight: 10}}
+                                className={classes.input}
+                            />
+                            <TextField
+                                id='date'
+                                type='date'
+                                variant='standard'
+                                value={filter.dateEnd}
+                                onChange={(event) => {
+                                    let dateStart = filter.dateStart
+                                    let dateEnd = ''
+                                    if(event.target.value) {
+                                        dateEnd = new Date(event.target.value)
+                                        dateStart = dateStart?new Date(dateStart):new Date(dateEnd)
+                                        if(dateEnd<dateStart||pdDDMMYYYY(dateEnd)===pdDDMMYYYY(dateStart))
+                                            dateStart.setDate(dateEnd.getDate() - 1)
+                                        dateStart = pdDatePicker(dateStart)
+                                        dateEnd = pdDatePicker(dateEnd)
+                                    }
+                                    else
+                                        dateStart = ''
+                                    setFilter({
+                                        ...filter,
+                                        dateStart,
+                                        dateEnd
+                                    })
+                                }}
+                                className={classes.input}
+                            />
+                        </div>
+                        :
+                        null
+                }
+                {
                     filterShow.delivery?
                         <TextField
                             id='date'
@@ -136,7 +204,9 @@ const Filter =  React.memo(
                             >
                                 <FormControlLabel value='all' control={<Radio/>} label='Все'/>
                                 <FormControlLabel value='installment' control={<Radio/>} label='Рассрочка'/>
-                                <FormControlLabel value='payment' control={<Radio/>} label='Платеж'/>
+                                <FormControlLabel value='sale' control={<Radio/>} label='Продажа'/>
+                                <FormControlLabel value='reservation' control={<Radio/>} label='Бронь'/>
+                                <FormControlLabel value='order' control={<Radio/>} label='Заказ'/>
                             </RadioGroup>
                         </FormControl>
                         :
@@ -327,6 +397,42 @@ const Filter =  React.memo(
                             minLength={0}
                             label={'Категория'}
                         />
+                        :
+                        null
+                }
+                {
+                    filterShow.promotion?
+                        <AutocomplectOnline
+                            element={filter.promotion}
+                            setElement={(promotion)=>{
+                                setFilter({
+                                    ...filter,
+                                    promotion
+                                })
+                            }}
+                            defaultValue={filter.promotion}
+                            getElements={async (search)=>{
+                                return await getPromotions({search})
+                            }}
+                            minLength={0}
+                            label={'Акция'}
+                        />
+                        :
+                        null
+                }
+                {
+                    filterShow.statusClient?
+                        <>
+                        <br/>
+                        <FormControl className={classes.input}>
+                            <InputLabel>Статус клиента</InputLabel>
+                            <Select variant='standard' value={filter.statusClient} onChange={handleStatusClient}>
+                                {statusClients.map((element)=>
+                                    <MenuItem key={element} value={element}>{element}</MenuItem>
+                                )}
+                            </Select>
+                        </FormControl>
+                        </>
                         :
                         null
                 }

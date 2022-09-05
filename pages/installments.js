@@ -6,7 +6,7 @@ import {getInstallments, getInstallmentsCount, setInstallment, getUnloadInstallm
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYYY, pdtDatePicker } from '../src/lib'
+import { cloneObject, pdDDMMYYYY, pdDatePicker } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -376,7 +376,7 @@ const Installments = React.memo((props) => {
                                             <div
                                                 onClick={()=>{
                                                     if(data.edit&&['активна', 'безнадежна'].includes(element.status)) {
-                                                        let date = pdtDatePicker(grid.month)
+                                                        let date = pdDatePicker(grid.month)
                                                         setMiniDialog('Месяц', <SetDate date={date} setDate={(date)=>{
                                                             list[idx].unsaved = true
                                                             unsaved.current[list[idx]._id] = true

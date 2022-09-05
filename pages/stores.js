@@ -27,7 +27,7 @@ import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import Card from '@mui/material/Card';
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id магазина (если требуется обновить);\nназвание.'
+const uploadText = 'Формат xlsx:\n_id или текущее название магазина (если требуется обновить);\nназвание.'
 
 const Store = React.memo((props) => {
     const {classes} = pageListStyle();

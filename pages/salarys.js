@@ -32,7 +32,7 @@ import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
 
-const uploadText = 'Формат xlsx:\nдата (ММ.ГГГГ);\n_id сотрудника;\nоклад;\nставка;\nфак дни;\nраб дни;\nпремия;\nбонус;\nштрафы;\nавансы;\nоплачено.'
+const uploadText = 'Формат xlsx:\nдата (ММ.ГГГГ);\nимя сотрудника;\nоклад;\nставка;\nфак дни;\nраб дни;\nпремия;\nбонус;\nштрафы;\nавансы;\nоплачено.'
 
 const Salarys = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -189,7 +189,7 @@ const Salarys = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add?
+                        data.add&&!search&&!filter.user&&!filter.department&&!filter.position?
                             <div className={classes.tableRow} style={{width: 'fit-content'}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -783,7 +783,7 @@ const Salarys = React.memo((props) => {
                     }
                     else
                         showSnackBar('Сохраните изменения или обновите страницу')
-                }} type='month'/>)
+                }} month/>)
                 showMiniDialog(true)
             }}>
                 {pdMonthYYYY(date)}

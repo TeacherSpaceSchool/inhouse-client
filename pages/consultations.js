@@ -31,12 +31,14 @@ const Consultations = React.memo((props) => {
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
         setList(cloneObject(await getConsultations({
+            ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.date?{date: filter.date}:{},
             skip: 0
         })));
         setCount(await getConsultationsCount({
+            ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.date?{date: filter.date}:{},
@@ -59,6 +61,7 @@ const Consultations = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getConsultations({
+                ...filter.statusClient?{statusClient: filter.statusClient}:{},
                 skip: list.length,
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
@@ -72,7 +75,7 @@ const Consultations = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{user: true, userRole: 'менеджер', store: true, date: true}} checkPagination={checkPagination} pageName='Консультации'>
+        <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, date: true}} checkPagination={checkPagination} pageName='Консультации'>
             <Head>
                 <title>Консультации</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -83,39 +86,52 @@ const Consultations = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/consultations`} />
                 <link rel='canonical' href={`${urlMain}/consultations`}/>
             </Head>
-            <Card className={classes.page}>
+            <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: '100%', justifyContent: 'start'}}>
+                    <div className={classes.tableHead} style={{width: 'fit-content', minWidth: '100%'}}>
+                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
                             Менеджер
                         </div>
-                        <div className={classes.tableCell} style={{width: '100%', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
                             Магазин
                         </div>
-                        <div className={classes.tableCell} style={{width: '100%', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
                             Начало
                         </div>
-                        <div className={classes.tableCell} style={{width: '100%', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
                             Конец
+                        </div>
+                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
+                            Клиент
+                        </div>
+                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'start'}}>
+                            Комментарий
                         </div>
                     </div>
                     {list.map((element) =>
                         <div className={classes.tableRow}>
-                            <div className={classes.tableCell} style={{width: '100%', overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{width: 200, overflow: 'auto'}}>
                                 <Link href='/user/[id]' as={`/user/${element.manager._id}`}>
                                     <a>
                                         {element.manager.name}
                                     </a>
                                 </Link>
                             </div>
-                            <div className={classes.tableCell} style={{width: '100%', overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{width: 150, overflow: 'auto'}}>
                                 {element.store.name}
                             </div>
-                            <div className={classes.tableCell} style={{width: '100%', overflow: 'auto', color: !element.end?distanceHour(element.createdAt)>1?'#f00':'#01C801':'#000'}}>
+                            <div className={classes.tableCell} style={{width: 130, overflow: 'auto', color: !element.end?distanceHour(element.createdAt)>1?'#f00':'#01C801':'#000'}}>
                                 {pdDDMMYYHHMM(element.createdAt)}
                             </div>
-                            <div className={classes.tableCell} style={{width: '100%', overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{width: 130, overflow: 'auto'}}>
                                 {element.end?pdDDMMYYHHMM(element.end):null}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 200, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>
+                                <div>{element.client?element.client.name:null}</div>
+                                <div>{element.statusClient?element.statusClient:null}</div>
+                            </div>
+                            <div className={classes.tableCell} style={{width: 250, overflow: 'auto', maxHeight: 100}}>
+                                {element.info}
                             </div>
                         </div>
                     )}

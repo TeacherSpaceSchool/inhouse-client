@@ -48,7 +48,10 @@ export const getConsultations = async({skip, manager, store, date, active}, clie
                             createdAt
                             manager {name _id}
                             store {name _id}
+                            client {name _id}
+                            info
                             end
+                            statusClient
                         }
                     }`,
             })
@@ -68,10 +71,28 @@ export const startConsultation = async()=>{
                             _id
                             createdAt
                             manager {name _id}
+                            client {name _id}
+                            info
                             end
+                            statusClient
                         }
                     }`})
         return res.data.startConsultation
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const setConsultation = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($info: String, $client: ID, $statusClient: String) {
+                        setConsultation(info: $info, client: $client, statusClient: $statusClient) 
+                    }`})
+        return res.data.setConsultation
     } catch(err){
         console.error(err)
     }

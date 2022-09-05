@@ -95,18 +95,14 @@ const BalanceClients = React.memo((props) => {
                                 </Link>
                             </div>
                             <div className={classes.tableCell} style={{flexDirection: 'column', ...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}}}>
-                                {
-                                    element.balance.map((balance, idx) =>
-                                        <div className={classes.row} key={`${element._id}balance${idx}`}>
-                                            <div className={classes.value}>
-                                                {balance.currency}:&nbsp;
-                                            </div>
-                                            <div>
-                                                {balance.amount}
-                                            </div>
-                                        </div>
-                                    )
-                                }
+                                <div className={classes.row}>
+                                    <div className={classes.value}>
+                                        сом:&nbsp;
+                                    </div>
+                                    <div>
+                                        {element.balance}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}

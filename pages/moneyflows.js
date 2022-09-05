@@ -27,6 +27,7 @@ import Save from '@mui/icons-material/Save';
 import Confirmation from '../components/dialog/Confirmation'
 import Badge from '@mui/material/Badge'
 import SetRecipient from '../components/dialog/SetRecipient';
+import SetRecipientE from '../components/dialog/SetRecipientE';
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -37,7 +38,19 @@ import Delete from '@mui/icons-material/Delete';
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
 
-const uploadText = 'Формат xlsx:\n_id движения денег (если требуется обновить);\nдата (ДД.ММ.ГГГГ);\n_id кассы;\n_id получателя (клиент, сотрудник, касса, получатель денег);\n_id операции клиента;\nмесяц рассрочки клиента;\n_id статьи;\nоперация (приход, расход);\nсумма;\nвалюта (сом, доллар, рубль, тенге, юань);\nкомментарий.'
+const uploadText = 'Формат xlsx:' +
+    '\nномер движения денег (если требуется обновить);' +
+    '\nдата (ДД.ММ.ГГГГ);' +
+    '\nназвание магазина;' +
+    '\nназвание кассы;' +
+    '\nтип получателя (клиент, сотрудник, касса, получатель денег);' +
+    '\nимя получателя;' +
+    '\nназвание статьи;' +
+    '\nоперация (приход, расход);' +
+    '\nсумма;' +
+    '\nвалюта (сом, доллар, рубль, тенге, юань);' +
+    '\nкурс;' +
+    '\nкомментарий.'
 const operations = ['приход', 'расход']
 const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юань']
 
@@ -53,23 +66,44 @@ const MoneyFlows = React.memo((props) => {
     //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
+    let [showStat, setShowStat] = useState(false);
     let [newElement, setNewElement] = useState({
         date: pdDatePicker(new Date()),
-        typeRecipient: 'Получатель денег',
+        typeRecipient: '',
         operation: 'приход',
         currency: 'сом',
-        typeClientOperation: 'Продажа',
+        typeClientOperation: '',
         info: '',
+        exchangeRate: 1,
         moneyArticle: data.defaultMoneyArticle['Не указано'],
         cashbox: profile.cashbox
     });
     //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
+    const getMoneyFlowsCountWithFilter = async ()=>{
+        setCount(await getMoneyFlowsCount({
+            search,
+            ...filter.store?{store: filter.store._id}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.currency?{currency: filter.currency}:{},
+            ...filter.operation?{operation: filter.operation}:{},
+            ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
+            ...filter.moneyRecipient?{moneyRecipient: filter.moneyRecipient._id}:{},
+            ...filter.user?{employment: filter.user._id}:{},
+            ...filter.client?{client: filter.client._id}:{},
+            ...filter.cashbox?{cashbox: filter.cashbox._id}:{},
+            ...data.installment?{installment: data.installment}:{},
+            ...data.sale?{sale: data.sale}:{},
+            ...data.reservation?{reservation: data.reservation}:{},
+            ...data.order?{order: data.order}:{},
+            ...data.refund?{refund: data.refund}:{},
+        }));
+    }
     const getList = async ()=>{
         setList(cloneObject(await getMoneyFlows({skip: 0,
             search,
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.currency?{currency: filter.currency}:{},
             ...filter.operation?{operation: filter.operation}:{},
             ...filter.store?{store: filter.store._id}:{},
@@ -84,23 +118,7 @@ const MoneyFlows = React.memo((props) => {
             ...data.order?{order: data.order}:{},
             ...data.refund?{refund: data.refund}:{},
         })));
-        setCount(await getMoneyFlowsCount({
-            search,
-            ...filter.store?{store: filter.store._id}:{},
-            ...filter.date?{date: filter.date}:{},
-            ...filter.currency?{currency: filter.currency}:{},
-            ...filter.operation?{operation: filter.operation}:{},
-            ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
-            ...filter.moneyRecipient?{moneyRecipient: filter.moneyRecipient._id}:{},
-            ...filter.user?{employment: filter.user._id}:{},
-            ...filter.client?{client: filter.client._id}:{},
-            ...filter.cashbox?{cashbox: filter.cashbox._id}:{},
-            ...data.installment?{installment: data.installment}:{},
-            ...data.sale?{sale: data.sale}:{},
-            ...data.reservation?{reservation: data.reservation}:{},
-            ...data.order?{order: data.order}:{},
-            ...data.refund?{refund: data.refund}:{},
-        }));
+        await getMoneyFlowsCountWithFilter();
         (document.getElementsByClassName('App-body-f'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
@@ -109,7 +127,15 @@ const MoneyFlows = React.memo((props) => {
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
-            if(!initialRender.current) await getList()
+            if(!initialRender.current) {
+                if(filter.currency&&filter.currency!==newElement.currency) newElement.currency = filter.currency
+                if(!newElement.clientOperation&&filter.operation&&filter.operation!==newElement.operation) newElement.operation = filter.operation
+                if(filter.moneyArticle&&filter.moneyArticle!==newElement.moneyArticle) newElement.moneyArticle = filter.moneyArticle
+                if(filter.cashbox&&(!newElement.cashbox||filter.cashbox._id!==newElement.cashbox._id)) newElement.cashbox = filter.cashbox
+                setNewElement({...newElement})
+
+                await getList()
+            }
         })()
     },[filter])
     useEffect(()=>{
@@ -130,7 +156,7 @@ const MoneyFlows = React.memo((props) => {
             let addedList = cloneObject(await getMoneyFlows({skip: list.length,
                 search,
                 ...filter.store?{store: filter.store._id}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.currency?{currency: filter.currency}:{},
                 ...filter.operation?{operation: filter.operation}:{},
                 ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
@@ -157,7 +183,7 @@ const MoneyFlows = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App searchShow={true} full unsaved={unsaved} filterShow={{date: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App searchShow={true} full unsaved={unsaved} filterShow={{period: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Движения денег</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -173,7 +199,7 @@ const MoneyFlows = React.memo((props) => {
                     <div className={classes.tableHead} style={{width: 'fit-content'}}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
-                            Дата
+                            Дата/Номер
                         </div>
                         <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                             Касса/Банк
@@ -193,34 +219,64 @@ const MoneyFlows = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
                             Валюта
                         </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                            Курс
+                        </div>
+                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                            Итого
+                        </div>
                         <div className={classes.tableCell} style={{width: 400, justifyContent: data.edit?'center':'start'}}>
                             Комментарий
                         </div>
                     </div>
                     {
-                        data.add?
+                        data.add&&(
+                            !search&&
+                            !filter.moneyRecipient&&
+                            !filter.dateStart&&
+                            !filter.user&&
+                            !filter.client&&
+                            !data.sale&&
+                            !data.reservation&&
+                            !data.order&&
+                            !data.refund&&
+                            !data.installment
+                        )?
                             <div className={classes.tableRow} style={{width: 'fit-content'}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
                                             <MenuItem onClick={()=>{
-                                                if((newElement.typeClientOperation!=='Рассрочка'||(newElement.clientOperation&&newElement.installmentMonth))&&newElement.date&&newElement.currency&&newElement.amount&&newElement.operation&&newElement.moneyArticle&&newElement.cashbox&&newElement.recipient&&(newElement.typeRecipient!=='Касса'||newElement.cashbox._id!==newElement.recipient._id)) {
+                                                if(
+                                                    (newElement.typeClientOperation!=='Рассрочка'||(newElement.clientOperation&&newElement.installmentMonth))&&
+                                                    newElement.date&&
+                                                    newElement.currency&&
+                                                    newElement.amount&&
+                                                    newElement.exchangeRate&&
+                                                    newElement.operation&&
+                                                    newElement.moneyArticle&&
+                                                    newElement.cashbox&&
+                                                    //newElement.recipient&&
+                                                    (newElement.typeRecipient!=='Касса'||newElement.recipient&&newElement.cashbox._id!==newElement.recipient._id)
+                                                ) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
                                                         let res = await addMoneyFlow({
-                                                            client: newElement.typeRecipient==='Клиент'?newElement.recipient._id:null,
-                                                            employment: newElement.typeRecipient==='Сотрудник'?newElement.recipient._id:null,
-                                                            cashboxRecipient: newElement.typeRecipient==='Касса'?newElement.recipient._id:null,
-                                                            moneyRecipient: newElement.typeRecipient==='Получатель денег'?newElement.recipient._id:null,
+                                                            client: newElement.typeRecipient==='Клиент'&&newElement.recipient?newElement.recipient._id:null,
+                                                            employment: newElement.typeRecipient==='Сотрудник'&&newElement.recipient?newElement.recipient._id:null,
+                                                            cashboxRecipient: newElement.typeRecipient==='Касса'&&newElement.recipient?newElement.recipient._id:null,
+                                                            moneyRecipient: newElement.typeRecipient==='Получатель денег'&&newElement.recipient?newElement.recipient._id:null,
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Продажа'?{sale: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='На заказ'?{order: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Бронь'?{reservation: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Возврат'?{refund: newElement.clientOperation._id}:{},
                                                             ...newElement.clientOperation&&newElement.typeClientOperation==='Рассрочка'&&newElement.installmentMonth?{installment: newElement.clientOperation._id, installmentMonth: newElement.installmentMonth}:{},
-                                                            cashbox: newElement.cashbox?newElement.cashbox._id:null,
+                                                            cashbox: newElement.cashbox._id,
                                                             moneyArticle: newElement.moneyArticle?newElement.moneyArticle._id:null,
                                                             operation: newElement.operation,
                                                             info: newElement.info,
                                                             amount: checkFloat(newElement.amount),
+                                                            amountEnd: checkFloat(newElement.amountEnd),
+                                                            exchangeRate: checkFloat(newElement.exchangeRate),
                                                             currency: newElement.currency,
                                                             date: newElement.date
                                                         })
@@ -229,17 +285,18 @@ const MoneyFlows = React.memo((props) => {
                                                             setList([res, ...list])
                                                             setNewElement({
                                                                 date: pdDatePicker(new Date()),
-                                                                typeRecipient: 'Получатель денег',
+                                                                typeRecipient: '',
                                                                 operation: 'приход',
-                                                                typeClientOperation: 'Продажа',
+                                                                typeClientOperation: '',
                                                                 currency: 'сом',
+                                                                exchangeRate: 1,
                                                                 info: '',
                                                                 amount: '',
                                                                 cashbox: profile.cashbox,
                                                                 moneyArticle: data.defaultMoneyArticle['Не указано']
                                                             })
                                                             delete unsaved.current['new']
-                                                            setCount(++count)
+                                                            await getMoneyFlowsCountWithFilter();
                                                         }
                                                         else
                                                             showSnackBar('Ошибка', 'error')
@@ -279,27 +336,34 @@ const MoneyFlows = React.memo((props) => {
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{width: 200}}>
-                                    <AutocomplectOnline
-                                        defaultValue={newElement.cashbox}
-                                        minLength={0}
-                                        element={newElement.cashbox}
-                                        error={!newElement.cashbox&&newElement.unsaved}
-                                        setElement={(cashbox)=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.cashbox = cashbox
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            return await getCashboxes({search, ...filter.store?{store: filter.store._id}:{}})
-                                        }}
-                                        placeholder={'Касса/Банк'}
-                                    />
+                                    {
+                                        !filter.cashbox?
+                                            <AutocomplectOnline
+                                                defaultValue={newElement.cashbox}
+                                                minLength={0}
+                                                element={newElement.cashbox}
+                                                error={!newElement.cashbox&&newElement.unsaved}
+                                                setElement={(cashbox)=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    newElement.cashbox = cashbox
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    return await getCashboxes({search, ...filter.store?{store: filter.store._id}:{}})
+                                                }}
+                                                placeholder={'Касса/Банк'}
+                                            />
+                                            :
+                                            newElement.cashbox.name
+                                    }
                                 </div>
-                                <div className={classes.tableCell} style={{width: 200, flexDirection: 'column', justifyContent: !newElement.recipient?'center':'start', color: !newElement.recipient||(newElement.typeRecipient==='Касса'&&newElement.cashbox&&newElement.cashbox._id===newElement.recipient._id)?'red':'black'}} onClick={()=>{
-                                    setMiniDialog('Получатель', <SetRecipient defaultMoneyArticle={data.defaultMoneyArticle} unsaved={unsaved} newElement={newElement} setNewElement={setNewElement}/>)
-                                    showMiniDialog(true)
-                                }}>
+                                <div className={classes.tableCell} style={{width: 200, flexDirection: 'column', justifyContent: !newElement.recipient?'center':'start', color: !newElement.recipient||(newElement.typeRecipient==='Касса'&&newElement.cashbox&&newElement.cashbox._id===newElement.recipient._id)?'red':'black'}}
+                                     onClick={()=>{
+                                        setMiniDialog('Получатель', <SetRecipient defaultMoneyArticle={data.defaultMoneyArticle} unsaved={unsaved} newElement={newElement} setNewElement={setNewElement}/>)
+                                        showMiniDialog(true)
+                                     }}
+                                >
                                     {
                                         newElement.recipient?newElement.recipient.name:'не указан'
                                     }
@@ -324,26 +388,31 @@ const MoneyFlows = React.memo((props) => {
                                     }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 250}}>
-                                    <AutocomplectOnline
-                                        defaultValue={newElement.moneyArticle}
-                                        minLength={0}
-                                        element={newElement.moneyArticle}
-                                        error={!newElement.moneyArticle&&newElement.unsaved}
-                                        setElement={(moneyArticle)=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.moneyArticle = moneyArticle
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            return await getMoneyArticles({search})
-                                        }}
-                                        placeholder={'Статья'}
-                                    />
+                                    {
+                                        !filter.moneyArticle?
+                                            <AutocomplectOnline
+                                                defaultValue={newElement.moneyArticle}
+                                                minLength={0}
+                                                element={newElement.moneyArticle}
+                                                error={!newElement.moneyArticle&&newElement.unsaved}
+                                                setElement={(moneyArticle)=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    newElement.moneyArticle = moneyArticle
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    return await getMoneyArticles({search})
+                                                }}
+                                                placeholder={'Статья'}
+                                            />
+                                            :
+                                            newElement.moneyArticle.name
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 115}}>
                                     {
-                                        newElement.clientOperation?
+                                        newElement.clientOperation||filter.operation?
                                             newElement.operation
                                             :
                                             <Select className={classes.input} error={!newElement.operation&&newElement.unsaved} variant='standard' value={newElement.operation} onChange={(event) => {
@@ -369,17 +438,22 @@ const MoneyFlows = React.memo((props) => {
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
                                             newElement.amount = inputFloat(event.target.value)
+                                            newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
                                             setNewElement({...newElement})
                                         }}
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{width: 115}}>
                                     {
-                                        newElement.typeRecipient!=='Клиент'?
+                                        !filter.currency?
                                             <Select className={classes.input} error={!newElement.currency&&newElement.unsaved} variant='standard' value={newElement.currency} onChange={(event) => {
                                                 newElement.unsaved = true
                                                 unsaved.current['new'] = true
                                                 newElement.currency = event.target.value
+                                                if(event.target.value==='сом') {
+                                                    newElement.exchangeRate = 1
+                                                    newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
+                                                }
                                                 setNewElement({...newElement})
                                             }}>
                                                 {currencies.map((element)=>
@@ -389,6 +463,30 @@ const MoneyFlows = React.memo((props) => {
                                             :
                                             newElement.currency
                                     }
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100}}>
+                                    {
+                                        newElement.currency==='сом'?
+                                            newElement.exchangeRate
+                                            :
+                                            <Input
+                                                placeholder='Курс'
+                                                error={!newElement.exchangeRate&&newElement.unsaved}
+                                                variant='standard'
+                                                className={classes.input}
+                                                value={newElement.exchangeRate}
+                                                onChange={(event) => {
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    newElement.exchangeRate = inputFloat(event.target.value)
+                                                    newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
+                                                    setNewElement({...newElement})
+                                                }}
+                                            />
+                                    }
+                                </div>
+                                <div className={classes.tableCell} style={{width: 150}}>
+                                    {newElement.amountEnd}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 400}}>
                                     <Input
@@ -424,6 +522,8 @@ const MoneyFlows = React.memo((props) => {
                                                                 let res = await setMoneyFlow({
                                                                     _id: element._id,
                                                                     amount: checkFloat(element.amount),
+                                                                    exchangeRate: checkFloat(element.exchangeRate),
+                                                                    amountEnd: checkFloat(element.amountEnd),
                                                                     moneyArticle: element.moneyArticle._id,
                                                                     info: element.info
                                                                 })
@@ -432,6 +532,7 @@ const MoneyFlows = React.memo((props) => {
                                                                     list[idx].unsaved = false
                                                                     delete unsaved.current[list[idx]._id]
                                                                     setList([...list])
+                                                                    await getMoneyFlowsCountWithFilter();
                                                                 }
                                                                 else
                                                                     showSnackBar('Ошибка', 'error')
@@ -475,7 +576,7 @@ const MoneyFlows = React.memo((props) => {
                                                                     let _list = [...list]
                                                                     _list.splice(idx, 1)
                                                                     setList(_list)
-                                                                    setCount(--count)
+                                                                    await getMoneyFlowsCountWithFilter();
                                                                 }
                                                                 else
                                                                     showSnackBar('Ошибка', 'error')
@@ -507,7 +608,9 @@ const MoneyFlows = React.memo((props) => {
                                     element.cashbox.name
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{flexDirection: 'column', width: 200}} >
+                            <div className={classes.tableCell} style={{flexDirection: 'column', width: 200,
+                                color: !element.client&&!element.moneyRecipient&&!element.moneyRecipient&&!element.cashboxRecipient?'red':'black'
+                            }}>
                                 {
                                     element.client?
                                         <Link href='/client/[id]' as={`/client/${element.client._id}`}>
@@ -567,6 +670,17 @@ const MoneyFlows = React.memo((props) => {
                                         :
                                         null
                                 }
+                                {
+                                    data.edit?
+                                        <div style={{marginTop: 10, fontWeight: 450, color: '#183B37'}} onClick={()=>{
+                                            if(data.edit) {
+                                                setMiniDialog('Получатель', <SetRecipientE list={list} idx={idx} setList={setList}/>)
+                                                showMiniDialog(true)
+                                            }
+                                        }}>Изменить</div>
+                                        :
+                                        null
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 250}}>
                                 {
@@ -607,6 +721,7 @@ const MoneyFlows = React.memo((props) => {
                                                 list[idx].unsaved = true
                                                 unsaved.current[list[idx]._id] = true
                                                 list[idx].amount = inputFloat(event.target.value)
+                                                list[idx].amountEnd = checkFloat(element.amount * element.exchangeRate)
                                                 setList([...list])
                                             }}
                                         />
@@ -617,7 +732,31 @@ const MoneyFlows = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 115}}>
                                 {element.currency}
                             </div>
-                            <div className={classes.tableCell} style={{width: 400}}>
+                            <div className={classes.tableCell} style={{width: 100}}>
+                                {
+                                    element.currency==='сом'?
+                                        element.exchangeRate
+                                        :
+                                        <Input
+                                            placeholder='Курс'
+                                            error={!element.exchangeRate&&element.unsaved}
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.exchangeRate}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].exchangeRate = inputFloat(event.target.value)
+                                                list[idx].amountEnd = checkFloat(element.amount * element.exchangeRate)
+                                                setList([...list])
+                                            }}
+                                        />
+                                }
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150}}>
+                                {element.amountEnd}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 400, ...data.edit?{}:{maxHeight: 100, overflow: 'auto'}}}>
                                 {
                                     data.edit?
                                         <Input
@@ -642,9 +781,71 @@ const MoneyFlows = React.memo((props) => {
                     )}
                 </div>
             </Card>
-            <div className='count' style={{left: 10}}>
-                {`Всего: ${count}`}
-            </div>
+            {
+                count?
+                    <div className='count' style={{left: 10}} onClick={()=>{setShowStat(!showStat)}}>
+                        {`Всего: ${count[0][0]}`}<br/>
+                        {
+                            showStat?
+                                <>
+                                {`Приход: сом: ${count[1][0]}${count[1][1]!=0?` | доллар: ${count[1][1]}`:''}${count[1][2]!=0?` | рубль: ${count[1][2]}`:''}${count[1][3]!=0?` | тенге: ${count[1][3]}`:''}${count[1][4]!=0?` | юань: ${count[1][4]}`:''}`}<br/>
+                                {`Расход: сом: ${count[2][0]}${count[2][1]!=0?` | доллар: ${count[2][1]}`:''}${count[2][2]!=0?` | рубль: ${count[2][2]}`:''}${count[2][3]!=0?` | тенге: ${count[2][3]}`:''}${count[2][4]!=0?` | юань: ${count[2][4]}`:''}`}<br/>
+                                {
+                                    count[3]?
+                                        <>{count[3][0]}: сом: {count[3][1]}{count[3][2]?` | доллар: ${count[3][2]}`:''}{count[3][3]?` | рубль: ${count[3][3]}`:''}{count[3][4]?` | тенге: ${count[3][4]}`:''}{count[3][5]?` | юань: ${count[3][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[4]?
+                                        <>{count[4][0]}: сом: {count[4][1]}{count[4][2]?` | доллар: ${count[4][2]}`:''}{count[4][3]?` | рубль: ${count[4][3]}`:''}{count[4][4]?` | тенге: ${count[4][4]}`:''}{count[4][5]?` | юань: ${count[4][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[5]?
+                                        <>{count[5][0]}: сом: {count[5][1]}{count[5][2]?` | доллар: ${count[5][2]}`:''}{count[5][3]?` | рубль: ${count[5][3]}`:''}{count[5][4]?` | тенге: ${count[5][4]}`:''}{count[5][5]?` | юань: ${count[5][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[6]?
+                                        <>{count[6][0]}: сом: {count[6][1]}{count[6][2]?` | доллар: ${count[6][2]}`:''}{count[6][3]?` | рубль: ${count[6][3]}`:''}{count[6][4]?` | тенге: ${count[6][4]}`:''}{count[6][5]?` | юань: ${count[6][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[7]?
+                                        <>{count[7][0]}: сом: {count[7][1]}{count[7][2]?` | доллар: ${count[7][2]}`:''}{count[7][3]?` | рубль: ${count[7][3]}`:''}{count[7][4]?` | тенге: ${count[7][4]}`:''}{count[7][5]?` | юань: ${count[7][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[8]?
+                                        <>{count[8][0]}: сом: {count[8][1]}{count[8][2]?` | доллар: ${count[8][2]}`:''}{count[8][3]?` | рубль: ${count[8][3]}`:''}{count[8][4]?` | тенге: ${count[8][4]}`:''}{count[8][5]?` | юань: ${count[8][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[9]?
+                                        <>{count[9][0]}: сом: {count[9][1]}{count[9][2]?` | доллар: ${count[9][2]}`:''}{count[9][3]?` | рубль: ${count[9][3]}`:''}{count[9][4]?` | тенге: ${count[9][4]}`:''}{count[9][5]?` | юань: ${count[9][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                {
+                                    count[10]?
+                                        <>{count[10][0]}: сом: {count[10][1]}{count[10][2]?` | доллар: ${count[10][2]}`:''}{count[10][3]?` | рубль: ${count[10][3]}`:''}{count[10][4]?` | тенге: ${count[10][4]}`:''}{count[10][5]?` | юань: ${count[10][5]}`:''}<br/></>
+                                        :
+                                        null
+                                }
+                                </>
+                                :
+                                null
+                        }
+                    </div>
+                    :
+                    null
+            }
             {
                 data.add||data.edit?
                     <UnloadUpload upload={uploadMoneyFlow} uploadText={uploadText} unload={()=>getUnloadMoneyFlows({search})}/>
@@ -657,7 +858,7 @@ const MoneyFlows = React.memo((props) => {
 
 MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад', 'юрист'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

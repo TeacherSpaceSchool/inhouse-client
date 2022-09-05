@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
 import { checkFloat, inputFloat, inputInt } from '../../src/lib';
 import { getCpas } from '../../src/gql/cpa';
+import { getPromotions } from '../../src/gql/promotion';
 import { addOrder } from '../../src/gql/order';
 import { addReservation } from '../../src/gql/reservation';
 import { addInstallment } from '../../src/gql/installment';
@@ -39,6 +40,7 @@ const BuyBasket =  React.memo(
         let [date, setDate] = useState();
         let [geo, setGeo] = useState(client.geo);
         let [cpa, setCpa] = useState();
+        let [promotion, setPromotion] = useState();
         let [remainder, setRemainder] = useState(0);
         let [monthInstallment, setMonthInstallment] = useState('');
         let [paidInstallment, setPaidInstallment] = useState('');
@@ -264,7 +266,6 @@ const BuyBasket =  React.memo(
                     ['reservation', 'sale'].includes(type)?
                         <TextField
                             id='date'
-                            error={!date}
                             type='date'
                             variant='standard'
                             label={type==='sale'?'Доставка':'Срок'}
@@ -305,6 +306,17 @@ const BuyBasket =  React.memo(
                             value={addressInfo}
                             onChange={(event) => setAddressInfo(event.target.value)}
                             className={classes.input}
+                        />
+                        <AutocomplectOnline
+                            element={promotion}
+                            setElement={async (promotion)=>{
+                                setPromotion(promotion)
+                            }}
+                            getElements={async (search)=>{
+                                return await getPromotions({search})
+                            }}
+                            minLength={0}
+                            label={'Акция'}
                         />
                         <AutocomplectOnline
                             element={cpa}
@@ -355,117 +367,114 @@ const BuyBasket =  React.memo(
                 <div>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         if(paid>=0) {
-                            if (!['reservation', 'sale'].includes(type) || date) {
-                                showLoad(true)
-                                let res
-                                if (type === 'order')
-                                    res = await addOrder({
+                            showLoad(true)
+                            let res
+                            if (type === 'order')
+                                res = await addOrder({
+                                    client: client._id,
+                                    itemsOrder: items,
+                                    amount: checkFloat(amountEnd),
+                                    paid: checkFloat(paid),
+                                    typePayment,
+                                    comment,
+                                    currency
+                                })
+                            else if (type === 'reservation')
+                                res = await addReservation({
+                                    client: client._id,
+                                    term: date,
+                                    itemsReservation: items,
+                                    amount: checkFloat(amountEnd),
+                                    paid: checkFloat(paid),
+                                    typePayment,
+                                    comment,
+                                    currency
+                                })
+                            else if (type === 'refund')
+                                res = await addRefund({
+                                    client: client._id,
+                                    discount: checkFloat(amountStart - amountEnd),
+                                    itemsRefund: items,
+                                    amount: checkFloat(amountEnd),
+                                    comment,
+                                    currency,
+                                    sale
+                                })
+                            else if (type === 'sale') {
+                                paidInstallment = checkFloat(paidInstallment)
+                                monthInstallment = checkFloat(monthInstallment)
+                                paid = checkFloat(paid)
+                                amountEnd = checkFloat(amountEnd)
+                                if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
+                                    res = await addSale({
+                                        geo,
                                         client: client._id,
-                                        itemsOrder: items,
-                                        amount: checkFloat(amountEnd),
-                                        paid: checkFloat(paid),
-                                        typePayment,
-                                        comment,
-                                        currency
-                                    })
-                                else if (type === 'reservation')
-                                    res = await addReservation({
-                                        client: client._id,
-                                        term: date,
-                                        itemsReservation: items,
-                                        amount: checkFloat(amountEnd),
-                                        paid: checkFloat(paid),
-                                        typePayment,
-                                        comment,
-                                        currency
-                                    })
-                                else if (type === 'refund')
-                                    res = await addRefund({
-                                        client: client._id,
+                                        itemsSale: items,
                                         discount: checkFloat(amountStart - amountEnd),
-                                        itemsRefund: items,
-                                        amount: checkFloat(amountEnd),
+                                        cpa: cpa ? cpa._id : null,
+                                        promotion: promotion ? promotion._id : null,
+                                        percentCpa: checkFloat(percentCpa),
+                                        amountStart: checkFloat(amountStart),
+                                        amountEnd,
+                                        typePayment,
+                                        address,
+                                        addressInfo,
                                         comment,
                                         currency,
-                                        sale
+                                        paid: checkFloat(paid),
+                                        prepaid,
+                                        delivery: date,
+                                        orders: orders,
+                                        reservations: reservations
                                     })
-                                else if (type === 'sale') {
-                                    paidInstallment = checkFloat(paidInstallment)
-                                    monthInstallment = checkFloat(monthInstallment)
-                                    paid = checkFloat(paid)
-                                    amountEnd = checkFloat(amountEnd)
-                                    if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
-                                        res = await addSale({
-                                            geo,
-                                            client: client._id,
-                                            itemsSale: items,
-                                            discount: checkFloat(amountStart - amountEnd),
-                                            cpa: cpa ? cpa._id : null,
-                                            percentCpa: checkFloat(percentCpa),
-                                            amountStart: checkFloat(amountStart),
-                                            amountEnd,
-                                            typePayment,
-                                            address,
-                                            addressInfo,
-                                            comment,
-                                            currency,
-                                            paid: checkFloat(paid),
-                                            prepaid,
-                                            delivery: date,
-                                            orders: orders,
-                                            reservations: reservations
+                                    if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
+                                        const grid = []
+                                        let month = new Date()
+                                        month.setHours(0, 0, 0, 0)
+                                        grid.push({
+                                            month: new Date(month),
+                                            amount: paid,
+                                            paid: 0,
+                                            datePaid: month
                                         })
-                                        if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
-                                            const grid = []
-                                            let month = new Date()
-                                            month.setHours(0, 0, 0, 0)
+                                        month.setMonth(month.getMonth() + 1)
+                                        for (let i = 0; i < monthInstallment; i++) {
                                             grid.push({
                                                 month: new Date(month),
-                                                amount: paid,
                                                 paid: 0,
-                                                datePaid: month
+                                                amount: paidInstallment
                                             })
                                             month.setMonth(month.getMonth() + 1)
-                                            for (let i = 0; i < monthInstallment; i++) {
-                                                grid.push({
-                                                    month: new Date(month),
-                                                    paid: 0,
-                                                    amount: paidInstallment
-                                                })
-                                                month.setMonth(month.getMonth() + 1)
-                                            }
-                                            grid[grid.length-1].amount += remainder
-                                            let _res = await addInstallment({
-                                                renew,
-                                                grid,
-                                                debt: checkFloat(amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid)),
-                                                client: client._id,
-                                                amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
-                                                paid: 0,
-                                                sale: res,
-                                                datePaid: grid[0].month,
-                                                store: profile.store,
-                                                currency
-                                            })
-                                            if (!_res || _res._id === 'ERROR')
-                                                showSnackBar('Ошибка', 'error')
                                         }
+                                        grid[grid.length-1].amount += remainder
+                                        let _res = await addInstallment({
+                                            renew,
+                                            grid,
+                                            debt: checkFloat(amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid)),
+                                            client: client._id,
+                                            amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
+                                            paid: 0,
+                                            sale: res,
+                                            datePaid: grid[0].month,
+                                            store: profile.store,
+                                            currency
+                                        })
+                                        if (!_res || _res._id === 'ERROR')
+                                            showSnackBar('Ошибка', 'error')
                                     }
-                                    else
-                                        showSnackBar('Укажите рассрочку')
-                                }
-                                if (res && res !== 'ERROR') {
-                                    localStorage.basket = JSON.stringify({})
-                                    await endConsultation({})
-                                    showSnackBar('Успешно', 'success')
-                                    Router.push(`/${type}/${res}`)
                                 }
                                 else
-                                    showSnackBar('Ошибка', 'error')
-                                showLoad(false)
+                                    showSnackBar('Укажите рассрочку')
+                            }
+                            if (res && res !== 'ERROR') {
+                                localStorage.basket = JSON.stringify({})
+                                await endConsultation({})
+                                showSnackBar('Успешно', 'success')
+                                Router.push(`/${type}/${res}`)
                             }
                             else
-                                showSnackBar('Укажите дату')
+                                showSnackBar('Ошибка', 'error')
+                            showLoad(false)
                         }
                         else
                             showSnackBar('Укажите оплату')

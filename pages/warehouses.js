@@ -30,7 +30,7 @@ import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import Card from '@mui/material/Card';
 
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id склада (если требуется обновить);\nназвание;\n_id магазина.'
+const uploadText = 'Формат xlsx:\n_id или текущее название склада (если требуется обновить);\nназвание;\nназвание магазина.'
 
 const Warehouses = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -162,10 +162,12 @@ const Warehouses = React.memo((props) => {
                                         className={classes.input}
                                         value={newElement.name}
                                         onChange={(event) => {
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.name = event.target.value
-                                            setNewElement({...newElement})
+                                            if(!['Брак', 'Реставрация'].includes(event.target.value)) {
+                                                newElement.unsaved = true
+                                                unsaved.current['new'] = true
+                                                newElement.name = event.target.value
+                                                setNewElement({...newElement})
+                                            }
                                         }}
                                     />
                                 </div>
@@ -195,69 +197,74 @@ const Warehouses = React.memo((props) => {
                         {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
-                                    <IconButton onClick={(event)=>{
-                                            setMenuItems(
-                                                [
-                                                    <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
-                                                        if(element.name.length) {
-                                                            setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await setWarehouse({...element})
-                                                                if(res==='OK') {
-                                                                    showSnackBar('Успешно', 'success')
-                                                                    list[idx].unsaved = false
-                                                                    delete unsaved.current[list[idx]._id]
-                                                                    setList([...list])
+                                        {
+                                            !['Брак', 'Реставрация'].includes(element.name)?
+                                                <IconButton onClick={(event)=>{
+                                                    setMenuItems(
+                                                        [
+                                                            <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
+                                                                if(element.name.length) {
+                                                                    setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                                                        let res = await setWarehouse({...element})
+                                                                        if(res==='OK') {
+                                                                            showSnackBar('Успешно', 'success')
+                                                                            list[idx].unsaved = false
+                                                                            delete unsaved.current[list[idx]._id]
+                                                                            setList([...list])
+                                                                        }
+                                                                        else
+                                                                            showSnackBar('Ошибка', 'error')
+                                                                    }}/>)
+                                                                    showMiniDialog(true)
                                                                 }
                                                                 else
-                                                                    showSnackBar('Ошибка', 'error')
-                                                            }}/>)
-                                                            showMiniDialog(true)
-                                                        }
-                                                        else
-                                                            showSnackBar('Заполните все поля')
-                                                        handleCloseQuick()
-                                                    }}>
-                                                        <Badge color='secondary' variant='dot' invisible={!element.unsaved}>
-                                                            <Save sx={{color: '#0f0'}}/>&nbsp;Сохранить
-                                                        </Badge>
-                                                    </MenuItem>,
-                                                    <MenuItem sx={{marginBottom: '5px'}} key='MenuItem2' onClick={async()=>{
-                                                        setMiniDialog('История', <History where={element._id}/>)
-                                                        showMiniDialog(true)
-                                                        handleCloseQuick()
-                                                    }}>
-                                                        <HistoryIcon/>&nbsp;История
-                                                    </MenuItem>,
-                                                    data.deleted?
-                                                        <MenuItem key='MenuItem3' onClick={async()=>{
-                                                            setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await deleteWarehouse(element._id)
-                                                                if(res==='OK'){
-                                                                    showSnackBar('Успешно', 'success')
-                                                                    delete unsaved.current[list[idx]._id]
-                                                                    let _list = [...list]
-                                                                    _list.splice(idx, 1)
-                                                                    setList(_list)
-                                                                    setCount(--count)
-                                                                }
-                                                                else
-                                                                    showSnackBar('Ошибка', 'error')
-                                                            }}/>)
-                                                            showMiniDialog(true)
-                                                            handleCloseQuick()
-                                                        }}>
-                                                            <Delete sx={{color: 'red'}}/>&nbsp;Удалить
-                                                        </MenuItem>
-                                                        :
-                                                        null
-                                                ]
-                                            )
-                                            handleMenuQuick(event)
-                                        }}>
-                                            <Badge color='secondary' variant='dot' invisible={!element.unsaved}>
-                                                <MoreVert/>
-                                            </Badge>
-                                        </IconButton>
+                                                                    showSnackBar('Заполните все поля')
+                                                                handleCloseQuick()
+                                                            }}>
+                                                                <Badge color='secondary' variant='dot' invisible={!element.unsaved}>
+                                                                    <Save sx={{color: '#0f0'}}/>&nbsp;Сохранить
+                                                                </Badge>
+                                                            </MenuItem>,
+                                                            <MenuItem sx={{marginBottom: '5px'}} key='MenuItem2' onClick={async()=>{
+                                                                setMiniDialog('История', <History where={element._id}/>)
+                                                                showMiniDialog(true)
+                                                                handleCloseQuick()
+                                                            }}>
+                                                                <HistoryIcon/>&nbsp;История
+                                                            </MenuItem>,
+                                                            data.deleted?
+                                                                <MenuItem key='MenuItem3' onClick={async()=>{
+                                                                    setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                                                        let res = await deleteWarehouse(element._id)
+                                                                        if(res==='OK'){
+                                                                            showSnackBar('Успешно', 'success')
+                                                                            delete unsaved.current[list[idx]._id]
+                                                                            let _list = [...list]
+                                                                            _list.splice(idx, 1)
+                                                                            setList(_list)
+                                                                            setCount(--count)
+                                                                        }
+                                                                        else
+                                                                            showSnackBar('Ошибка', 'error')
+                                                                    }}/>)
+                                                                    showMiniDialog(true)
+                                                                    handleCloseQuick()
+                                                                }}>
+                                                                    <Delete sx={{color: 'red'}}/>&nbsp;Удалить
+                                                                </MenuItem>
+                                                                :
+                                                                null
+                                                        ]
+                                                    )
+                                                    handleMenuQuick(event)
+                                                }}>
+                                                    <Badge color='secondary' variant='dot' invisible={!element.unsaved}>
+                                                        <MoreVert/>
+                                                    </Badge>
+                                                </IconButton>
+                                                :
+                                                null
+                                        }
                                     </div>
                                     :
                                     null
@@ -272,10 +279,12 @@ const Warehouses = React.memo((props) => {
                                             className={classes.input}
                                             value={element.name}
                                             onChange={(event) => {
-                                                list[idx].unsaved = true
-                                                unsaved.current[list[idx]._id] = true
-                                                list[idx].name = event.target.value
-                                                setList([...list])
+                                                if(!['Брак', 'Реставрация'].includes(element.name)&&!['Брак', 'Реставрация'].includes(event.target.value)) {
+                                                    list[idx].unsaved = true
+                                                    unsaved.current[list[idx]._id] = true
+                                                    list[idx].name = event.target.value
+                                                    setList([...list])
+                                                }
                                             }}
                                         />
                                         :

@@ -49,6 +49,7 @@ const Sales = React.memo((props) => {
             ...filter.date?{date: filter.date}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
+            ...filter.promotion?{promotion: filter.promotion}:{},
         })));
         setCount(await getSalesCount({
             ...filter.store?{store: filter.store._id}:{},
@@ -58,6 +59,7 @@ const Sales = React.memo((props) => {
             ...filter.date?{date: filter.date}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
+            ...filter.promotion?{promotion: filter.promotion}:{},
             search
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
@@ -101,6 +103,7 @@ const Sales = React.memo((props) => {
                 ...filter.date?{date: filter.date}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
+                ...filter.promotion?{promotion: filter.promotion}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -110,7 +113,7 @@ const Sales = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, user: true, client: true, cpa: true, date: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
+        <App filterShow={{status, promotion: true, user: true, client: true, cpa: true, date: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
                 <title>Продажи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -154,8 +157,8 @@ const Sales = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                                     {element.number}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', color: ['обработка'].includes(element.status)&&new Date(element.delivery)<today?'red':'black'}}>
-                                    {pdDDMMYYYY(element.delivery)}
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
+                                    {element.delivery?pdDDMMYYYY(element.delivery):'Самовывоз'}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 300px) / 2)', justifyContent: 'start'}}>
                                     {element.manager.name}
@@ -210,6 +213,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
+                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getSalesCount({
@@ -221,6 +225,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
+                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

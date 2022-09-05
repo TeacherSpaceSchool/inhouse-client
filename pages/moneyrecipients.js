@@ -27,7 +27,7 @@ import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id получателя денег (если требуется обновить);\nназвание.'
+const uploadText = 'Формат xlsx:\n_id или текущее название получателя денег (если требуется обновить);\nназвание.'
 
 const MoneyRecipients = React.memo((props) => {
     const {classes} = pageListStyle();

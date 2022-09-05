@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getCategorys, getCategorysCount, addCategory, setCategory, deleteCategory, getUnloadCategorys, uploadCategory} from '../src/gql/category'
+import {getPromotions, getPromotionsCount, addPromotion, setPromotion, deletePromotion, getUnloadPromotions, uploadPromotion} from '../src/gql/promotion'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -14,6 +14,7 @@ import initialApp from '../src/initialApp'
 import * as snackbarActions from '../src/redux/actions/snackbar'
 import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
+import Card from '@mui/material/Card';
 import Input from '@mui/material/Input';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
@@ -25,11 +26,10 @@ import Confirmation from '../components/dialog/Confirmation'
 import Badge from '@mui/material/Badge'
 import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
-import Card from '@mui/material/Card';
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id или текущее название категории (если требуется обновить);\nназвание.'
+const uploadText = 'Формат xlsx:\n_id или текущее название акции (если требуется обновить);\nназвание.'
 
-const Category = React.memo((props) => {
+const Promotions = React.memo((props) => {
     const {classes} = pageListStyle();
     //props
     const { data } = props;
@@ -37,8 +37,8 @@ const Category = React.memo((props) => {
     const { showSnackBar } = props.snackbarActions;
     const { search } = props.app;
     //настройка
-    const unsaved = useRef({});
     const initialRender = useRef(true);
+    const unsaved = useRef({});
     let [newElement, setNewElement] = useState({
         name: ''
     });
@@ -46,13 +46,14 @@ const Category = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
-        setList(cloneObject(await getCategorys({search, skip: 0})));
-        setCount(await getCategorysCount({search}));
+        setList(cloneObject(await getPromotions({search, skip: 0})));
+        setCount(await getPromotionsCount({search}));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
+        unsaved.current = {}
     }
-    //поиск
+    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -69,7 +70,7 @@ const Category = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getCategorys({skip: list.length, search}))
+            let addedList = cloneObject(await getPromotions({skip: list.length, search}))
             if(addedList.length>0)
                 setList([...list, ...addedList])
             else
@@ -83,16 +84,16 @@ const Category = React.memo((props) => {
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
     return (
-        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Категории' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App checkPagination={checkPagination} unsaved={unsaved} searchShow={true} pageName='Акции' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
-                <title>Категории</title>
+                <title>Акции</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content='Категории' />
+                <meta property='og:title' content='Акции' />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
-                <meta property='og:url' content={`${urlMain}/categories`} />
-                <link rel='canonical' href={`${urlMain}/categories`}/>
+                <meta property='og:url' content={`${urlMain}/promotions`} />
+                <link rel='canonical' href={`${urlMain}/promotions`}/>
             </Head>
             <Card className={classes.page}>
                 <div className={classes.table}>
@@ -106,20 +107,20 @@ const Category = React.memo((props) => {
                         data.add?
                             <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
-                                    <IconButton onClick={(event)=>{
+                                <IconButton onClick={(event)=>{
                                         setMenuItems(
                                             <MenuItem onClick={()=>{
                                                 if(newElement.name) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
-                                                        let res = await addCategory(newElement)
+                                                        let res = await addPromotion(newElement)
                                                         if(res&&res._id!=='ERROR') {
                                                             showSnackBar('Успешно', 'success')
                                                             setList([res, ...list])
                                                             setNewElement({
                                                                 name: ''
                                                             })
-                                                            delete unsaved.current['new']
                                                             setCount(++count)
+                                                            delete unsaved.current['new']
                                                         }
                                                         else
                                                             showSnackBar('Ошибка', 'error')
@@ -131,7 +132,7 @@ const Category = React.memo((props) => {
                                                 handleCloseQuick()
                                             }}>
                                                 <Badge color='secondary' variant='dot' invisible={!newElement.unsaved}>
-                                                    <Add style={{color: '#00ff00'}}/>&nbsp;Добавить
+                                                    <Add sx={{color: '#00ff00'}}/>&nbsp;Добавить
                                                 </Badge>
                                             </MenuItem>
                                         )
@@ -143,15 +144,15 @@ const Category = React.memo((props) => {
                                     </IconButton>
                                 </div>
                                 <div className={classes.tableCell} style={{width: data.edit?'calc(100% - 40px)':'100%'}}>
-                                    <Input
-                                        placeholder='Название'
-                                        error={!newElement.name.length&&newElement.unsaved}
+                                <Input
+                                    placeholder='Название'
+                                        error={!newElement.name&&newElement.unsaved}
                                         variant='standard'
                                         className={classes.input}
                                         value={newElement.name}
                                         onChange={(event) => {
-                                            newElement.unsaved = true
                                             unsaved.current['new'] = true
+                                            newElement.unsaved = true
                                             newElement.name = event.target.value
                                             setNewElement({...newElement})
                                         }}
@@ -163,16 +164,16 @@ const Category = React.memo((props) => {
                     }
                     {list.map((element, idx) =>
                         <div className={classes.tableRow} key={element._id}>
-                            {
+                        {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
-                                        <IconButton onClick={(event)=>{
+                                    <IconButton onClick={(event)=>{
                                             setMenuItems(
                                                 [
-                                                    <MenuItem style={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
+                                                    <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
                                                         if(element.name) {
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await setCategory(element)
+                                                                let res = await setPromotion(element)
                                                                 if(res==='OK') {
                                                                     showSnackBar('Успешно', 'success')
                                                                     list[idx].unsaved = false
@@ -189,10 +190,10 @@ const Category = React.memo((props) => {
                                                         handleCloseQuick()
                                                     }}>
                                                         <Badge color='secondary' variant='dot' invisible={!element.unsaved}>
-                                                            <Save style={{color: '#0f0'}}/>&nbsp;Сохранить
+                                                            <Save sx={{color: '#0f0'}}/>&nbsp;Сохранить
                                                         </Badge>
                                                     </MenuItem>,
-                                                    <MenuItem style={{marginBottom: '5px'}} key='MenuItem2' onClick={async()=>{
+                                                    <MenuItem sx={{marginBottom: '5px'}} key='MenuItem2' onClick={async()=>{
                                                         setMiniDialog('История', <History where={element._id}/>)
                                                         showMiniDialog(true)
                                                         handleCloseQuick()
@@ -202,13 +203,16 @@ const Category = React.memo((props) => {
                                                     data.deleted?
                                                         <MenuItem key='MenuItem3' onClick={async()=>{
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await deleteCategory(element._id)
+                                                                let res = await deletePromotion(element._id)
                                                                 if(res==='OK'){
                                                                     showSnackBar('Успешно', 'success')
+                                                                    delete unsaved.current[list[idx]._id]
                                                                     let _list = [...list]
                                                                     _list.splice(idx, 1)
                                                                     setList(_list)
                                                                     setCount(--count)
+                                                                    if(unsaved.current[list[idx]._id])
+                                                                        delete unsaved.current[list[idx]._id]
                                                                 }
                                                                 else
                                                                     showSnackBar('Ошибка', 'error')
@@ -216,7 +220,7 @@ const Category = React.memo((props) => {
                                                             showMiniDialog(true)
                                                             handleCloseQuick()
                                                         }}>
-                                                            <Delete style={{color: 'red'}}/>&nbsp;Удалить
+                                                            <Delete sx={{color: 'red'}}/>&nbsp;Удалить
                                                         </MenuItem>
                                                         :
                                                         null
@@ -233,7 +237,7 @@ const Category = React.memo((props) => {
                                     null
                             }
                             <div className={classes.tableCell} style={{width: data.edit?'calc(100% - 40px)':'100%', maxHeight: 100, overflow: 'auto'}}>
-                                {
+                            {
                                     data.edit?
                                         <Input
                                             placeholder='Название'
@@ -242,8 +246,10 @@ const Category = React.memo((props) => {
                                             className={classes.input}
                                             value={element.name}
                                             onChange={(event) => {
-                                                list[idx].unsaved = true
-                                                unsaved.current[list[idx]._id] = true
+                                                if(!list[idx].unsaved) {
+                                                    unsaved.current[list[idx]._id] = true
+                                                    list[idx].unsaved = true
+                                                }
                                                 list[idx].name = event.target.value
                                                 setList([...list])
                                             }}
@@ -261,7 +267,7 @@ const Category = React.memo((props) => {
             </div>
             {
                 data.add||data.edit?
-                    <UnloadUpload upload={uploadCategory} uploadText={uploadText} unload={()=>getUnloadCategorys({search})}/>
+                    <UnloadUpload upload={uploadPromotion} uploadText={uploadText} unload={()=>getUnloadPromotions({search})}/>
                     :
                     null
             }
@@ -269,9 +275,9 @@ const Category = React.memo((props) => {
     )
 })
 
-Category.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
+Promotions.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin',  'завсклад',  'менеджер/завсклад',  'управляющий'].includes(store.getState().user.profile.role))
+    if(!['admin',  'управляющий'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -283,11 +289,11 @@ Category.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         }
     return {
         data: {
-            edit: store.getState().user.profile.edit&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
-            add: store.getState().user.profile.add&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
-            deleted: store.getState().user.profile.deleted&&['admin',  'завсклад',  'менеджер/завсклад'].includes(store.getState().user.profile.role),
-            list: cloneObject(await getCategorys({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getCategorysCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
+            add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
+            deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
+            list: cloneObject(await getPromotions({skip: 0},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getPromotionsCount({}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })
@@ -305,4 +311,4 @@ function mapDispatchToProps(dispatch) {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Category);
+export default connect(mapStateToProps, mapDispatchToProps)(Promotions);

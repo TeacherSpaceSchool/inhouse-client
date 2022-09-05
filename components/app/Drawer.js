@@ -19,6 +19,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import HelpIcon from '@mui/icons-material/Help';
 import ArticleIcon from '@mui/icons-material/Article';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -39,22 +40,34 @@ const MyDrawer = React.memo((props) => {
     const router = useRouter();
     const variant = isMobileApp||full?'temporary' : 'permanent';
     let [uncover, setUncover] = useState(
-        router.pathname.includes('categories')||router.pathname.includes('typecharacteristics')||router.pathname.includes('characteristics')||router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||router.pathname.includes('warehouses')||router.pathname.includes('factorys')||router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||router.pathname.includes('cpa')||router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||router.pathname.includes('user')?
+        ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
+        router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
+        router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
+        router.pathname.includes('cpa')||
+        router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||
+        router.pathname.includes('user')?
             'Данные'
             :
-            router.pathname.includes('refund')||router.pathname.includes('order')||router.pathname.includes('reservation')||router.pathname.includes('sale')||router.pathname.includes('wayitems')?
+            ['/wayitems'].includes(router.pathname)||
+            router.pathname.includes('refund')||
+            router.pathname.includes('order')||
+            router.pathname.includes('reservation')||
+            router.pathname.includes('sale')?
                 'Операции'
                 :
-                router.pathname.includes('bonusmanagers')||router.pathname.includes('balanceclients')||router.pathname.includes('salarys')||router.pathname.includes('moneyflows')||router.pathname.includes('installments')||router.pathname.includes('moneyrecipients')||router.pathname.includes('moneyarticles')||router.pathname.includes('cashboxes')||router.pathname.includes('doc')?
+                ['/bonusmanagers', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
                     'Бухгалтерия'
                     :
-                    router.pathname.includes('/consultations')||router.pathname==='/balanceitems'||router.pathname==='/storebalanceitems'?
+                    ['/consultations', '/statisticcpa'].includes(router.pathname)?
                         'Статистика'
                         :
-                        router.pathname==='/errors'?
-                            'Инструменты'
+                        ['/balanceitems', '/storebalanceitems', '/warehouses'].includes(router.pathname)?
+                            'Склад'
                             :
-                            ''
+                            ['/errors'].includes(router.pathname)?
+                                'Инструменты'
+                                :
+                                ''
     );
     const handleUncover = (item)=>{
         if(uncover===item) item = ''
@@ -102,7 +115,18 @@ const MyDrawer = React.memo((props) => {
                 {
                     ['admin', 'менеджер', 'завсклад', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname.includes('categories')||router.pathname.includes('typecharacteristics')||router.pathname.includes('characteristics')||router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||router.pathname.includes('warehouses')||router.pathname.includes('factorys')||router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||router.pathname.includes('cpa')||router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||router.pathname.includes('user')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Данные');}}>
+                        <ListItem style={{
+                            background:
+                                ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
+                                router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
+                                router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
+                                router.pathname.includes('cpa')||
+                                router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('wayitems')||
+                                router.pathname.includes('user')?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Данные');}}>
                             <ListItemIcon><DashboardIcon color='inherit'/></ListItemIcon>
                             <ListItemText primary='Данные' />
                             <ListItemIcon>{uncover==='Данные'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
@@ -125,23 +149,6 @@ const MyDrawer = React.memo((props) => {
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
                                     <ListItemText primary='Магазины' />
-                                </ListItem>
-                                <Divider/>
-                                </>
-                                :
-                                null
-                        }
-                        {
-                            ['admin', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
-                                <>
-                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('warehouse')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
-                                    showDrawer(false)
-                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                        Router.push('/warehouses')
-                                    else
-                                        showSnackBar('Сохраните изменения или обновите страницу')
-                                }}>
-                                    <ListItemText primary='Склады' />
                                 </ListItem>
                                 <Divider/>
                                 </>
@@ -284,12 +291,39 @@ const MyDrawer = React.memo((props) => {
                                 :
                                 null
                         }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/promotions'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/promotions')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Акции' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
                     </List>
                 </Collapse>
                 {
                     ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'доставщик', 'завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname.includes('refund')||router.pathname.includes('order')||router.pathname.includes('reservation')||router.pathname.includes('sale')||router.pathname.includes('wayitems')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Операции');}}>
+                        <ListItem style={{
+                            background:
+                                ['/wayitems'].includes(router.pathname)||
+                                router.pathname.includes('refund')||
+                                router.pathname.includes('order')||
+                                router.pathname.includes('reservation')||
+                                router.pathname.includes('sale')?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Операции');}}>
                             <ListItemIcon><ReceiptIcon color='inherit'/></ListItemIcon>
                             <ListItemText primary='Операции' />
                             <ListItemIcon>{uncover==='Операции'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
@@ -391,7 +425,13 @@ const MyDrawer = React.memo((props) => {
                 {
                     ['admin', 'управляющий', 'кассир', 'менеджер', 'менеджер/завсклад', 'юрист'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname.includes('bonusmanagers')||router.pathname.includes('balanceclients')||router.pathname.includes('salarys')||router.pathname.includes('moneyflows')||router.pathname.includes('installments')||router.pathname.includes('moneyrecipients')||router.pathname.includes('moneyarticles')||router.pathname.includes('cashboxes')||router.pathname.includes('doc')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Бухгалтерия');}}>
+                        <ListItem style={{
+                            background:
+                                ['/bonusmanagers', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Бухгалтерия');}}>
                             <ListItemIcon><TableViewIcon color='inherit'/></ListItemIcon>
                             <ListItemText primary='Бухгалтерия' />
                             <ListItemIcon>{uncover==='Бухгалтерия'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
@@ -472,7 +512,7 @@ const MyDrawer = React.memo((props) => {
                                 null
                         }
                         {
-                            ['admin', 'управляющий', 'кассир'].includes(profile.role)?
+                            ['admin', 'управляющий', 'кассир', 'юрист'].includes(profile.role)?
                                 <>
                                 <ListItem style={{marginLeft: 16, background: router.pathname==='/moneyflows'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)
@@ -561,18 +601,41 @@ const MyDrawer = React.memo((props) => {
                 {
                     ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname.includes('/consultations')||router.pathname==='/balanceitems'||router.pathname==='/storebalanceitems'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Статистика');}}>
-                            <ListItemIcon><TimelineIcon color='inherit'/></ListItemIcon>
-                            <ListItemText primary='Статистика' />
-                            <ListItemIcon>{uncover==='Статистика'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
+                        <ListItem style={{
+                            background:
+                                ['/balanceitems', '/storebalanceitems', '/warehouses'].includes(router.pathname)?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Склад');}}>
+                            <ListItemIcon><WarehouseIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Склад' />
+                            <ListItemIcon>{uncover==='Склад'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
                         </ListItem>
                         <Divider/>
                         </>
                         :
                         null
                 }
-                <Collapse in={uncover==='Статистика'} timeout='auto' unmountOnExit>
+                <Collapse in={uncover==='Склад'} timeout='auto' unmountOnExit>
                     <List component='div' disablePadding>
+                        {
+                            ['admin', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('warehouse')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/warehouses')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Склады' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
                         {
                             ['admin', 'менеджер', 'менеджер/завсклад', 'управляющий', 'завсклад'].includes(profile.role)?
                                 <>
@@ -607,6 +670,29 @@ const MyDrawer = React.memo((props) => {
                                 :
                                 null
                         }
+                    </List>
+                </Collapse>
+                {
+                    ['admin', 'управляющий'].includes(profile.role)?
+                        <>
+                        <ListItem style={{
+                            background:
+                                ['/consultations', '/statisticcpa'].includes(router.pathname)?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Статистика');}}>
+                            <ListItemIcon><TimelineIcon color='inherit'/></ListItemIcon>
+                            <ListItemText primary='Статистика' />
+                            <ListItemIcon>{uncover==='Статистика'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>
+                        </ListItem>
+                        <Divider/>
+                        </>
+                        :
+                        null
+                }
+                <Collapse in={uncover==='Статистика'} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding>
                         {
                             ['admin', 'управляющий'].includes(profile.role)?
                                 <>
@@ -624,12 +710,35 @@ const MyDrawer = React.memo((props) => {
                                 :
                                 null
                         }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname==='/statisticcpa'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/statisticcpa')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Статистика партнеров' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
                     </List>
                 </Collapse>
                 {
                     'admin'===profile.role?
                         <>
-                        <ListItem style={{background: router.pathname==='/errors'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{handleUncover('Инструменты');}}>
+                        <ListItem style={{
+                            background:
+                                ['/errors'].includes(router.pathname)?
+                                    'rgba(24, 59, 55, .1)'
+                                    :
+                                    '#ffffff'
+                        }} button onClick={()=>{handleUncover('Инструменты');}}>
                             <ListItemIcon><SettingsIcon color='inherit'/></ListItemIcon>
                             <ListItemText primary='Инструменты' />
                             <ListItemIcon>{uncover==='Инструменты'?<UnfoldMoreIcon color='inherit'/>:<UnfoldLessIcon color='inherit'/>}</ListItemIcon>

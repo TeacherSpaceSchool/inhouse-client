@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import { getUsers } from '../../src/gql/user'
 import { getMoneyRecipients } from '../../src/gql/moneyRecipient'
-import { getBalanceClients } from '../../src/gql/balanceClient'
+import { setMoneyFlow } from '../../src/gql/moneyFlow'
 import { getClients } from '../../src/gql/client'
 import { getCashboxes } from '../../src/gql/cashbox'
 import { getOrders } from '../../src/gql/order'
@@ -20,24 +20,27 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import {pdDDMMYY, checkFloat} from '../../src/lib';
-import AddClient from './AddClient';
+import Confirmation from './Confirmation'
+import * as snackbarActions from '../../src/redux/actions/snackbar'
+import { getBalanceClients } from '../../src/gql/balanceClient'
 
 const types = ['Клиент', 'Сотрудник', 'Касса', 'Получатель денег']
-const typesClientOperation = ['Продажа', 'На заказ', 'Бронь', 'Возврат', 'Рассрочка']
+const typesClientOperationPrihod = ['Продажа', 'На заказ', 'Бронь', 'Рассрочка']
+const typesClientOperationRashod = ['Возврат']
 
-const SetRecipient =  React.memo(
+const SetRecipientE =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { newElement, setNewElement, unsaved, defaultMoneyArticle } = props;
+        const { list, idx, setList } = props;
         const { filter, isMobileApp } = props.app;
-        const { showMiniDialog } = props.mini_dialogActions;
-        const { profile } = props.user;
-        let [type, setType] = useState(newElement.typeRecipient);
-        let [recipient, setRecipient] = useState(newElement.recipient);
-        let [clientOperation, setClientOperation] = useState(newElement.clientOperation);
+        const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
+        const { showSnackBar } = props.snackbarActions;
         let [clientBalance, setClientBalance] = useState();
-        let [typeClientOperation, setTypeClientOperation] = useState(newElement.typeClientOperation);
-        let [installmentMonthes, setInstallmentMonthes] = useState(newElement.installmentMonthes);
+        let [type, setType] = useState();
+        let [recipient, setRecipient] = useState();
+        let [clientOperation, setClientOperation] = useState();
+        let [typeClientOperation, setTypeClientOperation] = useState();
+        let [installmentMonthes, setInstallmentMonthes] = useState();
         let [installmentMonth, setInstallmentMonth] = useState(null);
         const width = isMobileApp? (window.innerWidth-113) : 500
         return (
@@ -46,27 +49,12 @@ const SetRecipient =  React.memo(
                 <FormControl className={classes.input}>
                     <InputLabel>Тип</InputLabel>
                     <Select variant='standard' value={type} onChange={(event) => {
-                        newElement.unsaved = true
-                        unsaved.current['new'] = true
-                        newElement.typeRecipient = event.target.value
-                        setType(event.target.value)
-                        newElement.recipient = null
-                        setRecipient(null)
                         setClientBalance(null)
-                        newElement.installment = null
-                        newElement.clientOperation = null
+                        setType(event.target.value)
+                        setRecipient(null)
                         setClientOperation(null)
-                        newElement.installmentMonth = null
                         setInstallmentMonth(null)
-                        newElement.installmentMonthes = null
                         setInstallmentMonthes(null)
-
-                        if(event.target.value==='Сотрудник')
-                            newElement.moneyArticle = defaultMoneyArticle['Зарплата']
-                        else
-                            newElement.moneyArticle = defaultMoneyArticle['Не указано']
-
-                        setNewElement({...newElement})
                     }}>
                         {types.map((element)=>
                             <MenuItem key={element} value={element}>{element}</MenuItem>
@@ -79,11 +67,7 @@ const SetRecipient =  React.memo(
                             error={!recipient}
                             element={recipient}
                             setElement={(recipient)=>{
-                                newElement.unsaved = true
-                                unsaved.current['new'] = true
-                                newElement.recipient = recipient
                                 setRecipient(recipient)
-                                setNewElement({...newElement})
                             }}
                             defaultValue={recipient}
                             getElements={async (search)=>{
@@ -101,11 +85,7 @@ const SetRecipient =  React.memo(
                             error={!recipient}
                             element={recipient}
                             setElement={(recipient)=>{
-                                newElement.unsaved = true
-                                unsaved.current['new'] = true
-                                newElement.recipient = recipient
                                 setRecipient(recipient)
-                                setNewElement({...newElement})
                             }}
                             defaultValue={recipient}
                             getElements={async (search)=>{
@@ -124,18 +104,10 @@ const SetRecipient =  React.memo(
                             error={!recipient}
                             element={recipient}
                             setElement={async (recipient)=>{
-                                newElement.unsaved = true
-                                unsaved.current['new'] = true
-                                newElement.recipient = recipient
                                 setRecipient(recipient)
-                                newElement.installment = null
-                                newElement.clientOperation = null
                                 setClientOperation(null)
-                                newElement.installmentMonth = null
                                 setInstallmentMonth(null)
-                                newElement.installmentMonthes = null
                                 setInstallmentMonthes(null)
-                                setNewElement({...newElement})
                                 if(recipient) {
                                     clientBalance = await getBalanceClients({client: recipient._id})
                                     setClientBalance(clientBalance?clientBalance[0]:null)
@@ -149,20 +121,6 @@ const SetRecipient =  React.memo(
                             }}
                             minLength={0}
                             label={type}
-                            dialogAddElement={profile.add?(setElement, setInputValue, value)=>{return <AddClient setClient={(recipient)=>{
-                                newElement.unsaved = true
-                                unsaved.current['new'] = true
-                                newElement.recipient = recipient
-                                setRecipient(recipient)
-                                newElement.installment = null
-                                newElement.clientOperation = null
-                                setClientOperation(null)
-                                newElement.installmentMonth = null
-                                setInstallmentMonth(null)
-                                newElement.installmentMonthes = null
-                                setInstallmentMonthes(null)
-                                setNewElement({...newElement})
-                            }} value={value}/>}:null}
                         />
                         {
                             clientBalance!=undefined?
@@ -183,20 +141,12 @@ const SetRecipient =  React.memo(
                                 <FormControl className={classes.input}>
                                     <InputLabel>Тип операции</InputLabel>
                                     <Select variant='standard' value={typeClientOperation} onChange={(event) => {
-                                        newElement.unsaved = true
-                                        unsaved.current['new'] = true
-                                        newElement.typeClientOperation = event.target.value
                                         setTypeClientOperation(event.target.value)
-                                        newElement.installment = null
-                                        newElement.clientOperation = null
                                         setClientOperation(null)
-                                        newElement.installmentMonth = null
                                         setInstallmentMonth(null)
-                                        newElement.installmentMonthes = null
                                         setInstallmentMonthes(null)
-                                        setNewElement({...newElement})
                                     }}>
-                                        {typesClientOperation.map((element)=>
+                                        {(list[idx].operation==='расход'?typesClientOperationRashod:typesClientOperationPrihod).map((element)=>
                                             <MenuItem key={element} value={element}>{element}</MenuItem>
                                         )}
                                     </Select>
@@ -206,19 +156,7 @@ const SetRecipient =  React.memo(
                                         <AutocomplectOnline
                                             element={clientOperation}
                                             setElement={(clientOperation)=>{
-                                                newElement.unsaved = true
-                                                unsaved.current['new'] = true
-                                                newElement.clientOperation = clientOperation
-                                                newElement.operation = 'приход'
-                                                if(clientOperation) {
-                                                    newElement.amount = clientOperation.paid
-                                                    newElement.installment = clientOperation.installment
-                                                } else {
-                                                    newElement.amount = ''
-                                                    newElement.installment = null
-                                                }
                                                 setClientOperation(clientOperation)
-                                                setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
@@ -235,16 +173,7 @@ const SetRecipient =  React.memo(
                                         <AutocomplectOnline
                                             element={clientOperation}
                                             setElement={(clientOperation)=>{
-                                                newElement.unsaved = true
-                                                unsaved.current['new'] = true
-                                                newElement.clientOperation = clientOperation
-                                                newElement.operation = 'приход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
-                                                else
-                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
-                                                setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
@@ -261,16 +190,7 @@ const SetRecipient =  React.memo(
                                         <AutocomplectOnline
                                             element={clientOperation}
                                             setElement={(clientOperation)=>{
-                                                newElement.unsaved = true
-                                                unsaved.current['new'] = true
-                                                newElement.clientOperation = clientOperation
-                                                newElement.operation = 'приход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
-                                                else
-                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
-                                                setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
@@ -287,16 +207,7 @@ const SetRecipient =  React.memo(
                                         <AutocomplectOnline
                                             element={clientOperation}
                                             setElement={(clientOperation)=>{
-                                                newElement.unsaved = true
-                                                unsaved.current['new'] = true
-                                                newElement.clientOperation = clientOperation
-                                                newElement.operation = 'расход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
-                                                else
-                                                    newElement.amount = ''
                                                 setClientOperation(clientOperation)
-                                                setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
@@ -314,12 +225,7 @@ const SetRecipient =  React.memo(
                                         <AutocomplectOnline
                                             element={clientOperation}
                                             setElement={(clientOperation)=>{
-                                                newElement.unsaved = true
-                                                unsaved.current['new'] = true
-                                                newElement.clientOperation = clientOperation
-                                                newElement.operation = 'приход'
                                                 setClientOperation(clientOperation)
-                                                newElement.installmentMonth = null
                                                 setInstallmentMonth(null)
                                                 if(clientOperation) {
                                                     if(clientOperation.sale)
@@ -330,14 +236,11 @@ const SetRecipient =  React.memo(
                                                             installmentMonthes.push(clientOperation.grid[i]);
                                                         }
                                                     }
-                                                    newElement.installmentMonthes = installmentMonthes
                                                     setInstallmentMonthes(installmentMonthes)
                                                 }
                                                 else {
-                                                    newElement.installmentMonthes = null
                                                     setInstallmentMonthes(null)
                                                 }
-                                                setNewElement({...newElement})
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
@@ -354,12 +257,7 @@ const SetRecipient =  React.memo(
                                                 <FormControl className={classes.input}>
                                                     <InputLabel>Месяц</InputLabel>
                                                     <Select error={!installmentMonth} variant='standard' value={installmentMonth} onChange={(event) => {
-                                                        newElement.unsaved = true
-                                                        unsaved.current['new'] = true
-                                                        newElement.installmentMonth = event.target.value.month
-                                                        newElement.amount = event.target.value.amount
                                                         setInstallmentMonth(event.target.value)
-                                                        setNewElement({...newElement})
                                                     }}>
                                                         {installmentMonthes.map((element)=>
                                                             <MenuItem key={element.month} value={element}>{pdDDMMYY(element.month)}({checkFloat(element.paid)}/{element.amount})</MenuItem>
@@ -387,11 +285,7 @@ const SetRecipient =  React.memo(
                             error={!recipient}
                             element={recipient}
                             setElement={(recipient)=>{
-                                newElement.unsaved = true
-                                unsaved.current['new'] = true
-                                newElement.recipient = recipient
                                 setRecipient(recipient)
-                                setNewElement({...newElement})
                             }}
                             defaultValue={recipient}
                             getElements={async (search)=>{
@@ -405,8 +299,54 @@ const SetRecipient =  React.memo(
                 }
                 <br/>
                 <div>
-                    <Button variant='contained' color='primary' onClick={async()=>showMiniDialog(false)} className={classes.button}>
+                    <Button variant='contained' color='primary' onClick={async()=>{
+                        setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                            let res = await setMoneyFlow({
+                                _id: list[idx]._id,
+                                client: type==='Клиент'&&recipient?recipient._id:null,
+                                employment: type==='Сотрудник'&&recipient?recipient._id:null,
+                                cashboxRecipient: type==='Касса'&&recipient?recipient._id:null,
+                                moneyRecipient: type==='Получатель денег'&&recipient?recipient._id:null,
+                                clearRecipient: !recipient,
+                                ...clientOperation&&typeClientOperation==='Продажа'?{sale: clientOperation._id}:{},
+                                ...clientOperation&&typeClientOperation==='На заказ'?{order: clientOperation._id}:{},
+                                ...clientOperation&&typeClientOperation==='Бронь'?{reservation: clientOperation._id}:{},
+                                ...clientOperation&&typeClientOperation==='Возврат'?{refund: clientOperation._id}:{},
+                                ...clientOperation&&typeClientOperation==='Рассрочка'&&installmentMonth?{
+                                    installment: clientOperation._id, 
+                                    installmentMonth
+                                }:{},
+                            })
+                            if(res==='OK') {
+                                showSnackBar('Успешно', 'success')
+
+                                if(!recipient) list[idx].client = null
+                                else if(type==='Клиент'&&recipient) list[idx].client = recipient
+                                else if(type==='Сотрудник'&&recipient) list[idx].employment = recipient
+                                else if(type==='Касса'&&recipient) list[idx].cashboxRecipient = recipient
+                                else if(type==='Получатель денег'&&recipient) list[idx].moneyRecipient = recipient
+
+                                if(clientOperation&&typeClientOperation==='Продажа') list[idx].sale = clientOperation
+                                else if(clientOperation&&typeClientOperation==='На заказ') list[idx].order = clientOperation
+                                else if(clientOperation&&typeClientOperation==='Бронь') list[idx].reservation = clientOperation
+                                else if(clientOperation&&typeClientOperation==='Возврат') list[idx].refund = clientOperation
+                                else if(clientOperation&&typeClientOperation==='Рассрочка'&&installmentMonth) {
+                                    list[idx].installment = clientOperation._id
+                                    list[idx].installmentMonth = installmentMonth
+                                }
+
+                                setList([...list])
+                            }
+                            else
+                                showSnackBar('Ошибка', 'error')
+                        }}/>)
+                    }} className={classes.button}>
                         Сохранить
+                    </Button>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
                     </Button>
                 </div>
             </div>
@@ -423,8 +363,9 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps(dispatch) {
     return {
+        snackbarActions: bindActionCreators(snackbarActions, dispatch),
         mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SetRecipient)
+export default connect(mapStateToProps, mapDispatchToProps)(SetRecipientE)

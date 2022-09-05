@@ -5,6 +5,7 @@ import App from '../../layouts/App';
 import { connect } from 'react-redux'
 import { getSale, setSale, getAttachment, getUnloadSales } from '../../src/gql/sale'
 import { getClient } from '../../src/gql/client'
+import { getUsers } from '../../src/gql/user'
 import { getDoc } from '../../src/gql/doc'
 import { getItems } from '../../src/gql/item'
 import { getInstallments } from '../../src/gql/installment'
@@ -62,7 +63,7 @@ const colors = {
 const Sale = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
-    const { isMobileApp } = props.app;
+    const { isMobileApp, filter } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const { showLoad } = props.appActions;
     const { profile } = props.user;
@@ -80,6 +81,7 @@ const Sale = React.memo((props) => {
     let [comment, setComment] = useState(data.object.comment);
     let [address, setAddress] = useState(data.object.address);
     let [addressInfo, setAddressInfo] = useState(data.object.addressInfo);
+    let [deliverymans, setDeliverymans] = useState(data.object.deliverymans?cloneObject(data.object.deliverymans):[]);
     let [itemsSale, setItemsSale] = useState(cloneObject(data.object.itemsSale));
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const router = useRouter()
@@ -218,6 +220,19 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
+                                data.object.promotion?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Акция:
+                                        </div>
+                                        <div className={classes.value}>
+                                            {data.object.promotion.name}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 data.object.refunds&&data.object.refunds.length?
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
@@ -276,6 +291,8 @@ const Sale = React.memo((props) => {
                             }
                             {
                                 edit?
+                                    <>
+                                    <br/>
                                     <TextField
                                         id='date'
                                         error={!delivery}
@@ -286,15 +303,97 @@ const Sale = React.memo((props) => {
                                         onChange={(event) => setDelivery(event.target.value)}
                                         className={classes.input}
                                     />
+                                    </>
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Доставка:
                                         </div>
-                                        <div className={classes.value} style={{ color: ['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
-                                            {pdDDMMYY(data.object.delivery)}
+                                        <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
+                                            {data.object.delivery?pdDDMMYY(data.object.delivery):'Самовывоз'}
                                         </div>
                                     </div>
+                            }
+                            {
+                                data.object.deliveryFact?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Доставлен:
+                                        </div>
+                                        <div className={classes.value}>
+                                            {pdDDMMYYHHMM(data.object.deliveryFact)}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
+                                edit?
+                                    <>
+                                    {deliverymans.map((deliveryman, idx)=>
+                                        <div className={classes.row} key={`deliveryman${idx}`}>
+                                            <IconButton onClick={()=>{
+                                                deliverymans.splice(idx, 1)
+                                                setDeliverymans([...deliverymans])
+                                            }}>
+                                                <CloseIcon style={{color: 'red'}}/>
+                                            </IconButton>
+                                            <AutocomplectOnline
+                                                error={!deliveryman}
+                                                setElement={(deliveryman)=>{
+                                                    let deliverymansCheck = true
+                                                    for(let i=0; i<deliverymans.length; i++) {
+                                                        if(deliverymans[i]._id===deliveryman._id) {
+                                                            deliverymansCheck = false
+                                                            break
+                                                        }
+                                                    }
+                                                    if(deliverymansCheck) {
+                                                        deliverymans[idx] = deliveryman
+                                                        setDeliverymans([...deliverymans])
+                                                    }
+                                                    else showSnackBar('Доставщик уже присутствует')
+                                                }}
+                                                element={deliveryman}
+                                                getElements={async (search)=>{
+                                                    return await getUsers({
+                                                        search,
+                                                        ...filter.store?{store: filter.store._id}:{},
+                                                        ...filter.department?{department: filter.department.name}:{},
+                                                        ...filter.position?{position: filter.position.name}:{},
+                                                        role: 'доставщик'
+                                                    })
+                                                }}
+                                                label={`Доставщик ${idx+1}`}
+                                                minLength={0}
+                                            />
+                                        </div>
+                                    )}
+                                    <center style={{width: '100%'}}>
+                                        <Button size='small' onClick={async()=>{
+                                            setDeliverymans([...deliverymans, null])
+                                        }} color='primary'>
+                                            Добавить доставщика
+                                        </Button>
+                                    </center>
+                                    <br/>
+                                    </>
+                                    :
+                                    data.object.deliverymans&&data.object.deliverymans.length?
+                                        <div className={classes.row}>
+                                            <div className={classes.nameField}>
+                                                Доставщики:
+                                            </div>
+                                            <div>
+                                                {data.object.deliverymans.map((deliveryman)=>
+                                                    <div className={classes.value}>
+                                                        {deliveryman.name}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        :
+                                        null
                             }
                             <div className={classes.row}>
                                 <div className={classes.nameField}>
@@ -348,7 +447,7 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
-                                edit?
+                                edit&&data.object.status==='обработка'?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
                                         <Input
@@ -393,7 +492,7 @@ const Sale = React.memo((props) => {
                                     null
                             }
                             {
-                                edit?
+                                edit&&data.object.status==='обработка'?
                                     <TextField
                                         error={paid>amountEnd}
                                         id='paid'
@@ -512,7 +611,7 @@ const Sale = React.memo((props) => {
                             <div style={{height: 10}}/>
                             <div className={classes.nameField}>Позиции({itemsSale.length}):</div>
                             {
-                                edit?
+                                edit&&data.object.status==='обработка'?
                                     itemsSale.map((itemSale, idx)=>
                                         <div className={classes.column} key={`itemsSale${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
@@ -594,7 +693,7 @@ const Sale = React.memo((props) => {
                                     )
                             }
                             {
-                                edit?
+                                edit&&data.object.status==='обработка'?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
@@ -644,7 +743,7 @@ const Sale = React.memo((props) => {
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                 {
                                     ['admin', 'менеджер', 'менеджер/завсклад', 'завсклад', 'доставщик'].includes(profile.role)?
-                                        edit&&data.object.status==='обработка'?
+                                        edit?
                                             <>
                                             <Button color='primary' onClick={()=>{
                                                 setEdit(false)
@@ -654,7 +753,6 @@ const Sale = React.memo((props) => {
                                             <Button color='primary' onClick={()=>{
                                                 if(itemsSale.length) {
                                                     let itemsSaleCheck = true
-
                                                     for(let i=0; i<itemsSale.length; i++) {
                                                         if(itemsSale[i].count<1||itemsSale[i].count>data.storeBalanceItems[itemsSale[i].item]) {
                                                             itemsSaleCheck = false
@@ -663,47 +761,63 @@ const Sale = React.memo((props) => {
                                                     }
 
                                                     if(itemsSaleCheck) {
-                                                        if(paid<=amountEnd) {
-                                                            const action = async() => {
-                                                                let element = {_id: router.query.id}
-                                                                if (address!==data.object.address) element.address = address
-                                                                if (addressInfo!==data.object.addressInfo) element.addressInfo = addressInfo
-                                                                if (comment!==data.object.comment) element.comment = comment
-                                                                if (paid!=data.object.paid) element.paid = checkFloat(paid)
-                                                                if (pdDDMMYY(delivery)!==pdDDMMYY(data.object.delivery)) element.delivery = delivery
-                                                                if (discount!=data.object.discount) element.discount = checkFloat(checkFloat(amountStart)-checkFloat(amountEnd))
-                                                                if (amountStart!=data.object.amountStart) element.amountStart = checkFloat(amountStart)
-                                                                if (amountEnd!=data.object.amountEnd) element.amountEnd = checkFloat(amountEnd)
-                                                                if (JSON.stringify(geo)!==JSON.stringify(data.object.geo)) element.geo = geo
-                                                                if (JSON.stringify(itemsSale)!==JSON.stringify(data.object.itemsSale)) {
-                                                                    element.itemsSale = []
-                                                                    for(let i = 0; i <itemsSale.length; i++) {
-                                                                        element.itemsSale.push({
-                                                                            _id: itemsSale[i]._id,
-                                                                            count: checkFloat(itemsSale[i].count),
-                                                                            amount: checkFloat(itemsSale[i].amount),
-                                                                            characteristics: itemsSale[i].characteristics,
-                                                                            name: itemsSale[i].name,
-                                                                            unit: itemsSale[i].unit,
-                                                                            item: itemsSale[i].item,
-                                                                            price: checkFloat(itemsSale[i].price),
-                                                                            status: itemsSale[i].status
-                                                                        })
-                                                                    }
-                                                                }
-                                                                let res = await setSale(element)
-                                                                if(res&&res!=='ERROR') {
-                                                                    showSnackBar('Успешно', 'success')
-                                                                    Router.reload()
-                                                                }
-                                                                else
-                                                                    showSnackBar('Ошибка', 'error')
+
+                                                        let deliverymansCheck = true
+                                                        for(let i=0; i<deliverymans.length; i++) {
+                                                            if(!deliverymans[i]) {
+                                                                deliverymansCheck = false
+                                                                break
                                                             }
-                                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                                            showMiniDialog(true)
+                                                        }
+                                                        if(deliverymansCheck) {
+                                                            if (paid <= amountEnd) {
+                                                                const action = async () => {
+                                                                    let element = {_id: router.query.id}
+                                                                    if (address !== data.object.address) element.address = address
+                                                                    if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
+                                                                    if (comment !== data.object.comment) element.comment = comment
+                                                                    if (paid != data.object.paid) element.paid = checkFloat(paid)
+                                                                    if (pdDDMMYY(delivery) !== pdDDMMYY(data.object.delivery)) element.delivery = delivery
+                                                                    if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
+                                                                    if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
+                                                                    if (amountEnd != data.object.amountEnd) element.amountEnd = checkFloat(amountEnd)
+                                                                    if (JSON.stringify(geo) !== JSON.stringify(data.object.geo)) element.geo = geo
+
+                                                                    if (JSON.stringify(deliverymans) !== JSON.stringify(data.object.deliverymans)) element.deliverymans = deliverymans.map(deliveryman=>deliveryman._id)
+
+                                                                    if (JSON.stringify(itemsSale) !== JSON.stringify(data.object.itemsSale)) {
+                                                                        element.itemsSale = []
+                                                                        for (let i = 0; i < itemsSale.length; i++) {
+                                                                            element.itemsSale.push({
+                                                                                _id: itemsSale[i]._id,
+                                                                                count: checkFloat(itemsSale[i].count),
+                                                                                amount: checkFloat(itemsSale[i].amount),
+                                                                                characteristics: itemsSale[i].characteristics,
+                                                                                name: itemsSale[i].name,
+                                                                                unit: itemsSale[i].unit,
+                                                                                item: itemsSale[i].item,
+                                                                                price: checkFloat(itemsSale[i].price),
+                                                                                status: itemsSale[i].status
+                                                                            })
+                                                                        }
+                                                                    }
+                                                                    let res = await setSale(element)
+                                                                    if (res && res !== 'ERROR') {
+                                                                        showSnackBar('Успешно', 'success')
+                                                                        Router.reload()
+                                                                    }
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }
+                                                                setMiniDialog('Вы уверены?', <Confirmation
+                                                                    action={action}/>)
+                                                                showMiniDialog(true)
+                                                            }
+                                                            else
+                                                                showSnackBar('Оплата больше итого')
                                                         }
                                                         else
-                                                            showSnackBar('Оплата больше итого')
+                                                            showSnackBar('Доставщик не верен')
                                                     }
                                                     else
                                                         showSnackBar('Количество не верно')
@@ -717,7 +831,7 @@ const Sale = React.memo((props) => {
                                             :
                                             <>
                                             {
-                                                ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&data.object.status==='обработка'?
+                                                ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&['отгружен', 'обработка'].includes(data.object.status)?
                                                     <Button color='primary' onClick={()=>{
                                                         setEdit(true)
                                                     }}>

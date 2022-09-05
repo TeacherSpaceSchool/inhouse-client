@@ -33,8 +33,9 @@ import { inputFloat, checkFloat } from '../src/lib'
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
 import Fab from '@mui/material/Fab';
+import {getStores} from '../src/gql/store'
 
-const uploadText = 'Формат xlsx:\n_id модели (если требуется обновить);\n_id склада;\nостаток.'
+const uploadText = 'Формат xlsx:\nназвание модели;\nназвание склада;\nназвание магазина;\nостаток.'
 const sorts = [
     {
         name: 'Остаток',
@@ -60,7 +61,12 @@ const BalanceItems = React.memo((props) => {
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
         setList(cloneObject(await getBalanceItems({sort, search, skip: 0, ...filter.item?{item: filter.item._id}:{}, ...filter.warehouse?{warehouse: filter.warehouse._id}:{}, ...filter.store?{store: filter.store._id}:{}})));
-        setCount(await getBalanceItemsCount({search, ...filter.item?{item: filter.item._id}:{}, ...filter.warehouse?{warehouse: filter.warehouse._id}:{}, ...filter.store?{store: filter.store._id}:{}}));
+        setCount(await getBalanceItemsCount({
+            search,
+            ...filter.item?{item: filter.item._id}:{},
+            ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
+            ...filter.store?{store: filter.store._id}:{}
+        }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
         paginationWork.current = true
@@ -131,7 +137,7 @@ const BalanceItems = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add?
+                        data.add&&!search&&!filter.item&&!filter.warehouse?
                             <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -204,17 +210,39 @@ const BalanceItems = React.memo((props) => {
                                             setNewElement({...newElement})
                                         }}
                                         getElements={async (search)=>{
-                                            return await getWarehouses({
-                                                search,
-                                                ...filter.store?{store: filter.store._id}:{},
-                                            })
+                                            if(newElement.store)
+                                                return await getWarehouses({
+                                                    search,
+                                                    store: newElement.store._id,
+                                                })
+                                            else {
+                                                showSnackBar('Укажите магазин')
+                                                return []
+                                            }
                                         }}
                                         placeholder={'Склад'}
                                         minLength={0}
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
-                                    {newElement.warehouse?newElement.warehouse.store.name:''}
+                                    <AutocomplectOnline
+                                        error={!newElement.store}
+                                        element={newElement.store}
+                                        setElement={store=>{
+                                            newElement.unsaved = true
+                                            unsaved.current['new'] = true
+                                            if(!store) {
+                                                newElement.item = null
+                                                newElement.warehouse = null
+                                            }
+                                            newElement.store = store
+                                            setNewElement({...newElement})
+                                        }}
+                                        getElements={async (search)=>{
+                                            return await getStores({search})
+                                        }}
+                                        minLength={0}
+                                    />
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150}}>
                                     <Input

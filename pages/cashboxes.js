@@ -30,7 +30,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
 
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id кассы/банка (если требуется обновить);\nназвание;\n_id магазина.'
+const uploadText = 'Формат xlsx:\n_id или текущее название кассы/банка (если требуется обновить);\nназвание;\nназвание магазина.'
 
 
 const Cashboxes = React.memo((props) => {

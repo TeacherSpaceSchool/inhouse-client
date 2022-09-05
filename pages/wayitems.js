@@ -38,7 +38,7 @@ import Link from 'next/link';
 import Button from '@mui/material/Button';
 import UnloadUpload from '../components/app/UnloadUpload';
 
-const uploadText = 'Формат xlsx:\n_id в пути (если требуется обновить);\n_id модели;\n_id магазина;\nколичество;\nотправлен (ДД.ММ.ГГГГ);\nприбытие (ДД.ММ.ГГГГ);\nбронь (через запятую с пробелом. Пример: _id менеджер1: количество1, _id менеджер2: количество2).'
+const uploadText = 'Формат xlsx:\n_id в пути (если требуется обновить);\nназвание модели;\nназвание магазина;\nколичество;\nотправлен (ДД.ММ.ГГГГ);\nприбытие (ДД.ММ.ГГГГ);\nбронь (через запятую с пробелом. Пример: имя менеджер1: количество1, имя менеджер2: количество2).'
 const status = ['все', 'в пути', 'прибыл', 'отмена']
 const colors = {
     'в пути': 'blue',
@@ -161,7 +161,7 @@ const WayItems = React.memo((props) => {
                             Магазин
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Количество
+                            Кол-во
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Свободно
@@ -177,7 +177,7 @@ const WayItems = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add?
+                        data.add&&!filter.date&&!filter.item&&!filter.status&&!filter.timeDif?
                             <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -274,7 +274,7 @@ const WayItems = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100}}>
                                     <Input
-                                        placeholder='Количество'
+                                        placeholder='Кол-во'
                                         error={!newElement.amount&&newElement.unsaved}
                                         variant='standard'
                                         className={classes.input}

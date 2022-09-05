@@ -22,12 +22,13 @@ import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
+    'отложен': 'orange',
     'принят': 'blue',
     'выполнен': 'green',
     'проверен': 'green',
     'отмена': 'red'
 }
-const status = ['все', 'обработка', 'принят', 'выполнен', 'проверен']
+const status = ['все', 'отложен', 'обработка', 'принят', 'выполнен', 'проверен']
 
 const Tasks = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -143,7 +144,7 @@ const Tasks = React.memo((props) => {
                                         <div className={classes.tableCell} style={{width: 150}}>
                                             {element.whom.name}
                                         </div>
-                                        <div className={classes.tableCell} style={{width: 'calc(100% - 500px)'}}>
+                                        <div className={classes.tableCell} style={{width: 'calc(100% - 500px)', maxHeight: 100, overflow: 'auto'}}>
                                             {element.info}
                                         </div>
                                         </>

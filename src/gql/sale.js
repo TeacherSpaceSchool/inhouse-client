@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadSales = async({search, manager, client, cpa, date, delivery, status, store, _id}, clientGql)=>{
+export const getUnloadSales = async({search, manager, client, promotion, cpa, date, delivery, status, store, _id}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {search, manager, client, cpa, date, delivery, status, store, _id},
+            variables: {search, manager, client, promotion, cpa, date, delivery, status, store, _id},
             query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID, $_id: ID) {
-                        unloadSales(search: $search, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store, _id: $_id)
+                    query ($search: String, $manager: ID, $promotion: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID, $_id: ID) {
+                        unloadSales(search: $search, manager: $manager, promotion: $promotion, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store, _id: $_id)
                     }`,
         })
         return res.data.unloadSales
@@ -32,6 +32,9 @@ export const getSale = async({_id}, client)=>{
                             number
                             manager {_id name}
                             client {_id name}
+                            deliverymans {_id name}
+                            deliveryFact
+                            promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit}
                             discount 
                             paymentConfirmation
@@ -65,20 +68,22 @@ export const getSale = async({_id}, client)=>{
     }
 }
 
-export const getSales = async({search, skip, items, limit, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+export const getSales = async({search, skip, items, limit, promotion, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-                variables: {search, skip, items, limit, manager, client, cpa, date, delivery, status, store},
+                variables: {search, skip, items, limit, manager, client, promotion, cpa, date, delivery, status, store},
                 query: gql`
-                    query ($search: String, $skip: Int, $items: Boolean, $limit: Int, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
-                        sales(search: $search, skip: $skip, items: $items, limit: $limit, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store) {
+                    query ($search: String, $skip: Int, $items: Boolean, $limit: Int, $promotion: ID, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        sales(search: $search, skip: $skip, items: $items, limit: $limit, promotion: $promotion, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store) {
                             _id
                             createdAt
                             number
                             manager {_id name}
                             client {_id name}
+                            deliverymans {_id name}
+                            promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit images}
                             discount 
                             geo
@@ -97,6 +102,7 @@ export const getSales = async({search, skip, items, limit, manager, client, cpa,
                             comment
                             currency
                             paid
+                            deliveryFact
                             delivery
                             status
                             store {_id name}
@@ -112,15 +118,15 @@ export const getSales = async({search, skip, items, limit, manager, client, cpa,
     }
 }
 
-export const getSalesCount = async({search, manager, client, cpa, date, delivery, status, store}, clientGql)=>{
+export const getSalesCount = async({search, manager, client, promotion, cpa, date, delivery, status, store}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {search, manager, client, cpa, date, delivery, status, store},
+                variables: {search, manager, client, promotion, cpa, date, delivery, status, store},
                 query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
-                        salesCount(search: $search, manager: $manager, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store)
+                    query ($search: String, $manager: ID, $client: ID, $promotion: ID, $cpa: ID, $date: Date, $delivery: Date, $status: String, $store: ID) {
+                        salesCount(search: $search, manager: $manager, promotion: $promotion, client: $client, cpa: $cpa, date: $date, delivery: $delivery, status: $status, store: $store)
                     }`,
             })
         return res.data.salesCount
@@ -168,8 +174,8 @@ export const setSale = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
-                        setSale(_id: $_id, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
+                    mutation ($_id: ID!, $deliverymans: [ID], $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
+                        setSale(_id: $_id, deliverymans: $deliverymans, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
                     }`})
         return res.data.setSale
     } catch(err){
@@ -183,8 +189,8 @@ export const addSale = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($client: ID!, $prepaid: Float, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $percentCpa: Float, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date!, $orders: [ID], $reservations: [ID]!) {
-                        addSale(client: $client, geo: $geo, prepaid: $prepaid, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, orders: $orders, reservations: $reservations) 
+                    mutation ($client: ID!, $prepaid: Float, $promotion: ID, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $percentCpa: Float, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date, $orders: [ID], $reservations: [ID]!) {
+                        addSale(client: $client, geo: $geo, prepaid: $prepaid, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, orders: $orders, reservations: $reservations) 
                     }`})
         return res.data.addSale
     } catch(err){

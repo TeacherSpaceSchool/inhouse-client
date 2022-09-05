@@ -37,6 +37,8 @@ export default makeStyles()(()=>{
             display: 'flex',
             justifyContent: 'left',
             alignItems: 'baseline',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all'
         },
         tableCellGrid: {
             padding: 10,

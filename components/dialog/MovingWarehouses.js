@@ -15,6 +15,7 @@ import { checkFloat, inputFloat } from '../../src/lib'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import Router from 'next/router'
 import Confirmation from './Confirmation'
+import {getStores} from '../../src/gql/store'
 
 const MovingWarehouses =  React.memo(
     (props) =>{
@@ -25,30 +26,51 @@ const MovingWarehouses =  React.memo(
         const width = isMobileApp? (window.innerWidth-113) : 500
         let [warehouse1, setWarehouse1] = useState(null);
         let [warehouse2, setWarehouse2] = useState(null);
+        let [store, setStore] = useState(null);
         let [item, setItem] = useState(null);
         let [free, setFree] = useState(null);
         let [count, setCount] = useState(null);
         return (
             <div className={classes.main} style={{width}}>
                 <AutocomplectOnline
-                    element={warehouse1}
-                    error={!warehouse1}
-                    setElement={(warehouse)=>{
-                        setWarehouse1(warehouse)
+                    element={store}
+                    error={!store}
+                    setElement={(store)=>{
+                        setStore(store)
+                        setWarehouse1(null)
                         setWarehouse2(null)
                         setItem(null)
-                        setCount('')
-                        setFree(0)
                     }}
                     getElements={async (search)=>{
-                        return await getWarehouses({
-                            search,
-                            ...filter.store?{store: filter.store._id}:{},
-                        })
+                        return await getStores({search})
                     }}
-                    label='Отправитель'
                     minLength={0}
+                    label={'Магазин'}
                 />
+                {
+                    store?
+                        <AutocomplectOnline
+                            element={warehouse1}
+                            error={!warehouse1}
+                            setElement={(warehouse)=>{
+                                setWarehouse1(warehouse)
+                                setWarehouse2(null)
+                                setItem(null)
+                                setCount('')
+                                setFree(0)
+                            }}
+                            getElements={async (search)=>{
+                                return await getWarehouses({
+                                    search,
+                                    store: store._id
+                                })
+                            }}
+                            label='Отправитель'
+                            minLength={0}
+                        />
+                        :
+                        null
+                }
                 {
                     warehouse1?
                         <>
@@ -102,7 +124,7 @@ const MovingWarehouses =  React.memo(
                                     getElements={async (search)=>{
                                         return await getWarehouses({
                                             search,
-                                            store: warehouse1.store._id
+                                            store: store._id
                                         })
                                     }}
                                     label='Получатель'

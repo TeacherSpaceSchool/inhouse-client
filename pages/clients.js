@@ -20,7 +20,7 @@ import Link from 'next/link';
 import Fab from '@mui/material/Fab';
 
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id клиента (если требуется обновить);\nуровень (Бронза, Серебро, Золото, Платина);\nФИО;\nИНН;\nпаспорт;\nработа;\nадрес проживания;\nадрес прописки;\nдень рождения (ДД.ММ.ГГГГ);\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
+const uploadText = 'Формат xlsx:\n_id или текущее имя клиента (если требуется обновить);\nуровень (Бронза, Серебро, Золото, Платина);\nФИО;\nИНН;\nпаспорт;\nработа;\nадрес проживания;\nадрес прописки;\nдень рождения (ДД.ММ.ГГГГ);\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
 
 const Clients = React.memo((props) => {
     const {classes} = pageListStyle();

@@ -18,7 +18,10 @@ import {getConsultations, startConsultation, endConsultation} from '../src/gql/c
 import { getClientGqlSsr } from '../src/apollo'
 import Button from '@mui/material/Button';
 import Confirmation from '../components/dialog/Confirmation'
+import ConsultationEdit from '../components/dialog/ConsultationEdit'
 import Link from 'next/link';
+import Edit from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
 
 const Index = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -87,8 +90,14 @@ const Index = React.memo((props) => {
                                     </>
                                     :
                                     <>
-                                    <div style={{display: 'flex', fontWeight: 'bold', fontSize: '1.4rem'}}>
+                                    <div style={{display: 'flex', fontWeight: 'bold', fontSize: '1.4rem', alignItems: 'center'}}>
                                         Консультация c<div style={{color: distanceHour(consultation.createdAt)>1?'#f00':'#01C801'}}>&nbsp;{pdHHMM(consultation.createdAt)}</div>
+                                        <IconButton size='large' color='primary' onClick={()=>{
+                                            setMiniDialog('Комментировать', <ConsultationEdit _consultation={consultation} _setConsultation={setConsultation}/>)
+                                            showMiniDialog(true)
+                                        }}>
+                                            <Edit fontSize='inherit'/>
+                                        </IconButton>
                                     </div>
                                     <br/>
                                     <Link

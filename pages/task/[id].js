@@ -28,6 +28,7 @@ import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 
 const colors = {
     'обработка': 'orange',
+    'отложен': 'orange',
     'принят': 'blue',
     'выполнен': 'green',
     'проверен': 'green',
@@ -206,7 +207,7 @@ const Task = React.memo((props) => {
                             }
                             <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
                                 {
-                                    data.object.status==='обработка'&&(profile._id===data.object.whom._id||['admin'].includes(profile.role))?
+                                    ['отложен', 'обработка'].includes(data.object.status)&&profile._id===data.object.whom._id?
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
                                                 let res = await setTask({_id: router.query.id, status: 'принят'})
@@ -223,7 +224,7 @@ const Task = React.memo((props) => {
                                             Принять
                                         </Button>
                                     :
-                                    data.object.status==='принят'&&(profile._id===data.object.whom._id||['admin'].includes(profile.role))?
+                                    data.object.status==='принят'&&profile._id===data.object.whom._id?
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
                                                 let res = await setTask({_id: router.query.id, status: 'выполнен'})
@@ -240,7 +241,7 @@ const Task = React.memo((props) => {
                                             Выполнен
                                         </Button>
                                     :
-                                    data.object.status==='выполнен'&&(profile._id===data.object.who._id||['admin'].includes(profile.role))?
+                                    data.object.status==='выполнен'&&profile._id===data.object.who._id?
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
                                                 let res = await setTask({_id: router.query.id, status: 'проверен'})
@@ -258,6 +259,26 @@ const Task = React.memo((props) => {
                                         </Button>
                                     :
                                     null
+                                }
+                                {
+                                    data.object.status==='обработка'&&profile._id===data.object.whom._id?
+                                        <Button color='primary' onClick={()=>{
+                                            const action = async() => {
+                                                let res = await setTask({_id: router.query.id, status: 'отложен'})
+                                                if(res&&res!=='ERROR') {
+                                                    showSnackBar('Успешно', 'success')
+                                                    Router.reload()
+                                                }
+                                                else
+                                                    showSnackBar('Ошибка', 'error')
+                                            }
+                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            showMiniDialog(true)
+                                        }}>
+                                            Отложить
+                                        </Button>
+                                        :
+                                        null
                                 }
                                 {
                                     data.edit||router.query.id==='new'?
@@ -353,7 +374,7 @@ Task.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         }
     return {
         data: {
-            edit: object.status==='обработка'&&(['admin'].includes(store.getState().user.profile.role)||object.who&&object.who._id===store.getState().user.profile._id),
+            edit: object.status==='обработка'&&object.who&&object.who._id===store.getState().user.profile._id,
             object
         }
     };
