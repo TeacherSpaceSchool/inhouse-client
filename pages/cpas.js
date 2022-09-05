@@ -20,7 +20,7 @@ import Link from 'next/link';
 import Fab from '@mui/material/Fab';
 
 import UnloadUpload from '../components/app/UnloadUpload';
-const uploadText = 'Формат xlsx:\n_id или текущее имя партнера (если требуется обновить);\nФИО;\nпроцент;\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
+const uploadText = 'Формат xlsx:\n_id или текущее имя дизайнера (если требуется обновить);\nФИО;\nпроцент;\nтелефоны (через запятую с пробелом. Пример: 555780963, 559997132);\nemail (через запятую с пробелом. Пример: email1@email.com, email2@email.com);\nкомментарий.'
 
 const Cpas = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -65,11 +65,11 @@ const Cpas = React.memo((props) => {
     }
     //render
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Партнеры'>
+        <App checkPagination={checkPagination} searchShow={true} pageName='Дизайнеры'>
             <Head>
-                <title>Партнеры</title>
+                <title>Дизайнеры</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content='Партнеры' />
+                <meta property='og:title' content='Дизайнеры' />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />

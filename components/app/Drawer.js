@@ -199,7 +199,7 @@ const MyDrawer = React.memo((props) => {
                                     else
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
-                                    <ListItemText primary='Партнеры' />
+                                    <ListItemText primary='Дизайнеры' />
                                 </ListItem>
                                 <Divider/>
                                 </>
@@ -720,7 +720,7 @@ const MyDrawer = React.memo((props) => {
                                     else
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
-                                    <ListItemText primary='Статистика партнеров' />
+                                    <ListItemText primary='Статистика дизайнеров' />
                                 </ListItem>
                                 <Divider/>
                                 </>

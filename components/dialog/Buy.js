@@ -266,7 +266,7 @@ const BuyBasket =  React.memo(
                     ['reservation', 'sale'].includes(type)?
                         <TextField
                             id='date'
-                            type='date'
+                            type='datetime-local'
                             variant='standard'
                             label={type==='sale'?'Доставка':'Срок'}
                             value={date}
@@ -331,12 +331,12 @@ const BuyBasket =  React.memo(
                                 return await getCpas({search})
                             }}
                             minLength={0}
-                            label={'Партнер'}
+                            label={'Дизайнер'}
                         />
                         <TextField
                             id='percentCpa'
                             variant='standard'
-                            label='Процент партнера'
+                            label='Процент дизайнера'
                             value={percentCpa}
                             onChange={(event) => setPercentCpa(inputFloat(event.target.value))}
                             className={classes.input}

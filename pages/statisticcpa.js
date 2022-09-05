@@ -74,11 +74,11 @@ const StatisticCpa = React.memo((props) => {
     }
     //render
     return (
-        <App checkPagination={checkPagination} filterShow={{cpa: true, store: true, period: true}} pageName='Статистика партнеров'>
+        <App checkPagination={checkPagination} filterShow={{cpa: true, store: true, period: true}} pageName='Статистика дизайнеров'>
             <Head>
-                <title>Статистика партнеров</title>
+                <title>Статистика дизайнеров</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content='Статистика партнеров' />
+                <meta property='og:title' content='Статистика дизайнеров' />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website' />
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
@@ -89,7 +89,7 @@ const StatisticCpa = React.memo((props) => {
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
                         <div className={classes.tableCell} style={{width: '100%', justifyContent: 'center'}}>
-                            Партнер
+                            Дизайнер
                         </div>
                         <div className={classes.tableCell} style={{width: '100%', justifyContent: 'center'}}>
                             Бонус

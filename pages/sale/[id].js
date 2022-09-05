@@ -29,7 +29,7 @@ import { getClientGqlSsr } from '../../src/apollo'
 import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
-import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdDatePicker, pdDDMMYY } from '../../src/lib'
+import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdtDatePicker } from '../../src/lib'
 import { getSaleDoc } from '../../src/doc/sale'
 import { getVoucherDoc } from '../../src/doc/voucher'
 import { getInstallmentDoc } from '../../src/doc/installment'
@@ -77,7 +77,7 @@ const Sale = React.memo((props) => {
     let [newItem, setNewItem] = useState(null);
     let [amountStart, setAmountStart] = useState(data.object.amountStart);
     let [amountEnd, setAmountEnd] = useState(data.object.amountEnd);
-    let [delivery, setDelivery] = useState(pdDatePicker(data.object.delivery));
+    let [delivery, setDelivery] = useState(pdtDatePicker(data.object.delivery));
     let [comment, setComment] = useState(data.object.comment);
     let [address, setAddress] = useState(data.object.address);
     let [addressInfo, setAddressInfo] = useState(data.object.addressInfo);
@@ -296,7 +296,7 @@ const Sale = React.memo((props) => {
                                     <TextField
                                         id='date'
                                         error={!delivery}
-                                        type='date'
+                                        type='datetime-local'
                                         variant='standard'
                                         label='Доставка'
                                         value={delivery}
@@ -310,7 +310,7 @@ const Sale = React.memo((props) => {
                                             Доставка:
                                         </div>
                                         <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
-                                            {data.object.delivery?pdDDMMYY(data.object.delivery):'Самовывоз'}
+                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Самовывоз'}
                                         </div>
                                     </div>
                             }
@@ -417,7 +417,7 @@ const Sale = React.memo((props) => {
                                 data.object.cpa?
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
-                                            Партнер:
+                                            Дизайнер:
                                         </div>
                                         <Link href='/cpa/[id]' as={`/cpa/${data.object.cpa._id}`} >
                                             <div className={classes.value}>
@@ -777,7 +777,7 @@ const Sale = React.memo((props) => {
                                                                     if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
                                                                     if (comment !== data.object.comment) element.comment = comment
                                                                     if (paid != data.object.paid) element.paid = checkFloat(paid)
-                                                                    if (pdDDMMYY(delivery) !== pdDDMMYY(data.object.delivery)) element.delivery = delivery
+                                                                    if (pdDDMMYYHHMM(delivery) !== pdDDMMYYHHMM(data.object.delivery)) element.delivery = delivery
                                                                     if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
                                                                     if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
                                                                     if (amountEnd != data.object.amountEnd) element.amountEnd = checkFloat(amountEnd)

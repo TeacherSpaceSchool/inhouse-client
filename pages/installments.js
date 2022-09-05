@@ -160,7 +160,7 @@ const Installments = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Долг
                         </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
                             Сумма оплат
                         </div>
                         <div className={classes.tableCell} style={{width: 'fit-content', minWidth: 100, justifyContent: 'start'}}>
@@ -364,7 +364,7 @@ const Installments = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start', ...element.amount<element.paid?{color: 'red'}:{}}}>
                                 {element.debt}
                             </div>
-                            <div className={classes.tableCell} style={{width: 100, borderRight: 'solid 1px #00000040', justifyContent: data.edit?'center':'start', flexDirection: 'column'}}>
+                            <div className={classes.tableCell} style={{width: 115, borderRight: 'solid 1px #00000040', justifyContent: data.edit?'center':'start', flexDirection: 'column'}}>
                                 <div style={{height: 30, width: '100%', borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}/>
                                 <div style={{height: 30, width: '100%', borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>{element.amount}</div>
                                 <div style={{height: 30, width: '100%', justifyContent: 'start', display: 'flex', alignItems: 'center', ...element.amount<element.paid?{color: 'red'}:{}}}>{element.paid}</div>

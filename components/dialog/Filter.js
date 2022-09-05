@@ -611,7 +611,7 @@ const Filter =  React.memo(
                                 return await getCpas({search})
                             }}
                             minLength={0}
-                            label={'Партнер'}
+                            label={'Дизайнер'}
                         />
                         :
                         null
