@@ -74,6 +74,9 @@ const Geo =  React.memo(
                     <CircularProgress/>
                 </div>
                 <center style={{width: '100%'}}>
+                    <Button variant='contained' color='secondary' onClick={()=>{showFullDialog(false);}} className={classes.button}>
+                        Закрыть
+                    </Button>
                     {
                         setAddressGeo?
                             <Button variant='contained' color='primary' onClick={async()=>{
@@ -85,9 +88,6 @@ const Geo =  React.memo(
                             :
                             null
                     }
-                    <Button variant='contained' color='secondary' onClick={()=>{showFullDialog(false);}} className={classes.button}>
-                        Закрыть
-                    </Button>
                 </center>
             </div>
             {

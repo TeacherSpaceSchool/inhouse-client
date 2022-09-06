@@ -618,14 +618,14 @@ const Filter =  React.memo(
                 }
                 <br/>
                 <div>
-                    <Button variant='contained' color='primary' onClick={async()=>showMiniDialog(false)} className={classes.button}>
-                        Сохранить
-                    </Button>
                     <Button variant='contained' color='secondary' onClick={()=>{
                         setFilter({})
                         showMiniDialog(false);
                     }} className={classes.button}>
                         Сбросить
+                    </Button>
+                    <Button variant='contained' color='primary' onClick={async()=>showMiniDialog(false)} className={classes.button}>
+                        Сохранить
                     </Button>
                 </div>
             </div>

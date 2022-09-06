@@ -80,6 +80,12 @@ const SetCharacteristics =  React.memo(
                     </center>
                 </div>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                        showFullDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         let checkCharacteristics = true
                         for(let i = 0; i <_characteristics.length; i++) {
@@ -104,12 +110,6 @@ const SetCharacteristics =  React.memo(
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>{
-                        showMiniDialog(false);
-                        showFullDialog(false);
-                    }} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

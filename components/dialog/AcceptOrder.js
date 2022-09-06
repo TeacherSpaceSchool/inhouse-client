@@ -68,6 +68,9 @@ const AcceptOrder =  React.memo(
                     )
                 }
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         let confirmAcceptOrder = acceptOrder.length
                         for(let i=0; i<acceptOrder.length; i++){
@@ -135,9 +138,6 @@ const AcceptOrder =  React.memo(
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Принять
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

@@ -90,7 +90,7 @@ const Index = React.memo((props) => {
                                     </>
                                     :
                                     <>
-                                    <div style={{display: 'flex', fontWeight: 'bold', fontSize: '1.4rem', alignItems: 'center'}}>
+                                    <div style={{display: 'flex', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center'}}>
                                         Консультация c<div style={{color: distanceHour(consultation.createdAt)>1?'#f00':'#01C801'}}>&nbsp;{pdHHMM(consultation.createdAt)}</div>
                                         <IconButton size='large' color='primary' onClick={()=>{
                                             setMiniDialog('Комментировать', <ConsultationEdit _consultation={consultation} _setConsultation={setConsultation}/>)

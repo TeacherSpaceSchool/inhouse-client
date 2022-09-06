@@ -204,6 +204,9 @@ const AddInstallment =  React.memo(
                 </div>
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         amount = checkFloat(amount)
                         paid = checkFloat(paid)
@@ -264,9 +267,6 @@ const AddInstallment =  React.memo(
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

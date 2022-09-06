@@ -121,19 +121,12 @@ const Tasks = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
                             От кого
                         </div>
-                        {
-                            !isMobileApp?
-                                <>
-                                <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
-                                    Исполнитель
-                                </div>
-                                <div className={classes.tableCell} style={{width: 'calc(100% - 500px)', justifyContent: 'start'}}>
-                                    Комментарий
-                                </div>
-                                </>
-                                :
-                                null
-                        }
+                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
+                            Исполнитель
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 500px)', justifyContent: 'start'}}>
+                            Комментарий
+                        </div>
                     </div>
                     {list.map((element) =>
                         <Link href='/task/[id]' as={`/task/${element._id}`} key={element._id}>
@@ -152,19 +145,12 @@ const Tasks = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 150}}>
                                     {element.who.name}
                                 </div>
-                                {
-                                    !isMobileApp?
-                                        <>
-                                        <div className={classes.tableCell} style={{width: 150}}>
-                                            {element.whom.name}
-                                        </div>
-                                        <div className={classes.tableCell} style={{width: 'calc(100% - 500px)', maxHeight: 100, overflow: 'auto'}}>
-                                            {element.info}
-                                        </div>
-                                        </>
-                                        :
-                                        null
-                                }
+                                <div className={classes.tableCell} style={{width: 150}}>
+                                    {element.whom.name}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 500px)', maxHeight: 100, overflow: 'auto'}}>
+                                    {element.info}
+                                </div>
                             </div>
                         </Link>
                     )}

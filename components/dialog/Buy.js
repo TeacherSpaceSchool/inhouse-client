@@ -49,7 +49,7 @@ const BuyBasket =  React.memo(
         let [comment, setComment] = useState('');
         let [commentShow, setCommentShow] = useState(false);
         let [discount, setDiscount] = useState(_discount?_discount:'');
-        let [discountType, setDiscountType] = useState(_discount?'%':'сом');
+        let [discountType, setDiscountType] = useState('%');
         let [amountEnd, setAmountEnd] = useState(amountStart);
         useEffect(() => {
             amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
@@ -273,7 +273,8 @@ const BuyBasket =  React.memo(
                     ['reservation', 'sale'].includes(type)?
                         <TextField
                             id='date'
-                            type='datetime-local'
+                            error={!date&&type==='reservation'}
+                            type={type==='sale'?'datetime-local':'date'}
                             variant='standard'
                             label={type==='sale'?'Доставка':'Срок'}
                             value={date}
@@ -314,17 +315,22 @@ const BuyBasket =  React.memo(
                             onChange={(event) => setAddressInfo(event.target.value)}
                             className={classes.input}
                         />
-                        <AutocomplectOnline
-                            element={promotion}
-                            setElement={async (promotion)=>{
-                                setPromotion(promotion)
-                            }}
-                            getElements={async (search)=>{
-                                return await getPromotions({search})
-                            }}
-                            minLength={0}
-                            label={'Акция'}
-                        />
+                        {
+                            type==='sale'?
+                                <AutocomplectOnline
+                                    element={promotion}
+                                    setElement={async (promotion)=>{
+                                        setPromotion(promotion)
+                                    }}
+                                    getElements={async (search)=>{
+                                        return await getPromotions({search})
+                                    }}
+                                    minLength={0}
+                                    label={'Акция'}
+                                />
+                                :
+                                null
+                        }
                         <AutocomplectOnline
                             element={cpa}
                             setElement={async (cpa)=>{
@@ -360,125 +366,129 @@ const BuyBasket =  React.memo(
                 }
                 <br/>
                 <div>
-                    <Button variant='contained' color='primary' onClick={async()=>{
-                        if(paid>=0) {
-                            showLoad(true)
-                            let res
-                            if (type === 'order')
-                                res = await addOrder({
-                                    client: client._id,
-                                    itemsOrder: items,
-                                    amount: checkFloat(amountEnd),
-                                    paid: checkFloat(paid),
-                                    typePayment,
-                                    comment,
-                                    currency
-                                })
-                            else if (type === 'reservation')
-                                res = await addReservation({
-                                    client: client._id,
-                                    term: date,
-                                    itemsReservation: items,
-                                    amount: checkFloat(amountEnd),
-                                    paid: checkFloat(paid),
-                                    typePayment,
-                                    comment,
-                                    currency
-                                })
-                            else if (type === 'refund')
-                                res = await addRefund({
-                                    client: client._id,
-                                    discount: checkFloat(amountStart - amountEnd),
-                                    itemsRefund: items,
-                                    amount: checkFloat(amountEnd),
-                                    comment,
-                                    currency,
-                                    sale
-                                })
-                            else if (type === 'sale') {
-                                paidInstallment = checkFloat(paidInstallment)
-                                monthInstallment = checkFloat(monthInstallment)
-                                paid = checkFloat(paid)
-                                amountEnd = checkFloat(amountEnd)
-                                if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
-                                    res = await addSale({
-                                        geo,
-                                        client: client._id,
-                                        itemsSale: items,
-                                        discount: checkFloat(amountStart - amountEnd),
-                                        cpa: cpa ? cpa._id : null,
-                                        promotion: promotion ? promotion._id : null,
-                                        amountStart: checkFloat(amountStart),
-                                        amountEnd,
-                                        typePayment,
-                                        address,
-                                        addressInfo,
-                                        comment,
-                                        currency,
-                                        paid: checkFloat(paid),
-                                        prepaid,
-                                        delivery: date,
-                                        orders: orders,
-                                        reservations: reservations
-                                    })
-                                    if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
-                                        const grid = []
-                                        let month = new Date()
-                                        month.setHours(0, 0, 0, 0)
-                                        grid.push({
-                                            month: new Date(month),
-                                            amount: paid,
-                                            paid: 0,
-                                            datePaid: month
-                                        })
-                                        month.setMonth(month.getMonth() + 1)
-                                        for (let i = 0; i < monthInstallment; i++) {
-                                            grid.push({
-                                                month: new Date(month),
-                                                paid: 0,
-                                                amount: paidInstallment
-                                            })
-                                            month.setMonth(month.getMonth() + 1)
-                                        }
-                                        grid[grid.length-1].amount += remainder
-                                        let _res = await addInstallment({
-                                            renew,
-                                            grid,
-                                            debt: checkFloat(amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid)),
-                                            client: client._id,
-                                            amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
-                                            paid: 0,
-                                            sale: res,
-                                            datePaid: grid[0].month,
-                                            store: profile.store,
-                                            currency
-                                        })
-                                        if (!_res || _res._id === 'ERROR')
-                                            showSnackBar('Ошибка', 'error')
-                                    }
-                                }
-                                else
-                                    showSnackBar('Укажите рассрочку')
-                            }
-                            if (res && res !== 'ERROR') {
-                                localStorage.basket = JSON.stringify({})
-                                await endConsultation({})
-                                showSnackBar('Успешно', 'success')
-                                Router.push(`/${type}/${res}`)
-                            }
-                            else
-                                showSnackBar('Ошибка', 'error')
-                            showLoad(false)
-                        }
-                        else
-                            showSnackBar('Укажите оплату')
-                    }} className={classes.button}>
-                        Оформить
-                    </Button>
                     <Button variant='contained' color='secondary' onClick={()=>{
                         showMiniDialog(false);
                     }} className={classes.button}>
                         Закрыть
+                    </Button>
+                    <Button variant='contained' color='primary' onClick={async()=>{
+                        if(date||type!=='reservation') {
+                            if (paid >= 0) {
+                                showLoad(true)
+                                let res
+                                if (type === 'order')
+                                    res = await addOrder({
+                                        client: client._id,
+                                        itemsOrder: items,
+                                        amount: checkFloat(amountEnd),
+                                        paid: checkFloat(paid),
+                                        typePayment,
+                                        comment,
+                                        currency
+                                    })
+                                else if (type === 'reservation')
+                                    res = await addReservation({
+                                        client: client._id,
+                                        term: date,
+                                        itemsReservation: items,
+                                        amount: checkFloat(amountEnd),
+                                        paid: checkFloat(paid),
+                                        typePayment,
+                                        comment,
+                                        currency
+                                    })
+                                else if (type === 'refund')
+                                    res = await addRefund({
+                                        client: client._id,
+                                        discount: checkFloat(amountStart - amountEnd),
+                                        itemsRefund: items,
+                                        amount: checkFloat(amountEnd),
+                                        comment,
+                                        currency,
+                                        sale
+                                    })
+                                else if (type === 'sale') {
+                                    paidInstallment = checkFloat(paidInstallment)
+                                    monthInstallment = checkFloat(monthInstallment)
+                                    paid = checkFloat(paid)
+                                    amountEnd = checkFloat(amountEnd)
+                                    if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
+                                        res = await addSale({
+                                            geo,
+                                            client: client._id,
+                                            itemsSale: items,
+                                            discount: checkFloat(amountStart - amountEnd),
+                                            cpa: cpa ? cpa._id : null,
+                                            promotion: promotion ? promotion._id : null,
+                                            amountStart: checkFloat(amountStart),
+                                            amountEnd,
+                                            typePayment,
+                                            address,
+                                            addressInfo,
+                                            comment,
+                                            currency,
+                                            paid: checkFloat(paid),
+                                            prepaid,
+                                            delivery: date,
+                                            orders: orders,
+                                            reservations: reservations
+                                        })
+                                        if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
+                                            const grid = []
+                                            let month = new Date()
+                                            month.setHours(0, 0, 0, 0)
+                                            grid.push({
+                                                month: new Date(month),
+                                                amount: paid,
+                                                paid: 0,
+                                                datePaid: month
+                                            })
+                                            month.setMonth(month.getMonth() + 1)
+                                            for (let i = 0; i < monthInstallment; i++) {
+                                                grid.push({
+                                                    month: new Date(month),
+                                                    paid: 0,
+                                                    amount: paidInstallment
+                                                })
+                                                month.setMonth(month.getMonth() + 1)
+                                            }
+                                            grid[grid.length - 1].amount += remainder
+                                            let _res = await addInstallment({
+                                                renew,
+                                                grid,
+                                                debt: checkFloat(amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid)),
+                                                client: client._id,
+                                                amount: amountEnd + (renew ? installmentsDebt : 0) - checkFloat(prepaid),
+                                                paid: 0,
+                                                sale: res,
+                                                datePaid: grid[0].month,
+                                                store: profile.store,
+                                                currency
+                                            })
+                                            if (!_res || _res._id === 'ERROR')
+                                                showSnackBar('Ошибка', 'error')
+                                        }
+                                    }
+                                    else
+                                        showSnackBar('Укажите рассрочку')
+                                }
+                                if (res && res !== 'ERROR') {
+                                    localStorage.basket = JSON.stringify({})
+                                    await endConsultation({})
+                                    showSnackBar('Успешно', 'success')
+                                    Router.push(`/${type}/${res}`)
+                                }
+                                else
+                                    showSnackBar('Ошибка', 'error')
+                                showLoad(false)
+                            }
+                            else
+                                showSnackBar('Укажите оплату')
+                        }
+                        else
+                            showSnackBar('Заполните все поля')
+                    }} className={classes.button}>
+                        Оформить
                     </Button>
                 </div>
             </div>

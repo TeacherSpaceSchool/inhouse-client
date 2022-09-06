@@ -39,6 +39,9 @@ const ConfirmWayItem =  React.memo(
                     )
                 }
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         let confirmAmount = 0
                         const keys = Object.keys(confirm)
@@ -74,9 +77,6 @@ const ConfirmWayItem =  React.memo(
                             showSnackBar('Распределение не равно количеству')
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

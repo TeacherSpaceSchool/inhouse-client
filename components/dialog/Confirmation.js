@@ -17,7 +17,15 @@ const Confirmation =  React.memo(
         return (
             action?
                 <center className={classes.line}>
-                    <Button variant='outlined' size='large' color='primary' style={{marginRight: 20}} onClick={async()=>{
+                    <Button variant='outlined' color='secondary' size='large' style={{marginRight: 20}} onClick={async()=>{
+                        showMiniDialog(false)
+                        if(actionCancel){
+                            await actionCancel()
+                        }
+                    }}>
+                        НЕТ
+                    </Button>
+                    <Button variant='outlined' size='large' color='primary' onClick={async()=>{
                         await showMiniDialog(false)
                         await showLoad(true)
                         try {
@@ -29,14 +37,6 @@ const Confirmation =  React.memo(
                         await showLoad(false)
                     }}>
                         ДА
-                    </Button>
-                    <Button variant='outlined' color='secondary' size='large' onClick={async()=>{
-                        showMiniDialog(false)
-                        if(actionCancel){
-                            await actionCancel()
-                        }
-                    }}>
-                        НЕТ
                     </Button>
                 </center>
                 :

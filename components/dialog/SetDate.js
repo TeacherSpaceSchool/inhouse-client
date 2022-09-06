@@ -39,14 +39,14 @@ const SetDate =  React.memo(
                 />
                 <br/>
                 <div>
-                    <Button variant="contained" color="primary" onClick={async()=>{
-                       setDate(_date)
-                       showMiniDialog(false);
-                    }} className={classes.button}>
-                        Сохранить
-                    </Button>
                     <Button variant="contained" color="secondary" onClick={()=>{showMiniDialog(false);}} className={classes.button}>
                         Закрыть
+                    </Button>
+                    <Button variant="contained" color="primary" onClick={async()=>{
+                        setDate(_date)
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Сохранить
                     </Button>
                 </div>
             </div>

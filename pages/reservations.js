@@ -117,9 +117,9 @@ const Reservations = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/reservations`} />
                 <link rel='canonical' href={`${urlMain}/reservations`}/>
             </Head>
-            <Card className={classes.page}>
+            <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
+                    <div className={classes.tableHead} style={{width: 'fit-content'}}>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
@@ -138,7 +138,7 @@ const Reservations = React.memo((props) => {
                     </div>
                     {list.map((element) =>
                         <Link href='/reservation/[id]' as={`/reservation/${element._id}`} key={element._id}>
-                            <div className={classes.tableRow} onClick={()=>{
+                            <div className={classes.tableRow} style={{width: 'fit-content'}} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]
                                 sessionStorage.scrollPositionStore = appBody.scrollTop
                                 sessionStorage.scrollPositionName = 'reservation'

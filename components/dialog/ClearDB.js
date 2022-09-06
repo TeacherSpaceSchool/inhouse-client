@@ -52,6 +52,9 @@ const ClearDB =  React.memo(
                     />
                 </FormControl>
                 <div>
+                    <Button variant="contained" color="secondary" onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant="contained" color="primary" onClick={async()=>{
                         if(password.length) {
                             const action = async () => {
@@ -67,9 +70,6 @@ const ClearDB =  React.memo(
                             showSnackBar('Ошибка', 'error')
                     }} className={classes.button}>
                         Очистить
-                    </Button>
-                    <Button variant="contained" color="secondary" onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

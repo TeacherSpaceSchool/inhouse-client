@@ -64,9 +64,10 @@ const MoneyFlows = React.memo((props) => {
     const { profile } = props.user;
     const { showLoad } = props.appActions;
     //настройка
+    let [today, setToday] = useState();
     const unsaved = useRef({});
     const initialRender = useRef(true);
-    let [showStat, setShowStat] = useState(false);
+    let [showStat, setShowStat] = useState(true);
     let [newElement, setNewElement] = useState({
         date: pdDatePicker(new Date()),
         typeRecipient: '',
@@ -140,8 +141,12 @@ const MoneyFlows = React.memo((props) => {
     },[filter])
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current)
+            if(initialRender.current) {
+                today = new Date()
+                today.setHours(6, 0, 0, 0)
+                setToday(today)
                 initialRender.current = false;
+            }
             else {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
@@ -249,7 +254,7 @@ const MoneyFlows = React.memo((props) => {
                                             <MenuItem onClick={()=>{
                                                 if(
                                                     (newElement.typeClientOperation!=='Рассрочка'||(newElement.clientOperation&&newElement.installmentMonth))&&
-                                                    newElement.date&&
+                                                    newElement.date&&new Date(newElement.date)<=today&&
                                                     newElement.currency&&
                                                     newElement.amount&&
                                                     newElement.exchangeRate&&
@@ -322,7 +327,7 @@ const MoneyFlows = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 135}}>
                                     <Input
                                         placeholder='Дата'
-                                        error={!newElement.date&&newElement.unsaved}
+                                        error={!newElement.date&&newElement.unsaved||newElement.date&&new Date(newElement.date)>today}
                                         variant='standard'
                                         type='date'
                                         className={classes.input}
@@ -624,7 +629,7 @@ const MoneyFlows = React.memo((props) => {
                                     element.employment?
                                         <Link href='/user/[id]' as={`/user/${element.employment._id}`}>
                                             <a>
-                                                element.employment.name
+                                                {element.employment.name}
                                             </a>
                                         </Link>
                                         :

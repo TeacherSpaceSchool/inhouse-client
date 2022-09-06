@@ -37,6 +37,9 @@ const History =  React.memo(
                 }
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
+                        Закрыть
+                    </Button>
                     {
                         setText?
                             <Button variant='contained' color='primary' onClick={()=>{
@@ -48,9 +51,6 @@ const History =  React.memo(
                             :
                             null
                     }
-                    <Button variant='contained' color='secondary' onClick={()=>{showMiniDialog(false);}} className={classes.button}>
-                        Закрыть
-                    </Button>
                 </div>
             </div>
         );

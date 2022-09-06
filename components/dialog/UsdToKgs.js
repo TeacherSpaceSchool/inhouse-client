@@ -33,6 +33,9 @@ const UsdToKgs =  React.memo(
                     className={classes.input}
                 />
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         if(usdToKgs) {
                             usdToKgs = checkFloat(usdToKgs)
@@ -63,9 +66,6 @@ const UsdToKgs =  React.memo(
                             showSnackBar('Укажите курс доллара')
                     }} className={classes.button}>
                         Рассчитать
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

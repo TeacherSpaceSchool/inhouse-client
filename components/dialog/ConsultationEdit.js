@@ -68,6 +68,11 @@ const ConsultationEdit =  React.memo(
                 />
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         setMiniDialog('Вы уверены?', <Confirmation action={async () => {
                             let res = await setConsultation({
@@ -89,11 +94,6 @@ const ConsultationEdit =  React.memo(
                         }}/>)
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>{
-                        showMiniDialog(false);
-                    }} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

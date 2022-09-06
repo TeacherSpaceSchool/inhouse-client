@@ -141,6 +141,9 @@ const SetBookings =  React.memo(
                         null
                 }
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     {
                         edit&&[undefined, 'обработка', 'в пути'].includes(element.status)?
                             <Button variant='contained' color='primary' onClick={async()=>{
@@ -164,9 +167,6 @@ const SetBookings =  React.memo(
                             :
                             null
                     }
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
-                    </Button>
                 </div>
             </div>
         );

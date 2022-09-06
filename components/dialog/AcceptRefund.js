@@ -48,6 +48,9 @@ const AcceptRefund =  React.memo(
                     )
                 }
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         let confirmAcceptRefund = true, res, count
                         for(let i=0; i<items.length; i++){
@@ -93,9 +96,6 @@ const AcceptRefund =  React.memo(
                             showSnackBar('Количество не верно')
                     }} className={classes.button}>
                         Принять
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

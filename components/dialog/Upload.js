@@ -37,6 +37,9 @@ const Filter =  React.memo(
                 </Button>
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
+                        Отмена
+                    </Button>
                     {
                         document?
                             <Button variant='contained' color='primary' onClick={async()=>{
@@ -56,9 +59,6 @@ const Filter =  React.memo(
                             :
                             null
                     }
-                    <Button variant='contained' color='secondary' onClick={()=>showMiniDialog(false)} className={classes.button}>
-                        Отмена
-                    </Button>
                 </div>
                 <input
                     ref={documentRef}

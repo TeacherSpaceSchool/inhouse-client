@@ -140,6 +140,11 @@ const MovingWarehouses =  React.memo(
                 }
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         count = checkFloat(count)
                         if (warehouse1&&warehouse2&&warehouse1._id!==warehouse2._id&&item&&count&&count<=free) {
@@ -175,11 +180,6 @@ const MovingWarehouses =  React.memo(
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>{
-                        showMiniDialog(false);
-                    }} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

@@ -207,6 +207,12 @@ const AddClient =  React.memo(
                 />
                 <br/>
                 <div>
+                    <Button variant='contained' color='secondary' onClick={()=>{
+                        showMiniDialog(false);
+                        setClient(null)
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
                         let checkPhones = !phones.length||validPhones1(phones)
                         let checkMail = !emails.length||validMails(emails)
@@ -226,12 +232,6 @@ const AddClient =  React.memo(
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
                         Сохранить
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={()=>{
-                        showMiniDialog(false);
-                        setClient(null)
-                    }} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>

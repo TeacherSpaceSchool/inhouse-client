@@ -53,7 +53,7 @@ const Installments = React.memo((props) => {
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     //настройка
-    const today = useRef();
+    let [today, setToday] = useState();
     const initialRender = useRef(true);
     const [showComment, setShowComment] = useState(false);
     //получение данных
@@ -92,8 +92,12 @@ const Installments = React.memo((props) => {
     },[filter])
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current)
+            if(initialRender.current) {
+                today = new Date()
+                today.setHours(0, 0, 0, 0)
+                setToday(today)
                 initialRender.current = false;
+            }
             else {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
@@ -386,7 +390,7 @@ const Installments = React.memo((props) => {
                                                         showMiniDialog(true)
                                                     }
                                                 }}
-                                                style={{height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center', color: !grid.paid&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'black'}}>
+                                                style={{fontWeight: 'bold', color: grid.amount!=0&&(!grid.paid||grid.paid==0)&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'blue', height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>
                                                 {
                                                     pdDDMMYYYY(grid.month)
                                                 }

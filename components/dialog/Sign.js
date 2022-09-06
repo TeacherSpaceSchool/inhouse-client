@@ -74,18 +74,18 @@ const Sign =  React.memo(
                     <br/>
                 }
                 <div>
+                    <Button variant="contained" color="secondary" onClick={()=>{
+                        clearError()
+                        showMiniDialog(false);
+                    }} className={classes.button}>
+                        Закрыть
+                    </Button>
                     <Button variant="contained" color="primary" onClick={()=>{
                         if(loginEnter.length>0&&passEnter.length>0) {
                             signin({login: loginEnter, password: passEnter})
                         }
                     }} className={classes.button}>
                         Войти
-                    </Button>
-                    <Button variant="contained" color="secondary" onClick={()=>{
-                        clearError()
-                        showMiniDialog(false);
-                    }} className={classes.button}>
-                        Закрыть
                     </Button>
                 </div>
             </div>
