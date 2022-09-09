@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadWayItems = async({item, store, status, late, soon, today, date}, client)=>{
+export const getUnloadWayItems = async({item, store, status, late, soon, today, date, my}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-            variables: {item, store, status, late, soon, today, date},
+            variables: {item, store, status, late, soon, today, date, my},
             query: gql`
-                    query ($item: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
-                        unloadWayItems(item: $item, date: $date, store: $store, soon: $soon, status: $status, late: $late, today: $today)
+                    query ($item: ID, $store: ID, $soon: Boolean, $my: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
+                        unloadWayItems(item: $item, date: $date, my: $my, store: $store, soon: $soon, status: $status, late: $late, today: $today)
                     }`,
         })
         return res.data.unloadWayItems
@@ -33,19 +33,19 @@ export const uploadWayItem = async(variables)=>{
     }
 }
 
-export const getWayItems = async({skip, item, store, status, late, soon, today, date}, client)=>{
+export const getWayItems = async({skip, item, store, status, late, soon, today, date, my}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-            variables: {skip, item, store, status, late, soon, today, date},
+            variables: {skip, item, store, status, late, soon, today, date, my},
             query: gql`
-                    query ($skip: Int, $date: Date, $soon: Boolean, $item: ID, $store: ID, $status: String, $late: Boolean, $today: Boolean) {
-                        wayItems(skip: $skip, date: $date, soon: $soon, item: $item, store: $store, status: $status, late: $late, today: $today) {
+                    query ($skip: Int, $date: Date, $soon: Boolean, $item: ID, $my: Boolean, $store: ID, $status: String, $late: Boolean, $today: Boolean) {
+                        wayItems(skip: $skip, date: $date, soon: $soon, item: $item, my: $my, store: $store, status: $status, late: $late, today: $today) {
                             _id
                             createdAt
                             store {_id name}
-                            item {_id name unit}
+                            item {_id name unit factory {name}}
                             bookings {manager {_id name} client {_id name} amount}
                             amount
                             status
@@ -72,7 +72,7 @@ export const getWayItem = async({_id}, client)=>{
                             _id
                             createdAt
                             store {_id name}
-                            item {_id name unit}
+                            item {_id name unit factory {name}}
                             bookings {manager {_id name} client {_id name} amount}
                             amount
                             status
@@ -87,15 +87,15 @@ export const getWayItem = async({_id}, client)=>{
     }
 }
 
-export const getWayItemsCount = async({item, store, status, late, soon, today, date}, client)=>{
+export const getWayItemsCount = async({item, store, status, late, soon, today, date, my}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {item, store, status, late, soon, today, date},
+                variables: {item, store, status, late, soon, today, date, my},
                 query: gql`
-                    query ($item: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
-                        wayItemsCount(item: $item, date: $date, store: $store, soon: $soon, status: $status, late: $late, today: $today)
+                    query ($item: ID, $store: ID, $soon: Boolean, $date: Date, $my: Boolean, $status: String, $late: Boolean, $today: Boolean) {
+                        wayItemsCount(item: $item, date: $date, store: $store, soon: $soon, my: $my, status: $status, late: $late, today: $today)
                     }`,
             })
         return res.data.wayItemsCount
@@ -130,7 +130,7 @@ export const addWayItem = async(variables)=>{
                             _id
                             createdAt
                             store {_id name}
-                            item {_id name unit}
+                            item {_id name unit factory {name}}
                             bookings {manager {_id name} client {_id name} amount}
                             amount
                             status

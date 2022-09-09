@@ -22,6 +22,8 @@ import {getClients} from '../../src/gql/client';
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import ShowItemsCatalog from '../../components/dialog/ShowItemsCatalog';
 import { getSales } from '../../src/gql/sale';
+import {getConsultations, setConsultation} from '../../src/gql/consultation'
+import { getClientGqlSsr } from '../../src/apollo'
 
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -29,12 +31,12 @@ const Catalog = React.memo((props) => {
     //props
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
     const {  profile } = props.user;
-    const {  isMobileApp } = props.app;
+    const {  isMobileApp, consultation } = props.app;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     //настройка
     const initialRender = useRef(true);
-    let [client, setClient] = useState(null);
+    let [client, setClient] = useState(consultation.client);
     let [sale, setSale] = useState(null);
     let [currency, setCurrency] = useState('сом');
     //корзина
@@ -57,6 +59,14 @@ const Catalog = React.memo((props) => {
         else
             initialRender.current = false
     },[basket])
+    //useEffect
+    useEffect(()=>{
+        setConsultation({
+            info: consultation.info,
+            statusClient: consultation.statusClient,
+            client: client?client._id:null
+        })
+    },[client])
     //render
     return (
         <App pageName='Каталог'>
@@ -73,6 +83,7 @@ const Catalog = React.memo((props) => {
             <Card className={classes.page} style={{margin: 0, width: '100%'}}>
                 <CardContent className={classes.column} style={{maxWidth: 600, padding: 10}}>
                     <AutocomplectOnline
+                        defaultValue={client}
                         error={!client}
                         element={client}
                         setElement={client=>{
@@ -241,6 +252,15 @@ const Catalog = React.memo((props) => {
 Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
     if(!['менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
+        if(ctx.res) {
+            ctx.res.writeHead(302, {
+                Location: '/'
+            })
+            ctx.res.end()
+        } else
+            Router.push('/')
+    store.getState().app.consultation = (await getConsultations({active: true}, ctx.req?await getClientGqlSsr(ctx.req):undefined))[0]
+    if(!store.getState().app.consultation)
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

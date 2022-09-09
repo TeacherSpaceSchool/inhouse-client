@@ -103,7 +103,7 @@ const Items = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead}>
                         <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 4)', justifyContent: 'start'}}>
                             Название
                         </div>
@@ -119,7 +119,7 @@ const Items = React.memo((props) => {
                     </div>
                     {list.map((element) =>
                         <Link href='/item/[id]' as={`/item/${element._id}`} key={element._id}>
-                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}} onClick={()=>{
+                            <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]
                                 sessionStorage.scrollPositionStore = appBody.scrollTop
                                 sessionStorage.scrollPositionName = 'item'

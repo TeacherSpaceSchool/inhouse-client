@@ -29,7 +29,7 @@ export const getStoreBalanceItems = async({item, skip, sort, store}, client)=>{
                         storeBalanceItems(item: $item, skip: $skip, sort: $sort, store: $store) {
                             _id
                             createdAt
-                            item {_id name}
+                            item {_id name unit factory {name} category {name}}
                             store {_id name}
                             amount
                             reservation

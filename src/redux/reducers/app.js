@@ -1,4 +1,4 @@
-import { SET_SHOW_LIGHTBOX, SET_COLUMNS, SET_IMAGES_LIGHTBOX, SET_INDEX_LIGHTBOX, SHOW_APPBAR, SHOW_DRAWER, SET_SEARCH, SET_FILTER, SET_SORT, SET_IS_MOBILE_APP, SHOW_LOAD, SET_DATE } from '../constants/app'
+import { SET_CONSULTATION, SET_SHOW_LIGHTBOX, SET_COLUMNS, SET_IMAGES_LIGHTBOX, SET_INDEX_LIGHTBOX, SHOW_APPBAR, SHOW_DRAWER, SET_SEARCH, SET_FILTER, SET_SORT, SET_IS_MOBILE_APP, SHOW_LOAD, SET_DATE } from '../constants/app'
 
 const initialState = {
     showAppBar: true,
@@ -12,6 +12,7 @@ const initialState = {
     date: '',
     showLightbox: false,
     columns: [],
+    consultation: null,
     imagesLightbox: [],
     indexLightbox: 0
 }
@@ -22,6 +23,8 @@ export default function mini_dialog(state = initialState, action) {
             return {...state, showAppBar: action.payload}
         case SET_COLUMNS:
             return {...state, columns: action.payload}
+        case SET_CONSULTATION:
+            return {...state, consultation: action.payload}
         case SHOW_DRAWER:
             return {...state, drawer: action.payload}
         case SET_SORT:

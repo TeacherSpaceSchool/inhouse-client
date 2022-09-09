@@ -20,6 +20,7 @@ import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import dynamic from 'next/dynamic'
 import {endConsultation} from '../../src/gql/consultation'
 const Geo = dynamic(import('./Geo'), { ssr: false });
+import {setConsultation} from '../../src/gql/consultation'
 
 const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юань']
 
@@ -27,7 +28,7 @@ const BuyBasket =  React.memo(
     (props) =>{
         const { amountStart, type, items, client, orders, reservations, prepaid, installmentsDebt, _currency, sale, _discount } = props;
         const { profile } = props.user;
-        const { isMobileApp } = props.app;
+        const { isMobileApp, consultation } = props.app;
         const { classes } = dialogContentStyle();
         const { showMiniDialog, showFullDialog, setFullDialog } = props.mini_dialogActions;
         const { showLoad } = props.appActions;
@@ -376,7 +377,13 @@ const BuyBasket =  React.memo(
                             if (paid >= 0) {
                                 showLoad(true)
                                 let res
-                                if (type === 'order')
+                                if (type === 'order') {
+                                    setConsultation({
+                                        info: consultation.info,
+                                        statusClient: consultation.statusClient,
+                                        client: consultation.client?consultation.client._id:null,
+                                        operation: 'на заказ'
+                                    })
                                     res = await addOrder({
                                         client: client._id,
                                         itemsOrder: items,
@@ -386,7 +393,14 @@ const BuyBasket =  React.memo(
                                         comment,
                                         currency
                                     })
-                                else if (type === 'reservation')
+                                }
+                                else if (type === 'reservation') {
+                                    setConsultation({
+                                        info: consultation.info,
+                                        statusClient: consultation.statusClient,
+                                        client: consultation.client?consultation.client._id:null,
+                                        operation: 'бронь'
+                                    })
                                     res = await addReservation({
                                         client: client._id,
                                         term: date,
@@ -397,7 +411,14 @@ const BuyBasket =  React.memo(
                                         comment,
                                         currency
                                     })
-                                else if (type === 'refund')
+                                }
+                                else if (type === 'refund') {
+                                    setConsultation({
+                                        info: consultation.info,
+                                        statusClient: consultation.statusClient,
+                                        client: consultation.client?consultation.client._id:null,
+                                        operation: 'возврат'
+                                    })
                                     res = await addRefund({
                                         client: client._id,
                                         discount: checkFloat(amountStart - amountEnd),
@@ -407,12 +428,19 @@ const BuyBasket =  React.memo(
                                         currency,
                                         sale
                                     })
+                                }
                                 else if (type === 'sale') {
                                     paidInstallment = checkFloat(paidInstallment)
                                     monthInstallment = checkFloat(monthInstallment)
                                     paid = checkFloat(paid)
                                     amountEnd = checkFloat(amountEnd)
                                     if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
+                                        setConsultation({
+                                            info: consultation.info,
+                                            statusClient: consultation.statusClient,
+                                            client: consultation.client?consultation.client._id:null,
+                                            operation: `продажа${(paid + prepaid) < amountEnd?'-рассрочка':''}`
+                                        })
                                         res = await addSale({
                                             geo,
                                             client: client._id,

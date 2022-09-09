@@ -31,6 +31,7 @@ import ShowItemsCatalog from '../components/dialog/ShowItemsCatalog';
 import { getOrders } from '../src/gql/order';
 import { getReservations } from '../src/gql/reservation';
 import { getInstallments } from '../src/gql/installment';
+import {getConsultations, setConsultation} from '../src/gql/consultation'
 
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -38,13 +39,13 @@ const Catalog = React.memo((props) => {
     //props
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
     const { data } = props;
-    const { search, filter, isMobileApp } = props.app;
+    const { search, filter, isMobileApp, consultation } = props.app;
     const { profile } = props.user;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     //настройка
     const initialRender = useRef(true);
-    let [client, setClient] = useState(null);
+    let [client, setClient] = useState(consultation.client);
     let [orders, setOrders] = useState([]);
     let [reservations, setReservations] = useState([]);
     let [itemsReservations, setItemsReservations] = useState({});
@@ -125,6 +126,67 @@ const Catalog = React.memo((props) => {
                 paginationWork.current = false
         }
     }
+    //useEffect
+    useEffect(()=>{
+        (async()=>{
+            if(data.type==='sale') {
+                if (client) {
+                    let installments = [
+                        ...await getInstallments({
+                            store: profile.store,
+                            client: client._id,
+                            status: 'безнадежна'
+                        }),
+                        ...await getInstallments({
+                            store: profile.store,
+                            client: client._id,
+                            status: 'активна'
+                        }),
+                    ]
+                    installmentsDebt = 0
+                    for(let i = 0; i <installments.length; i++) {
+                        installmentsDebt += installments[i].debt
+                    }
+                    setInstallmentsDebt(installmentsDebt)
+                    orders = await getOrders({
+                        store: profile.store,
+                        manager: profile._id,
+                        client: client._id,
+                        status: 'принят',
+                        items: true
+                    })
+                    setOrders(orders)
+                    reservations = await getReservations({
+                        store: profile.store,
+                        manager: profile._id,
+                        client: client._id,
+                        status: 'обработка',
+                        items: true
+                    })
+                    setReservations(reservations)
+                    for (let i = 0; i < reservations.length; i++) {
+                        for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
+                            if (!itemsReservations[reservations[i].itemsReservation[i1].item])
+                                itemsReservations[reservations[i].itemsReservation[i1].item] = 0
+                            itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
+                        }
+                    }
+                    setItemsReservations(itemsReservations)
+                }
+                else {
+                    setOrders([])
+                    setReservations([])
+                    setItemsReservations({})
+                    setInstallmentsDebt(0)
+                }
+            }
+            setConsultation({
+                info: consultation.info,
+                statusClient: consultation.statusClient,
+                client: client?client._id:null
+            })
+        })()
+    },[client])
     //render
     return (
         <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Каталог'>
@@ -141,60 +203,10 @@ const Catalog = React.memo((props) => {
             <Card className={classes.page} style={{margin: 0, width: '100%'}}>
                 <CardContent className={classes.column} style={{maxWidth: 600, padding: 10}}>
                     <AutocomplectOnline
+                        defaultValue={client}
                         error={!client}
                         element={client}
-                        setElement={async (client)=>{
-                            if(data.type==='sale') {
-                                if (client) {
-                                    let installments = [
-                                        ...await getInstallments({
-                                            store: profile.store,
-                                            client: client._id,
-                                            status: 'безнадежна'
-                                        }),
-                                        ...await getInstallments({
-                                            store: profile.store,
-                                            client: client._id,
-                                            status: 'активна'
-                                        }),
-                                    ]
-                                    installmentsDebt = 0
-                                    for(let i = 0; i <installments.length; i++) {
-                                        installmentsDebt += installments[i].debt
-                                    }
-                                    setInstallmentsDebt(installmentsDebt)
-                                    orders = await getOrders({
-                                        store: profile.store,
-                                        manager: profile._id,
-                                        client: client._id,
-                                        status: 'принят',
-                                        items: true
-                                    })
-                                    setOrders(orders)
-                                    reservations = await getReservations({
-                                        store: profile.store,
-                                        manager: profile._id,
-                                        client: client._id,
-                                        status: 'обработка',
-                                        items: true
-                                    })
-                                    setReservations(reservations)
-                                    for (let i = 0; i < reservations.length; i++) {
-                                        for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
-                                            if (!itemsReservations[reservations[i].itemsReservation[i1].item])
-                                                itemsReservations[reservations[i].itemsReservation[i1].item] = 0
-                                            itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
-                                        }
-                                    }
-                                    setItemsReservations(itemsReservations)
-                                }
-                                else {
-                                    setOrders([])
-                                    setReservations([])
-                                    setItemsReservations({})
-                                    setInstallmentsDebt(0)
-                                }
-                            }
+                        setElement={(client)=>{
                             setClient(client)
                         }}
                         dialogAddElement={profile.add?(setElement, setInputValue, value)=>{return <AddClient setClient={setClient} value={value}/>}:null}
@@ -456,6 +468,15 @@ const Catalog = React.memo((props) => {
 Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
     if(!['менеджер', 'менеджер/завсклад'].includes(store.getState().user.profile.role))
+        if(ctx.res) {
+            ctx.res.writeHead(302, {
+                Location: '/'
+            })
+            ctx.res.end()
+        } else
+            Router.push('/')
+    store.getState().app.consultation = (await getConsultations({active: true}, ctx.req?await getClientGqlSsr(ctx.req):undefined))[0]
+    if(!store.getState().app.consultation)
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'

@@ -172,7 +172,7 @@ const Installments = React.memo((props) => {
                         </div>
                     </div>
                     {list.map((element, idx) =>
-                        <div className={classes.tableRow} style={{width: 'fit-content'}}>
+                        <div className={classes.tableRow}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -386,11 +386,12 @@ const Installments = React.memo((props) => {
                                                             unsaved.current[list[idx]._id] = true
                                                             list[idx].grid[idx1].month = date
                                                             setList([...list])
+                                                            showMiniDialog(false)
                                                         }}/>)
                                                         showMiniDialog(true)
                                                     }
                                                 }}
-                                                style={{fontWeight: 'bold', color: grid.amount!=0&&(!grid.paid||grid.paid==0)&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today.current?'red':'blue', height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>
+                                                style={{fontWeight: 'bold', color: grid.amount!=0&&(!grid.paid||grid.paid==0)&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today?'red':'blue', height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>
                                                 {
                                                     pdDDMMYYYY(grid.month)
                                                 }

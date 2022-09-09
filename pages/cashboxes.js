@@ -106,7 +106,7 @@ const Cashboxes = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{minWidth: 200, width: `calc((100% - ${data.edit?240:200}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
                             Название
@@ -120,7 +120,7 @@ const Cashboxes = React.memo((props) => {
                     </div>
                     {
                         data.add?
-                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
+                            <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
@@ -196,7 +196,7 @@ const Cashboxes = React.memo((props) => {
                             null
                     }
                     {list.map((element, idx) =>
-                        <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
+                        <div className={classes.tableRow} key={element._id}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>

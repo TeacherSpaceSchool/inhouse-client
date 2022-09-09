@@ -143,7 +143,7 @@ const Salarys = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                    <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                             Сотрудник
@@ -190,7 +190,7 @@ const Salarys = React.memo((props) => {
                     </div>
                     {
                         data.add&&!search&&!filter.user&&!filter.department&&!filter.position?
-                            <div className={classes.tableRow} style={{width: 'fit-content'}}>
+                            <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
@@ -449,7 +449,7 @@ const Salarys = React.memo((props) => {
                             null
                     }
                     {list.map((element, idx) =>
-                        <div className={classes.tableRow} style={{width: 'fit-content'}}>
+                        <div className={classes.tableRow}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -783,6 +783,7 @@ const Salarys = React.memo((props) => {
                     }
                     else
                         showSnackBar('Сохраните изменения или обновите страницу')
+                    showMiniDialog(false)
                 }} month/>)
                 showMiniDialog(true)
             }}>

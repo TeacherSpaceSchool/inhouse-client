@@ -30,6 +30,7 @@ const MovingWarehouses =  React.memo(
         let [item, setItem] = useState(null);
         let [free, setFree] = useState(null);
         let [count, setCount] = useState(null);
+        let [info, setInfo] = useState('');
         return (
             <div className={classes.main} style={{width}}>
                 <AutocomplectOnline
@@ -82,7 +83,9 @@ const MovingWarehouses =  React.memo(
                                 if(item) {
                                     let balanceItem = (await getBalanceItems({item: item._id, warehouse: warehouse1._id, store: warehouse1.store._id}))[0];
                                     let storeBalanceItem = (await getStoreBalanceItems({item: item._id, store: warehouse1.store._id}))[0];
-                                    if(!balanceItem||!storeBalanceItem)
+                                    if(['Брак', 'Реставрация'].includes(warehouse1.name))
+                                        free = balanceItem.amount
+                                    else if(!balanceItem||!storeBalanceItem)
                                         free = 0
                                     else {
                                         free = balanceItem.amount>storeBalanceItem.free?storeBalanceItem.free:balanceItem.amount
@@ -130,6 +133,15 @@ const MovingWarehouses =  React.memo(
                                     label='Получатель'
                                     minLength={0}
                                 />
+                                <TextField
+                                    id='info'
+                                    variant='standard'
+                                    onChange={(event) => setInfo(event.target.value)}
+                                    label='Комментарий'
+                                    multiline={true}
+                                    value={info}
+                                    className={classes.input}
+                                />
                                 </>
                                 :
                                 null
@@ -154,7 +166,8 @@ const MovingWarehouses =  React.memo(
                                     warehouse: warehouse1._id,
                                     amount: count,
                                     type: '-',
-                                    warehouse2: warehouse2.name
+                                    warehouse2: warehouse2.name,
+                                    info
                                 })
                                 if (!res || res === 'ERROR') {
                                     showSnackBar('Ошибка', 'error')
@@ -165,6 +178,7 @@ const MovingWarehouses =  React.memo(
                                         warehouse: warehouse2._id,
                                         amount: count,
                                         type: '+',
+                                        info,
                                         warehouse2: warehouse1.name
                                     })
                                     if (!res || res === 'ERROR') {

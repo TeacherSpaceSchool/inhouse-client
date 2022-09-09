@@ -52,11 +52,13 @@ const WayItems = React.memo((props) => {
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    const { isMobileApp, filter } = props.app;
+    const { filter } = props.app;
+    const { profile } = props.user;
     //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [today, setToday] = useState();
+    let [free, setFree] = useState(0);
     let [newElement, setNewElement] = useState({
         amount: '',
         bookings: []
@@ -67,6 +69,7 @@ const WayItems = React.memo((props) => {
     const getList = async ()=>{
         list = cloneObject(await getWayItems({
             skip: 0,
+            ...filter.my==='my'?{my: true}:{},
             ...filter.date?{date: filter.date}:{},
             ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{},
@@ -82,6 +85,7 @@ const WayItems = React.memo((props) => {
             }
         setList(list);
         setCount(await getWayItemsCount({
+            ...filter.my==='my'?{my: true}:{},
             ...filter.date?{date: filter.date}:{},
             ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{},
@@ -110,6 +114,7 @@ const WayItems = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getWayItems({skip: list.length,
+                ...filter.my==='my'?{my: true}:{},
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.date?{date: filter.date}:{},
                 ...filter.store?{store: filter.store._id}:{},
@@ -135,8 +140,14 @@ const WayItems = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     //render
+    useEffect(()=>{
+        let used = 0
+        for(let i=0; i<newElement.bookings.length; i++)
+            used += newElement.bookings[i].amount
+        setFree(checkFloat(newElement.amount - used))
+    },[newElement])
     return (
-        <App unsaved={unsaved} filterShow={{item: true, store: true, status, timeDif: true, date: true}} checkPagination={checkPagination} pageName='В пути' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} filterShow={{my: profile.role==='менеджер', item: true, store: true, status, timeDif: true, date: true}} checkPagination={checkPagination} pageName='В пути' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>В пути</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -147,24 +158,21 @@ const WayItems = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/wayitems`} />
                 <link rel='canonical' href={`${urlMain}/wayitems`}/>
             </Head>
-            <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
+            <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead} style={{width: 'fit-content'}}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                             Статус
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                             Модель
                         </div>
                         <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                            Фабрика
+                        </div>
+                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                             Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Кол-во
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Свободно
                         </div>
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                             Отправлен
@@ -172,13 +180,19 @@ const WayItems = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                             Прибытие
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                            Кол-во
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                            Свободно
+                        </div>
+                        <div className={classes.tableCell} style={{width: 300, justifyContent: data.edit?'center':'start'}}>
                             Бронь
                         </div>
                     </div>
                     {
                         data.add&&!filter.date&&!filter.item&&!filter.status&&!filter.timeDif?
-                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
+                            <div className={classes.tableRow} style={{width: 'fit-content'}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
@@ -239,7 +253,7 @@ const WayItems = React.memo((props) => {
                                     </IconButton>
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100}}/>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                                     <AutocomplectOnline
                                         element={newElement.item}
                                         error={!newElement.item&&newElement.unsaved}
@@ -254,6 +268,9 @@ const WayItems = React.memo((props) => {
                                         }}
                                         placeholder={'Модель'}
                                     />
+                                </div>
+                                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                    {newElement.item?newElement.item.factory.name:''}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                                     <AutocomplectOnline
@@ -272,22 +289,6 @@ const WayItems = React.memo((props) => {
                                         minLength={0}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100}}>
-                                    <Input
-                                        placeholder='Кол-во'
-                                        error={!newElement.amount&&newElement.unsaved}
-                                        variant='standard'
-                                        className={classes.input}
-                                        value={newElement.amount}
-                                        onChange={(event) => {
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.amount = inputFloat(event.target.value)
-                                            setNewElement({...newElement})
-                                        }}
-                                    />
-                                </div>
-                                <div className={classes.tableCell} style={{width: 100}}/>
                                 <div className={classes.tableCell} style={{width: 135}}>
                                     <Input
                                         type='date'
@@ -318,37 +319,53 @@ const WayItems = React.memo((props) => {
                                         }}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
-                                    setMiniDialog('Бронь', <SetBookings edit={data.edit} element={newElement} setElement={(bookings)=>{
-                                        newElement.unsaved = true
-                                        unsaved.current['new'] = true
-                                        newElement.bookings = bookings
-                                        setNewElement({...newElement})
-                                    }}/>)
-                                    showMiniDialog(true)
-                                }}>
+                                <div className={classes.tableCell} style={{width: 100}}>
+                                    <Input
+                                        placeholder='Кол-во'
+                                        error={!newElement.amount&&newElement.unsaved}
+                                        variant='standard'
+                                        className={classes.input}
+                                        value={newElement.amount}
+                                        onChange={(event) => {
+                                            newElement.unsaved = true
+                                            unsaved.current['new'] = true
+                                            newElement.amount = inputFloat(event.target.value)
+                                            setNewElement({...newElement})
+                                        }}
+                                    />
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100}}>
+                                    {free}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 300, flexDirection: 'column'}}>
                                     {
-                                        newElement.bookings.length?
-                                            newElement.bookings.map((booking, idx) =>
-                                                <div className={classes.row} key={`booking${idx}`}>
-                                                        <div className={classes.nameField} style={{fontWeight: 500}}>
-                                                            <Link href='/user/[id]' as={`/user/${booking.manager._id}`}>
-                                                                <a>
-                                                                    {booking.manager.name}
-                                                                    </a>
-                                                            </Link>
-                                                            :&nbsp;
-                                                        </div>
-                                                    <div className={classes.value} style={{fontWeight: 400}}>
-                                                        {booking.amount} шт
-                                                    </div>
+                                        newElement.bookings.length?newElement.bookings.map((booking, idx) =>
+                                            <div className={classes.row} key={`booking${idx}`}>
+                                                <div className={classes.nameField} style={{fontWeight: 500}}>
+                                                    <Link href='/user/[id]' as={`/user/${booking.manager._id}`}>
+                                                        <a>
+                                                            {booking.manager.name}
+                                                        </a>
+                                                    </Link>
+                                                    :&nbsp;
                                                 </div>
-                                            )
-                                            :
-                                            <center style={{width: '100%'}}><Button size='small' color='primary'>
-                                                Добавить бронь
-                                            </Button></center>
+                                                <div className={classes.value} style={{fontWeight: 400}}>
+                                                    {booking.amount} шт
+                                                </div>
+                                            </div>
+                                        ):null
                                     }
+                                    <center style={{width: '100%'}}><Button onClick={()=>{
+                                        setMiniDialog('Бронь', <SetBookings edit={data.edit} element={newElement} setElement={(bookings)=>{
+                                            newElement.unsaved = true
+                                            unsaved.current['new'] = true
+                                            newElement.bookings = bookings
+                                            setNewElement({...newElement})
+                                        }}/>)
+                                        showMiniDialog(true)
+                                    }} size='small' color='primary'>
+                                        {newElement.bookings.length?'Редактировать бронь':'Добавить бронь'}
+                                    </Button></center>
                                 </div>
                             </div>
                             :
@@ -359,7 +376,7 @@ const WayItems = React.memo((props) => {
                         for(let i=0; i<element.bookings.length; i++)
                             used += element.bookings[i].amount
                         const free = checkFloat(element.amount - used)
-                        return <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
+                        return <div className={classes.tableRow} key={element._id} style={{width: 'fit-content'}}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -471,38 +488,20 @@ const WayItems = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 100, fontWeight: 'bold', color: colors[element.status], justifyContent: data.edit?'center':'start'}}>
                                 {element.status}
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                            <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                                 {
                                     element.item.name
                                 }
                             </div>
                             <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                                 {
+                                    element.item.factory.name
+                                }
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                {
                                     element.store.name
                                 }
-                            </div>
-                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                {
-                                    data.edit&&['обработка', 'в пути'].includes(element.status)?
-                                        <Input
-                                            placeholder='Количество'
-                                            error={!element.amount}
-                                            variant='standard'
-                                            className={classes.input}
-                                            value={element.amount}
-                                            onChange={(event) => {
-                                                list[idx].unsaved = true
-                                                unsaved.current[list[idx]._id] = true
-                                                list[idx].amount = inputFloat(event.target.value)
-                                                setList([...list])
-                                            }}
-                                        />
-                                        :
-                                        <>{element.amount} {element.item.unit}</>
-                                }
-                            </div>
-                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                                {free} {element.item.unit}
                             </div>
                             <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                                 {
@@ -551,35 +550,53 @@ const WayItems = React.memo((props) => {
                                             null
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?760:720}px) / 2)`, flexDirection: 'column'}} onClick={()=>{
-                                setMiniDialog('Бронь', <SetBookings edit={data.edit} element={element} setElement={(bookings)=>{
-                                    list[idx].unsaved = true
-                                    unsaved.current[list[idx]._id] = true
-                                    list[idx].bookings = bookings
-                                    setList([...list])
-                                }}/>)
-                                showMiniDialog(true)
-                            }}>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
                                 {
-                                    element.bookings.length?
-                                        element.bookings.map((booking, idx) =>
-                                            <div className={classes.row} key={`booking${idx}`}>
-                                                <div className={classes.nameField} style={{fontWeight: 500}}>
-                                                    {booking.manager.name}:&nbsp;
-                                                </div>
-                                                <div className={classes.value} style={{fontWeight: 400}}>
-                                                    {booking.amount} шт
-                                                </div>
-                                            </div>
-                                        )
+                                    data.edit&&['обработка', 'в пути'].includes(element.status)?
+                                        <Input
+                                            placeholder='Количество'
+                                            error={!element.amount}
+                                            variant='standard'
+                                            className={classes.input}
+                                            value={element.amount}
+                                            onChange={(event) => {
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].amount = inputFloat(event.target.value)
+                                                setList([...list])
+                                            }}
+                                        />
                                         :
-                                        data.edit?
-                                            <center style={{width: '100%'}}><Button size='small' color='primary'>
-                                                Добавить бронь
-                                            </Button></center>
-                                            :
-                                            null
+                                        <>{element.amount} {element.item.unit}</>
                                 }
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                                {free} {element.item.unit}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 300, flexDirection: 'column'}}>
+                                {
+                                    element.bookings.length?element.bookings.map((booking, idx) =>
+                                        <div className={classes.row} key={`booking${idx}`}>
+                                            <div className={classes.nameField} style={{fontWeight: 500}}>
+                                                {booking.manager.name}:&nbsp;
+                                            </div>
+                                            <div className={classes.value} style={{fontWeight: 400}}>
+                                                {booking.amount} шт
+                                            </div>
+                                        </div>
+                                    ):null
+                                }
+                                <center style={{width: '100%'}}><Button onClick={()=>{
+                                    setMiniDialog('Бронь', <SetBookings edit={data.edit} element={element} setElement={(bookings)=>{
+                                        list[idx].unsaved = true
+                                        unsaved.current[list[idx]._id] = true
+                                        list[idx].bookings = bookings
+                                        setList([...list])
+                                    }}/>)
+                                    showMiniDialog(true)
+                                }} size='small' color='primary'>
+                                    {element.bookings.length?'Редактировать бронь':'Добавить бронь'}
+                                </Button></center>
                             </div>
                         </div>
                     })}
@@ -644,6 +661,7 @@ WayItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
 function mapStateToProps (state) {
     return {
         app: state.app,
+        user: state.user,
     }
 }
 

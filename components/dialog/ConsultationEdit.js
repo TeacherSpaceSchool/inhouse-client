@@ -22,14 +22,14 @@ const statusClients = ['холодный', 'теплый', 'горячий']
 const ConsultationEdit =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { _consultation, _setConsultation } = props
-        const { isMobileApp } = props.app;
+        const { closeConsultation } = props
+        const { isMobileApp, consultation } = props.app;
         const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
         const { showSnackBar } = props.snackbarActions;
         const width = isMobileApp? (window.innerWidth-113) : 500
-        let [client, setClient] = useState(_consultation.client);
-        let [info, setInfo] = useState(_consultation.info);
-        let [statusClient, setStatusClient] = useState(_consultation.statusClient);
+        let [client, setClient] = useState(consultation.client);
+        let [info, setInfo] = useState(consultation.info);
+        let [statusClient, setStatusClient] = useState(consultation.statusClient);
         let handleStatus = (event) => {
             setStatusClient(event.target.value)
         };
@@ -37,19 +37,24 @@ const ConsultationEdit =  React.memo(
             <div className={classes.main} style={{width}}>
                 <br/>
                 <FormControl className={classes.input}>
-                    <InputLabel>Статус клиента</InputLabel>
-                    <Select variant='standard' value={statusClient} onChange={handleStatus}>
+                    <InputLabel error={!statusClient}>Статус клиента</InputLabel>
+                    <Select error={!statusClient} variant='standard' value={statusClient} onChange={handleStatus}>
                         {statusClients.map((element)=>
                             <MenuItem key={element} value={element}>{element}</MenuItem>
                         )}
                     </Select>
                 </FormControl>
                 <AutocomplectOnline
+                    error={!client}
+                    defaultValue={client}
                     element={client}
                     setElement={async (client)=>{
                         setClient(client)
                     }}
-                    dialogAddElement={(setElement, setInputValue, value)=>{return <AddClient setClient={setClient} value={value}/>}}
+                    dialogAddElement={(setElement, setInputValue, value)=>{return <AddClient
+                        _consultation closeConsultation={closeConsultation} setClient={setClient}
+                        value={value}
+                    />}}
                     getElements={async (search)=>{
                         return await getClients({search})
                     }}
@@ -57,6 +62,7 @@ const ConsultationEdit =  React.memo(
                     label={'Клиент'}
                 />
                 <TextField
+                    error={!info}
                     id='info'
                     variant='standard'
                     onChange={(event) => setInfo(event.target.value)}
@@ -71,29 +77,38 @@ const ConsultationEdit =  React.memo(
                     <Button variant='contained' color='secondary' onClick={()=>{
                         showMiniDialog(false);
                     }} className={classes.button}>
-                        Закрыть
+                        {closeConsultation?'Отмена':'Закрыть'}
                     </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
-                        setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                            let res = await setConsultation({
-                                info,
-                                client: client?client._id:null,
-                                statusClient
-                            })
-                            if (!res || res === 'ERROR') {
-                                showSnackBar('Ошибка', 'error')
-                            }
-                            else {
-                                showSnackBar('Успешно', 'success')
-                                showMiniDialog(false)
-                                _consultation.client = client
-                                _consultation.info = info
-                                _consultation.statusClient = statusClient
-                                _setConsultation({..._consultation})
-                            }
+                        if(!closeConsultation||info&&client&&statusClient) {
+                            setMiniDialog('Вы уверены?', <Confirmation action={async () => {
+                                let res = await setConsultation({
+                                    info,
+                                    client: client ? client._id : null,
+                                    statusClient
+                                })
+                                if (!res || res === 'ERROR') {
+                                    showSnackBar('Ошибка', 'error')
+                                }
+                                else {
+                                    showSnackBar('Успешно', 'success')
+                                    if (closeConsultation) {
+                                        await closeConsultation()
+                                    }
+                                    else {
+                                        consultation.client = client
+                                        consultation.info = info
+                                        consultation.statusClient = statusClient
+                                        props.appActions.setConsultation({...consultation})
+                                    }
+                                    showMiniDialog(false)
+                                }
                         }}/>)
+                        }
+                        else
+                            showSnackBar('Заполните все поля')
                     }} className={classes.button}>
-                        Сохранить
+                        {closeConsultation?'Закрыть консультацию':'Сохранить'}
                     </Button>
                 </div>
             </div>

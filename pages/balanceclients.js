@@ -77,7 +77,7 @@ const BalanceClients = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead}>
                         <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
                             Клиент
                         </div>
@@ -86,7 +86,7 @@ const BalanceClients = React.memo((props) => {
                         </div>
                     </div>
                     {list.map((element) =>
-                        <div className={classes.tableRow} key={element._id} style={isMobileApp?{width: 'fit-content'}:{}}>
+                        <div className={classes.tableRow} key={element._id}>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
                                 <Link href='/client/[id]' as={`/client/${element.client._id}`}>
                                     <a>

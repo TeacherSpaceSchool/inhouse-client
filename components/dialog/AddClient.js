@@ -17,15 +17,17 @@ import Remove from '@mui/icons-material/Remove';
 import { validPhone1, validMail, inputPhone, pdDatePicker, validPhones1, validMails } from '../../src/lib'
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import ConsultationEdit from './ConsultationEdit'
 
 const levels = ['Бронза', 'Серебро', 'Золото', 'Платина']
 
 const AddClient =  React.memo(
     (props) =>{
         const { classes } = dialogContentStyle();
-        const { value, setClient } = props;
-        const { isMobileApp } = props.app;
-        const { showMiniDialog } = props.mini_dialogActions;
+        const { value, setClient, _consultation, closeConsultation } = props;
+        const { isMobileApp, consultation } = props.app;
+        const { setConsultation } = props.appActions;
+        const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
         const { showSnackBar } = props.snackbarActions;
         const width = isMobileApp? (window.innerWidth-113) : 500
         let [name, setName] = useState(value);
@@ -224,14 +226,20 @@ const AddClient =  React.memo(
                                 showSnackBar('Успешно', 'success')
                                 client._id = res
                                 setClient(client)
-                                showMiniDialog(false);
+                                if(_consultation) {
+                                    consultation.client = client
+                                    setConsultation({...consultation})
+                                    setMiniDialog('Комментировать', <ConsultationEdit closeConsultation={closeConsultation}/>)
+                                }
+                                else
+                                    showMiniDialog(false);
                             }
                             else
                                 showSnackBar('Ошибка', 'error')
                         } else
                             showSnackBar('Заполните все поля')
                     }} className={classes.button}>
-                        Сохранить
+                        Добавить
                     </Button>
                 </div>
             </div>

@@ -109,13 +109,13 @@ const BonusCpas = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                             Магазин
                         </div>
                         <div className={classes.tableCell} style={{
-                            ...isMobileApp?{minWidth: 200}:{},
+                            ...isMobileApp?{minWidth: 250}:{},
                             width: data.edit?'calc(100% - 190px)':'calc(100% - 150px)',
                             justifyContent: data.edit?'center':'start'
                         }}>
@@ -124,7 +124,7 @@ const BonusCpas = React.memo((props) => {
                     </div>
                     {
                         data.add?
-                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
+                            <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
@@ -213,7 +213,7 @@ const BonusCpas = React.memo((props) => {
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{
-                                    ...isMobileApp?{minWidth: 200}:{},
+                                    ...isMobileApp?{minWidth: 250}:{},
                                     width: data.edit?'calc(100% - 190px)':'calc(100% - 150px)',
                                     justifyContent: data.edit?'center':'start',
                                     flexDirection: 'column'
@@ -401,7 +401,7 @@ const BonusCpas = React.memo((props) => {
                             null
                     }
                     {list.map((element, idx) =>
-                        <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}}>
+                        <div className={classes.tableRow}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -507,7 +507,7 @@ const BonusCpas = React.memo((props) => {
                                 {element.store.name}
                             </div>
                             <div className={classes.tableCell} style={{
-                                ...isMobileApp?{minWidth: 200}:{},
+                                ...isMobileApp?{minWidth: 250}:{},
                                 width: data.edit?'calc(100% - 190px)':'calc(100% - 150px)',
                                 justifyContent: data.edit?'center':'start',
                                 flexDirection: 'column'

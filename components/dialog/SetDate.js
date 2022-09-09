@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
 import { pdDatePicker, pdDatePickerMonth } from '../../src/lib'
+import * as snackbarActions from '../../src/redux/actions/snackbar'
 
 const SetDate =  React.memo(
     (props) =>{
@@ -14,6 +15,7 @@ const SetDate =  React.memo(
         const { date, setDate, month } = props;
         const { isMobileApp } = props.app;
         let [_date, _setDate] = useState(month?pdDatePickerMonth(date):pdDatePicker(date));
+        const { showSnackBar } = props.snackbarActions;
         const { showMiniDialog } = props.mini_dialogActions;
         const width = isMobileApp? (window.innerWidth-113) : 500
         return (
@@ -43,8 +45,10 @@ const SetDate =  React.memo(
                         Закрыть
                     </Button>
                     <Button variant="contained" color="primary" onClick={async()=>{
-                        setDate(_date)
-                        showMiniDialog(false);
+                        if(!_date)
+                            showSnackBar('Укажите дату')
+                        else
+                            setDate(_date)
                     }} className={classes.button}>
                         Сохранить
                     </Button>
@@ -62,6 +66,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps(dispatch) {
     return {
+        snackbarActions: bindActionCreators(snackbarActions, dispatch),
         mini_dialogActions: bindActionCreators(mini_dialogActions, dispatch),
         appActions: bindActionCreators(appActions, dispatch),
     }

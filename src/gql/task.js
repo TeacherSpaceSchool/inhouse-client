@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadTasks = async({status, search, employment}, client)=>{
+export const getUnloadTasks = async({status, search, employment, soon, late, today}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-            variables: {status, search, employment},
+            variables: {status, search, employment, soon, late, today},
             query: gql`
-                    query ($status: String, $search: String, $employment: ID) {
-                        unloadTasks(status: $status, search: $search, employment: $employment)
+                    query ($status: String, $search: String, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
+                        unloadTasks(status: $status, search: $search, employment: $employment, soon: $soon, late: $late, today: $today)
                     }`,
         })
         return res.data.unloadTasks
@@ -43,15 +43,15 @@ export const getTask = async({_id}, client)=>{
     }
 }
 
-export const getTasks = async({status, search, skip, limit, employment}, client)=>{
+export const getTasks = async({status, search, skip, limit, employment, soon, late, today}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-                variables: {status, search, skip, limit, employment},
+                variables: {status, search, skip, limit, employment, soon, late, today},
                 query: gql`
-                    query ($status: String, $search: String, $skip: Int, $limit: Int, $employment: ID) {
-                        tasks(status: $status, search: $search, skip: $skip, limit: $limit, employment: $employment) {
+                    query ($status: String, $search: String, $skip: Int, $limit: Int, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
+                        tasks(status: $status, search: $search, skip: $skip, limit: $limit, employment: $employment, soon: $soon, late: $late, today: $today) {
                             _id
                             createdAt
                             who {_id name}
@@ -68,15 +68,15 @@ export const getTasks = async({status, search, skip, limit, employment}, client)
     }
 }
 
-export const getTasksCount = async({search, status, employment}, client)=>{
+export const getTasksCount = async({search, status, employment, soon, late, today}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {search, status, employment},
+                variables: {search, status, employment, soon, late, today},
                 query: gql`
-                    query ($search: String, $status: String, $employment: ID) {
-                        tasksCount(search: $search, status: $status, employment: $employment)
+                    query ($search: String, $status: String, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
+                        tasksCount(search: $search, status: $status, employment: $employment, soon: $soon, late: $late, today: $today)
                     }`,
             })
         return res.data.tasksCount

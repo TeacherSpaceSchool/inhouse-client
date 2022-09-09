@@ -1,15 +1,42 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadConsultations = async({manager, store, date}, client)=>{
+export const getConsultations = async({skip, manager, store, active, dateStart, dateEnd, operation}, client)=>{
+    try{
+        client = client? client : getClientGql()
+        let res = await client
+            .query({
+                variables: {skip, manager, store, active, dateStart, dateEnd, operation},
+                query: gql`
+                    query ($skip: Int, $manager: ID, $store: ID, $active: Boolean, $dateStart: Date, $dateEnd: Date, $operation: String) {
+                        consultations(skip: $skip, manager: $manager, active: $active, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, operation: $operation) {
+                            _id
+                            createdAt
+                            manager {name _id}
+                            store {name _id}
+                            client {name _id}
+                            operation
+                            info
+                            end
+                            statusClient
+                        }
+                    }`,
+            })
+        return res.data.consultations
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadConsultations = async({manager, store, dateStart, dateEnd, operation}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-            variables: {manager, store, date},
+            variables: {manager, store, dateStart, dateEnd, operation},
             query: gql`
-                    query ($manager: ID, $store: ID, $date: Date) {
-                        unloadConsultations(manager: $manager, store: $store, date: $date)
+                    query ($manager: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $operation: String) {
+                        unloadConsultations(manager: $manager, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, operation: $operation)
                     }`,
         })
         return res.data.unloadConsultations
@@ -18,44 +45,18 @@ export const getUnloadConsultations = async({manager, store, date}, client)=>{
     }
 }
 
-export const getConsultationsCount = async({manager, store, date}, client)=>{
+export const getConsultationsCount = async({manager, store, dateStart, dateEnd, operation}, client)=>{
     try{
         client = client? client : getClientGql()
         let res = await client
             .query({
-                variables: {manager, store, date},
+                variables: {manager, store, dateStart, dateEnd, operation},
                 query: gql`
-                    query ($manager: ID, $store: ID, $date: Date) {
-                        consultationsCount(manager: $manager, store: $store, date: $date)
+                    query ($manager: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $operation: String) {
+                        consultationsCount(manager: $manager, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, operation: $operation)
                     }`,
             })
         return res.data.consultationsCount
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const getConsultations = async({skip, manager, store, date, active}, client)=>{
-    try{
-        client = client? client : getClientGql()
-        let res = await client
-            .query({
-                variables: {skip, manager, store, date, active},
-                query: gql`
-                    query ($skip: Int, $manager: ID, $store: ID, $date: Date, $active: Boolean) {
-                        consultations(skip: $skip, manager: $manager, store: $store, date: $date, active: $active) {
-                            _id
-                            createdAt
-                            manager {name _id}
-                            store {name _id}
-                            client {name _id}
-                            info
-                            end
-                            statusClient
-                        }
-                    }`,
-            })
-        return res.data.consultations
     } catch(err){
         console.error(err)
     }
@@ -72,6 +73,7 @@ export const startConsultation = async()=>{
                             createdAt
                             manager {name _id}
                             client {name _id}
+                            operation
                             info
                             end
                             statusClient
@@ -89,8 +91,8 @@ export const setConsultation = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($info: String, $client: ID, $statusClient: String) {
-                        setConsultation(info: $info, client: $client, statusClient: $statusClient) 
+                    mutation ($info: String, $client: ID, $statusClient: String, $operation: String) {
+                        setConsultation(info: $info, client: $client, statusClient: $statusClient, operation: $operation) 
                     }`})
         return res.data.setConsultation
     } catch(err){
@@ -112,3 +114,4 @@ export const endConsultation = async(variables)=>{
         console.error(err)
     }
 }
+

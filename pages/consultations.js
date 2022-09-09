@@ -34,14 +34,14 @@ const Consultations = React.memo((props) => {
             ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             skip: 0
         })));
         setCount(await getConsultationsCount({
             ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
@@ -65,7 +65,7 @@ const Consultations = React.memo((props) => {
                 skip: list.length,
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -75,7 +75,7 @@ const Consultations = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, date: true}} checkPagination={checkPagination} pageName='Консультации'>
+        <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, period: true}} checkPagination={checkPagination} pageName='Консультации'>
             <Head>
                 <title>Консультации</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -100,6 +100,9 @@ const Consultations = React.memo((props) => {
                         </div>
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
                             Конец
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                            Операция
                         </div>
                         <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
                             Клиент
@@ -126,6 +129,9 @@ const Consultations = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 130, overflow: 'auto'}}>
                                 {element.end?pdDDMMYYHHMM(element.end):null}
                             </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                {element.operation}
+                            </div>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>
                                 <div>{element.client?element.client.name:null}</div>
                                 <div>{element.statusClient?element.statusClient:null}</div>
@@ -140,7 +146,7 @@ const Consultations = React.memo((props) => {
             <UnloadUpload unload={()=>getUnloadConsultations({
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
-                ...filter.date?{date: filter.date}:{}
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             })}/>
             <div className='count'>
                 {`Всего: ${count}`}
@@ -161,7 +167,6 @@ Consultations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) 
         else {
             Router.push('/')
         }
-    store.getState().app.filter.date = pdDatePicker(new Date())
     return {
         data: {
             list: cloneObject(await getConsultations({

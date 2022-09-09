@@ -23,12 +23,11 @@ import UnloadUpload from '../components/app/UnloadUpload';
 const colors = {
     'обработка': 'orange',
     'отложен': 'orange',
-    'принят': 'blue',
+    'в процессе': 'blue',
     'выполнен': 'green',
-    'проверен': 'green',
-    'отмена': 'red'
+    'проверен': 'green'
 }
-const status = ['все', 'отложен', 'обработка', 'принят', 'выполнен', 'проверен']
+const status = ['все', 'отложен', 'обработка', 'в процессе', 'выполнен', 'проверен']
 
 const Tasks = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -38,6 +37,7 @@ const Tasks = React.memo((props) => {
     //настройка
     const initialRender = useRef(true);
     let [today, setToday] = useState();
+    let [showStat, setShowStat] = useState(false);
     //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -46,12 +46,14 @@ const Tasks = React.memo((props) => {
             search,
             skip: 0,
             ...filter.status?{status: filter.status}:{},
-            ...filter.user?{employment: filter.user._id}:{}
+            ...filter.user?{employment: filter.user._id}:{},
+            ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
         })));
         setCount(await getTasksCount({
             search,
             ...filter.status?{status: filter.status}:{},
-            ...filter.user?{employment: filter.user._id}:{}
+            ...filter.user?{employment: filter.user._id}:{},
+            ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
@@ -88,7 +90,8 @@ const Tasks = React.memo((props) => {
                 skip: list.length,
                 search,
                 ...filter.status?{status: filter.status}:{},
-                ...filter.user?{employment: filter.user._id}:{}
+                ...filter.user?{employment: filter.user._id}:{},
+                ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -98,7 +101,7 @@ const Tasks = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, user: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
+        <App filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
             <Head>
                 <title>Задачи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -111,7 +114,7 @@ const Tasks = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                    <div className={classes.tableHead}>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
@@ -130,7 +133,7 @@ const Tasks = React.memo((props) => {
                     </div>
                     {list.map((element) =>
                         <Link href='/task/[id]' as={`/task/${element._id}`} key={element._id}>
-                            <div className={classes.tableRow} style={isMobileApp?{width: 'fit-content'}:{}} onClick={()=>{
+                            <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]
                                 sessionStorage.scrollPositionStore = appBody.scrollTop
                                 sessionStorage.scrollPositionName = 'task'
@@ -161,8 +164,22 @@ const Tasks = React.memo((props) => {
                     <AddIcon />
                 </Fab>
             </Link>
-            <div className='count'>
-                {`Всего: ${count}`}
+            <div className='count' onClick={()=>{
+                setShowStat(!showStat)
+            }}>
+                {`Всего: ${count[0]}`}
+                {
+                    showStat?
+                        <>
+                        <br/>{`Обработка: ${count[1]}`}
+                        <br/>{`Отложен: ${count[2]}`}
+                        <br/> {`В процессе: ${count[3]}`}
+                        <br/> {`Выполнен: ${count[4]}`}
+                        <br/> {`Проверен: ${count[5]}`}
+                        </>
+                        :
+                        null
+                }
             </div>
             <UnloadUpload position={2} unload={()=>getUnloadTasks({search, ...filter.status?{status: filter.status}:{}})}/>
         </App>

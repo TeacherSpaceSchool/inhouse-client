@@ -1,10 +1,10 @@
 import Head from 'next/head';
-import React, {useState} from 'react';
+import React from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { pdHHMM, distanceHour } from '../src/lib'
+import {pdHHMM, distanceHour, cloneObject} from '../src/lib'
 import initialApp from '../src/initialApp'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
@@ -26,11 +26,11 @@ import IconButton from '@mui/material/IconButton';
 const Index = React.memo((props) => {
     const {classes} = pageListStyle();
     const { profile } = props.user;
-    const { isMobileApp } = props.app;
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    let [consultation, setConsultation] = useState(data.consultation);
+    const { isMobileApp, consultation } = props.app;
+    const { setConsultation } = props.appActions;
     return (
         <App pageName='Главная'>
             <Head>
@@ -93,7 +93,7 @@ const Index = React.memo((props) => {
                                     <div style={{display: 'flex', fontWeight: 'bold', fontSize: '1.2rem', alignItems: 'center'}}>
                                         Консультация c<div style={{color: distanceHour(consultation.createdAt)>1?'#f00':'#01C801'}}>&nbsp;{pdHHMM(consultation.createdAt)}</div>
                                         <IconButton size='large' color='primary' onClick={()=>{
-                                            setMiniDialog('Комментировать', <ConsultationEdit _consultation={consultation} _setConsultation={setConsultation}/>)
+                                            setMiniDialog('Комментировать', <ConsultationEdit/>)
                                             showMiniDialog(true)
                                         }}>
                                             <Edit fontSize='inherit'/>
@@ -167,16 +167,31 @@ const Index = React.memo((props) => {
                                     <br/>
                                     <br/>
                                     <Button variant='contained' color='secondary' onClick={()=>{
-                                        const action = async() => {
-                                            localStorage.basket = JSON.stringify({})
-                                            let res = await endConsultation({})
-                                            if(res&&res!=='ERROR')
-                                                setConsultation(null)
-                                            else
-                                                showSnackBar('Ошибка', 'error')
+                                        if(consultation.info&&consultation.statusClient&&consultation.client) {
+                                            const action = async () => {
+                                                localStorage.basket = JSON.stringify({})
+                                                let res = await endConsultation({})
+                                                if (res && res !== 'ERROR')
+                                                    setConsultation(null)
+                                                else
+                                                    showSnackBar('Ошибка', 'error')
+                                            }
+                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            showMiniDialog(true)
                                         }
-                                        setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                        showMiniDialog(true)
+                                        else {
+                                            setMiniDialog('Комментировать', <ConsultationEdit
+                                                closeConsultation={async ()=>{
+                                                    localStorage.basket = JSON.stringify({})
+                                                    let res = await endConsultation({})
+                                                    if (res && res !== 'ERROR')
+                                                        setConsultation(null)
+                                                    else
+                                                        showSnackBar('Ошибка', 'error')
+                                                }}
+                                            />)
+                                            showMiniDialog(true)
+                                        }
                                     }}>
                                         Закрыть консультацию
                                     </Button>
@@ -199,13 +214,13 @@ const Index = React.memo((props) => {
 
 Index.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    let consultation
     if(['менеджер/завсклад', 'менеджер'].includes(store.getState().user.profile.role))
-        consultation = (await getConsultations({active: true}, ctx.req?await getClientGqlSsr(ctx.req):undefined))[0]
+        store.getState().app.consultation = (await getConsultations({active: true}, ctx.req?await getClientGqlSsr(ctx.req):undefined))[0]
+    else
+        store.getState().app.consultation = null
     return {
         data: {
             salesBonusManager: await getSalesBonusManager(ctx.req?await getClientGqlSsr(ctx.req):undefined),
-            consultation
         }
     };
 })

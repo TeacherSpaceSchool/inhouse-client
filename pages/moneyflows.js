@@ -201,7 +201,7 @@ const MoneyFlows = React.memo((props) => {
             </Head>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                    <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
                             Дата/Номер
@@ -247,7 +247,7 @@ const MoneyFlows = React.memo((props) => {
                             !data.refund&&
                             !data.installment
                         )?
-                            <div className={classes.tableRow} style={{width: 'fit-content'}}>
+                            <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
                                         setMenuItems(
@@ -514,7 +514,7 @@ const MoneyFlows = React.memo((props) => {
                             null
                     }
                     {list.map((element, idx) =>
-                        <div className={classes.tableRow} key={element._id} style={{width: 'fit-content'}}>
+                        <div className={classes.tableRow} key={element._id}>
                             {
                                 data.edit?
                                     <div className={classes.tableCell} style={{width: 40, padding: 0}}>
@@ -853,7 +853,23 @@ const MoneyFlows = React.memo((props) => {
             }
             {
                 data.add||data.edit?
-                    <UnloadUpload upload={uploadMoneyFlow} uploadText={uploadText} unload={()=>getUnloadMoneyFlows({search})}/>
+                    <UnloadUpload upload={uploadMoneyFlow} uploadText={uploadText} unload={()=>getUnloadMoneyFlows({
+                        search,
+                        ...filter.store?{store: filter.store._id}:{},
+                        ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                        ...filter.currency?{currency: filter.currency}:{},
+                        ...filter.operation?{operation: filter.operation}:{},
+                        ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
+                        ...filter.moneyRecipient?{moneyRecipient: filter.moneyRecipient._id}:{},
+                        ...filter.user?{employment: filter.user._id}:{},
+                        ...filter.client?{client: filter.client._id}:{},
+                        ...filter.cashbox?{cashbox: filter.cashbox._id}:{},
+                        ...data.installment?{installment: data.installment}:{},
+                        ...data.sale?{sale: data.sale}:{},
+                        ...data.reservation?{reservation: data.reservation}:{},
+                        ...data.order?{order: data.order}:{},
+                        ...data.refund?{refund: data.refund}:{}
+                    })}/>
                     :
                     null
             }

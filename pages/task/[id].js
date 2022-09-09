@@ -25,11 +25,12 @@ import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
+import SetDate from '../../components/dialog/SetDate'
 
 const colors = {
     'обработка': 'orange',
     'отложен': 'orange',
-    'принят': 'blue',
+    'в процессе': 'blue',
     'выполнен': 'green',
     'проверен': 'green',
     'отмена': 'red'
@@ -210,7 +211,7 @@ const Task = React.memo((props) => {
                                     ['отложен', 'обработка'].includes(data.object.status)&&profile._id===data.object.whom._id?
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
-                                                let res = await setTask({_id: router.query.id, status: 'принят'})
+                                                let res = await setTask({_id: router.query.id, status: 'в процессе'})
                                                 if(res&&res!=='ERROR') {
                                                     showSnackBar('Успешно', 'success')
                                                     Router.reload()
@@ -224,7 +225,7 @@ const Task = React.memo((props) => {
                                             Принять
                                         </Button>
                                     :
-                                    data.object.status==='принят'&&profile._id===data.object.whom._id?
+                                    data.object.status==='в процессе'&&profile._id===data.object.whom._id?
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
                                                 let res = await setTask({_id: router.query.id, status: 'выполнен'})
@@ -242,6 +243,7 @@ const Task = React.memo((props) => {
                                         </Button>
                                     :
                                     data.object.status==='выполнен'&&profile._id===data.object.who._id?
+                                        <>
                                         <Button color='primary' onClick={()=>{
                                             const action = async() => {
                                                 let res = await setTask({_id: router.query.id, status: 'проверен'})
@@ -255,16 +257,11 @@ const Task = React.memo((props) => {
                                             setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
                                             showMiniDialog(true)
                                         }}>
-                                            Проверил
+                                            Проверен
                                         </Button>
-                                    :
-                                    null
-                                }
-                                {
-                                    data.object.status==='обработка'&&profile._id===data.object.whom._id?
-                                        <Button color='primary' onClick={()=>{
+                                        <Button color='secondary' onClick={()=>{
                                             const action = async() => {
-                                                let res = await setTask({_id: router.query.id, status: 'отложен'})
+                                                let res = await setTask({_id: router.query.id, status: 'в процессе'})
                                                 if(res&&res!=='ERROR') {
                                                     showSnackBar('Успешно', 'success')
                                                     Router.reload()
@@ -273,6 +270,29 @@ const Task = React.memo((props) => {
                                                     showSnackBar('Ошибка', 'error')
                                             }
                                             setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            showMiniDialog(true)
+                                        }}>
+                                            Отклонен
+                                        </Button>
+                                        </>
+                                    :
+                                    null
+                                }
+                                {
+                                    ['отложен', 'обработка'].includes(data.object.status)&&profile._id===data.object.whom._id?
+                                        <Button color='primary' onClick={()=>{
+                                            setMiniDialog('Отложить', <SetDate date={date} setDate={(date)=>{
+                                                const action = async() => {
+                                                    let res = await setTask({_id: router.query.id, status: 'отложен', date})
+                                                    if(res&&res!=='ERROR') {
+                                                        showSnackBar('Успешно', 'success')
+                                                        Router.reload()
+                                                    }
+                                                    else
+                                                        showSnackBar('Ошибка', 'error')
+                                                }
+                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                            }}/>)
                                             showMiniDialog(true)
                                         }}>
                                             Отложить
@@ -374,7 +394,7 @@ Task.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         }
     return {
         data: {
-            edit: object.status==='обработка'&&object.who&&object.who._id===store.getState().user.profile._id,
+            edit: !['выполнен', 'проверен'].includes(object.status)&&object.who&&object.who._id===store.getState().user.profile._id,
             object
         }
     };

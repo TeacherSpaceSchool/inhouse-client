@@ -71,6 +71,27 @@ const Filter =  React.memo(
         return (
             <div className={classes.main} style={{width}}>
                 {
+                    filterShow.my?
+                        <FormControl>
+                            <FormLabel>Принадлежность</FormLabel>
+                            <RadioGroup
+                                row
+                                value={filter.my}
+                                onChange={event => {
+                                    setFilter({
+                                        ...filter,
+                                        my: event.target.value
+                                    })
+                                }}
+                            >
+                                <FormControlLabel value='' control={<Radio/>} label='Все'/>
+                                <FormControlLabel value='my' control={<Radio/>} label='Мои'/>
+                            </RadioGroup>
+                        </FormControl>
+                        :
+                        null
+                }
+                {
                     filterShow.timeDif?
                         <FormControl>
                             <FormLabel>Срок</FormLabel>
