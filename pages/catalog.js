@@ -28,7 +28,6 @@ import {getClients} from '../src/gql/client';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import AddClient from '../components/dialog/AddClient';
 import ShowItemsCatalog from '../components/dialog/ShowItemsCatalog';
-import { getOrders } from '../src/gql/order';
 import { getReservations } from '../src/gql/reservation';
 import { getInstallments } from '../src/gql/installment';
 import {getConsultations, setConsultation} from '../src/gql/consultation'
@@ -46,7 +45,6 @@ const Catalog = React.memo((props) => {
     //настройка
     const initialRender = useRef(true);
     let [client, setClient] = useState(consultation.client);
-    let [orders, setOrders] = useState([]);
     let [reservations, setReservations] = useState([]);
     let [itemsReservations, setItemsReservations] = useState({});
     let [installmentsDebt, setInstallmentsDebt] = useState(0);
@@ -148,14 +146,6 @@ const Catalog = React.memo((props) => {
                         installmentsDebt += installments[i].debt
                     }
                     setInstallmentsDebt(installmentsDebt)
-                    orders = await getOrders({
-                        store: profile.store,
-                        manager: profile._id,
-                        client: client._id,
-                        status: 'принят',
-                        items: true
-                    })
-                    setOrders(orders)
                     reservations = await getReservations({
                         store: profile.store,
                         manager: profile._id,
@@ -174,7 +164,6 @@ const Catalog = React.memo((props) => {
                     setItemsReservations(itemsReservations)
                 }
                 else {
-                    setOrders([])
                     setReservations([])
                     setItemsReservations({})
                     setInstallmentsDebt(0)
@@ -217,42 +206,20 @@ const Catalog = React.memo((props) => {
                         label={'Клиент'}
                     />
                     {
-                        orders.length||reservations.length?
+                        reservations.length?
                             <div className={classes.row} style={{height: 30, position: 'relative'}}>
-                                {
-                                    reservations.length?
-                                        <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
-                                            if(isMobileApp) {
-                                                setFullDialog('Бронь', <ShowReservationOrderSale list={reservations} type='reservation'/>)
-                                                showFullDialog(true)
-                                            }
-                                            else {
-                                                setMiniDialog('Бронь', <ShowReservationOrderSale list={reservations} type='reservation'/>)
-                                                showMiniDialog(true)
-                                            }
-                                        }}>
-                                            Бронь: {reservations.length}
-                                        </div>
-                                        :
-                                        null
-                                }
-                                {
-                                    orders.length?
-                                        <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}} onClick={()=>{
-                                            if(isMobileApp) {
-                                                setFullDialog('На заказ', <ShowReservationOrderSale list={orders} type='order'/>)
-                                                showFullDialog(true)
-                                            }
-                                            else {
-                                                setMiniDialog('На заказ', <ShowReservationOrderSale list={orders} type='order'/>)
-                                                showMiniDialog(true)
-                                            }
-                                        }}>
-                                            На заказ: {orders.length}
-                                        </div>
-                                        :
-                                        null
-                                }
+                                <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
+                                    if(isMobileApp) {
+                                        setFullDialog('Бронь', <ShowReservationOrderSale list={reservations} type='reservation'/>)
+                                        showFullDialog(true)
+                                    }
+                                    else {
+                                        setMiniDialog('Бронь', <ShowReservationOrderSale list={reservations} type='reservation'/>)
+                                        showMiniDialog(true)
+                                    }
+                                }}>
+                                    Бронь: {reservations.length}
+                                </div>
                             </div>
                             :
                             null
@@ -436,18 +403,14 @@ const Catalog = React.memo((props) => {
                                         status: 'обработка'
                                     })
                                 }
-                                let prepaid = 0, _reservations = [], _orders = []
+                                let prepaid = 0, _reservations = []
                                 for (let i = 0; i < reservations.length; i++) {
                                     prepaid = checkFloat(prepaid + reservations[i].paid)
                                     _reservations[i] = reservations[i]._id
                                 }
-                                for (let i = 0; i < orders.length; i++) {
-                                    prepaid = checkFloat(prepaid + orders[i].paid)
-                                    _orders[i] = orders[i]._id
-                                }
                                 setMiniDialog('Оформление', <Buy client={client} installmentsDebt={installmentsDebt}
                                                                  items={items} type={data.type} prepaid={prepaid}
-                                                                 amountStart={amountStart} orders={_orders}
+                                                                 amountStart={amountStart} _discount={data.type==='order'?30:0}
                                                                  reservations={_reservations}/>)
                                 showMiniDialog(true)
                             }

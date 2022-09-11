@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadReservations = async({search, client, store, manager, date, soon, status, late, today, _id}, clientGql)=>{
+export const getUnloadReservations = async({search, client, store, manager, dateStart, dateEnd, soon, status, late, today, _id}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {search, client, store, manager, date, soon, status, late, today, _id},
+            variables: {search, client, store, manager, dateStart, dateEnd, soon, status, late, today, _id},
             query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean, $_id: ID) {
-                        unloadReservations(search: $search, manager: $manager, client: $client, soon: $soon, store: $store, date: $date, status: $status, late: $late, today: $today, _id: $_id)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $soon: Boolean, $dateStart: Date, $dateEnd: Date, $status: String, $late: Boolean, $today: Boolean, $_id: ID) {
+                        unloadReservations(search: $search, manager: $manager, client: $client, soon: $soon, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, late: $late, today: $today, _id: $_id)
                     }`,
         })
         return res.data.unloadReservations
@@ -69,15 +69,15 @@ export const prepareAcceptReservation = async({_id}, client)=>{
     }
 }
 
-export const getReservations = async({search, skip, limit, manager, client, store, date, status, soon, late, today, items}, clientGql)=>{
+export const getReservations = async({search, skip, limit, manager, client, store, dateStart, dateEnd, status, soon, late, today, items}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {search, skip, limit, manager, client, store, date, status, soon, late, today, items},
+            variables: {search, skip, limit, manager, client, store, dateStart, dateEnd, status, soon, late, today, items},
             query: gql`
-                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $soon: Boolean, $client: ID, $store: ID, $date: Date, $status: String, $late: Boolean, $today: Boolean, $items: Boolean) {
-                        reservations(search: $search, skip: $skip, items: $items, limit: $limit, soon: $soon, manager: $manager, client: $client, store: $store, date: $date, status: $status, late: $late, today: $today) {
+                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $soon: Boolean, $client: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $status: String, $late: Boolean, $today: Boolean, $items: Boolean) {
+                        reservations(search: $search, skip: $skip, items: $items, limit: $limit, soon: $soon, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, late: $late, today: $today) {
                             _id
                             createdAt
                             number
@@ -103,15 +103,15 @@ export const getReservations = async({search, skip, limit, manager, client, stor
     }
 }
 
-export const getReservationsCount = async({search, manager, client, store, date, status, soon, late, today}, clientGql)=>{
+export const getReservationsCount = async({search, manager, client, store, dateStart, dateEnd, status, soon, late, today}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {search, manager, client, store, date, status, soon, late, today},
+                variables: {search, manager, client, store, dateStart, dateEnd, status, soon, late, today},
                 query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $store: ID, $soon: Boolean, $date: Date, $status: String, $late: Boolean, $today: Boolean) {
-                        reservationsCount(search: $search, manager: $manager, client: $client, soon: $soon, store: $store, date: $date, status: $status, late: $late, today: $today)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $soon: Boolean, $dateStart: Date, $dateEnd: Date, $status: String, $late: Boolean, $today: Boolean) {
+                        reservationsCount(search: $search, manager: $manager, client: $client, soon: $soon, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, late: $late, today: $today)
                     }`,
             })
         return res.data.reservationsCount

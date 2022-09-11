@@ -7,7 +7,6 @@ import { getMoneyRecipients } from '../../src/gql/moneyRecipient'
 import { setMoneyFlow } from '../../src/gql/moneyFlow'
 import { getClients } from '../../src/gql/client'
 import { getCashboxes } from '../../src/gql/cashbox'
-import { getOrders } from '../../src/gql/order'
 import { getReservations } from '../../src/gql/reservation'
 import { getSales } from '../../src/gql/sale'
 import { getRefunds } from '../../src/gql/refund'
@@ -177,7 +176,7 @@ const SetRecipientE =  React.memo(
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getOrders({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getSales({status: 'оплата', order: true, search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}

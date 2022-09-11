@@ -9,7 +9,6 @@ import dialogContentStyle from '../../src/styleMUI/dialogContent'
 import { checkFloat, inputFloat, inputInt } from '../../src/lib';
 import { getCpas } from '../../src/gql/cpa';
 import { getPromotions } from '../../src/gql/promotion';
-import { addOrder } from '../../src/gql/order';
 import { addReservation } from '../../src/gql/reservation';
 import { addInstallment } from '../../src/gql/installment';
 import { addSale } from '../../src/gql/sale';
@@ -26,7 +25,7 @@ const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юа�
 
 const BuyBasket =  React.memo(
     (props) =>{
-        const { amountStart, type, items, client, orders, reservations, prepaid, installmentsDebt, _currency, sale, _discount } = props;
+        const { amountStart, type, items, client, reservations, prepaid, installmentsDebt, _currency, sale, _discount } = props;
         const { profile } = props.user;
         const { isMobileApp, consultation } = props.app;
         const { classes } = dialogContentStyle();
@@ -80,9 +79,9 @@ const BuyBasket =  React.memo(
         return (
             <div className={classes.main} style={{width}}>
                 {
-                    ['sale', 'refund'].includes(type)?
+                    ['sale', 'refund', 'order'].includes(type)?
                         <div className={classes.row}>
-                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>{type==='sale'?'Скидка':'Уценка'}:&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>{type==='refund'?'Уценка':'Скидка'}:&nbsp;&nbsp;&nbsp;&nbsp;</div>
                             <div className={classes.counter}>
                                 <div className={classes.counterbtn} onClick={() => {
                                     if(discount>0) {
@@ -207,7 +206,7 @@ const BuyBasket =  React.memo(
                         null
                 }
                 {
-                    type==='sale'&&(checkFloat(paid)+prepaid)<amountEnd?
+                    ['order', 'sale'].includes(type)&&(checkFloat(paid)+prepaid)<amountEnd?
                         <>
                         <div className={classes.row}>
                             <center className={classes.input}>
@@ -245,6 +244,7 @@ const BuyBasket =  React.memo(
                                 label='Месячный платеж'
                                 value={paidInstallment}
                                 className={classes.input}
+                                style={{marginRight: remainder?10:0}}
                                 inputProps={{
                                     'aria-placeholder': 'description',
                                     readOnly: true,
@@ -271,13 +271,13 @@ const BuyBasket =  React.memo(
                         null
                 }
                 {
-                    ['reservation', 'sale'].includes(type)?
+                    ['order', 'reservation', 'sale'].includes(type)?
                         <TextField
                             id='date'
                             error={!date&&type==='reservation'}
-                            type={type==='sale'?'datetime-local':'date'}
+                            type={type==='reservation'?'date':'datetime-local'}
                             variant='standard'
-                            label={type==='sale'?'Доставка':'Срок'}
+                            label={type==='reservation'?'Срок':'Доставка'}
                             value={date}
                             onChange={(event) => setDate(event.target.value)}
                             className={classes.input}
@@ -286,7 +286,7 @@ const BuyBasket =  React.memo(
                         null
                 }
                 {
-                    type==='sale'?
+                    ['order', 'sale'].includes(type)?
                         <>
                         <TextField
                             id='address'
@@ -373,28 +373,11 @@ const BuyBasket =  React.memo(
                         Закрыть
                     </Button>
                     <Button variant='contained' color='primary' onClick={async()=>{
-                        if(date||type!=='reservation') {
+                        if((address||['reservation', 'refund'].includes(type))&&(date||['sale', 'order', 'refund'].includes(type))) {
                             if (paid >= 0) {
                                 showLoad(true)
                                 let res
-                                if (type === 'order') {
-                                    setConsultation({
-                                        info: consultation.info,
-                                        statusClient: consultation.statusClient,
-                                        client: consultation.client?consultation.client._id:null,
-                                        operation: 'на заказ'
-                                    })
-                                    res = await addOrder({
-                                        client: client._id,
-                                        itemsOrder: items,
-                                        amount: checkFloat(amountEnd),
-                                        paid: checkFloat(paid),
-                                        typePayment,
-                                        comment,
-                                        currency
-                                    })
-                                }
-                                else if (type === 'reservation') {
+                                if (type === 'reservation') {
                                     setConsultation({
                                         info: consultation.info,
                                         statusClient: consultation.statusClient,
@@ -429,7 +412,7 @@ const BuyBasket =  React.memo(
                                         sale
                                     })
                                 }
-                                else if (type === 'sale') {
+                                else if (['sale', 'order'].includes(type)) {
                                     paidInstallment = checkFloat(paidInstallment)
                                     monthInstallment = checkFloat(monthInstallment)
                                     paid = checkFloat(paid)
@@ -439,7 +422,7 @@ const BuyBasket =  React.memo(
                                             info: consultation.info,
                                             statusClient: consultation.statusClient,
                                             client: consultation.client?consultation.client._id:null,
-                                            operation: `продажа${(paid + prepaid) < amountEnd?'-рассрочка':''}`
+                                            operation: `${type==='order'?'на заказ':'продажа'}${(paid + prepaid) < amountEnd?'-рассрочка':''}`
                                         })
                                         res = await addSale({
                                             geo,
@@ -458,8 +441,8 @@ const BuyBasket =  React.memo(
                                             paid: checkFloat(paid),
                                             prepaid,
                                             delivery: date,
-                                            orders: orders,
-                                            reservations: reservations
+                                            reservations: reservations,
+                                            ...type==='order'?{order: true}:{}
                                         })
                                         if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
                                             const grid = []

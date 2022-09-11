@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getOrder, setOrder, prepareAcceptOrder, getUnloadOrders } from '../../src/gql/order'
+import { getSale, setSale, prepareAcceptOrder, getUnloadSales, getAttachment } from '../../src/gql/sale'
 import { getItems } from '../../src/gql/item'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -24,21 +24,30 @@ import History from '../../components/dialog/History';
 import AcceptOrder from '../../components/dialog/AcceptOrder';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
-import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject } from '../../src/lib'
+import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdtDatePicker } from '../../src/lib'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
 import SetCharacteristics from '../../components/dialog/SetCharacteristics'
-import UnloadUpload from '../../components/app/UnloadUpload';
+import { getSaleDoc } from '../../src/doc/sale'
+import { getVoucherDoc } from '../../src/doc/voucher'
+import { getInstallmentDoc } from '../../src/doc/installment'
+import { getClient } from '../../src/gql/client'
+import { getDoc } from '../../src/gql/doc'
+import { getInstallments } from '../../src/gql/installment'
+import Menu from '@mui/material/Menu';
 
 const colors = {
-    'продан': 'green',
     'обработка': 'orange',
-    'принят': 'blue',
-    'выполнен': 'green',
-    'проверен': 'green',
+    'заказан': 'orange',
+    'доставлен': 'green',
+    'возврат': 'red',
+    'активна': 'orange',
+    'оплачен': 'green',
+    'перерасчет': 'red',
+    'отгружен': 'blue',
     'отмена': 'red'
 }
 
@@ -46,33 +55,64 @@ const Order = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
     const { isMobileApp } = props.app;
+    const { showLoad } = props.appActions;
     const { showSnackBar } = props.snackbarActions;
     const { profile } = props.user;
+    let [today, setToday] = useState();
     const unsaved = useRef();
     let [edit, setEdit] = useState(false);
     let [paid, setPaid] = useState(data.object.paid);
     let [newItem, setNewItem] = useState(null);
-    let [amount, setAmount] = useState(data.object.amount);
     let [comment, setComment] = useState(data.object.comment);
-    let [itemsOrder, setItemsOrder] = useState(cloneObject(data.object.itemsOrder));
+    let [itemsSale, setItemsSale] = useState(cloneObject(data.object.itemsSale));
+    let [discount, setDiscount] = useState(data.object.discount);
+    let [discountType, setDiscountType] = useState('сом');
+    let [bonusManager, setBonusManager] = useState('');
+    let [percentCpa, setPercentCpa] = useState('');
+    let [geo, setGeo] = useState(data.object?cloneObject(data.object.geo):null);
+    let [amountStart, setAmountStart] = useState(data.object.amountStart);
+    let [amountEnd, setAmountEnd] = useState(data.object.amountEnd);
+    let [delivery, setDelivery] = useState(data.object.delivery?pdtDatePicker(data.object.delivery):data.object.delivery);
+    let [address, setAddress] = useState(data.object.address);
+    let [addressInfo, setAddressInfo] = useState(data.object.addressInfo);
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const router = useRouter()
     useEffect(()=>{
-        amount = 0
-        for (let i = 0; i < itemsOrder.length; i++) {
-            amount = checkFloat(amount + itemsOrder[i].amount)
+        if(!today) {
+            today = new Date()
+            today.setHours(0, 0, 0, 0)
+            setToday(today)
         }
-        setAmount(amount)
-        setPaid(amount)
-    },[itemsOrder])
+        amountStart = 0
+        for (let i = 0; i < itemsSale.length; i++) {
+            amountStart = checkFloat(amountStart + itemsSale[i].amount)
+        }
+        setAmountStart(amountStart)
+    },[itemsSale])
+    useEffect(()=>{
+        amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
+        if(amountEnd<0)
+            amountEnd = 0
+        setAmountEnd(amountEnd)
+        if(!data.object.installment)
+            setPaid(amountEnd)
+    },[amountStart, discount, discountType])
     useEffect(()=>{
         if(!unsaved.current)
             unsaved.current = {}
         else if(edit)
             unsaved.current[router.query.id] = true
     },[edit])
+    const [anchorElQuick, setAnchorElQuick] = useState(null);
+    const openQuick = Boolean(anchorElQuick);
+    let handleMenuQuick = (event) => {
+        setAnchorElQuick(event.currentTarget);
+    }
+    let handleCloseQuick = () => {
+        setAnchorElQuick(null);
+    }
     return (
-        <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':`На заказ №${data.object.number}`:'Ничего не найдено'}>
+        <App unsaved={unsaved} pageName={data.object!==null?`На заказ №${data.object.number}`:'Ничего не найдено'}>
             <Head>
                 <title>{data.object!==null?router.query.id==='new'?'Добавить':`На заказ №${data.object.number}`:'Ничего не найдено'}</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -90,7 +130,7 @@ const Order = React.memo((props) => {
                             <HistoryIcon onClick={async()=>{
                                 setMiniDialog('История', <History where={data.object._id}/>)
                                 showMiniDialog(true)
-                            }} style={{ color: '#10183D'}}/>
+                            }} style={{ color: '#183B37'}}/>
                             :
                             null
                     }
@@ -144,17 +184,75 @@ const Order = React.memo((props) => {
                                 </div>
                             </div>
                             {
-                                data.object.sale?
-                                    <Link href='/sale/[id]' as={`/sale/${data.object.sale._id}`}>
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>
-                                                Продажа:
-                                            </div>
-                                            <div className={classes.value}>
-                                                №{data.object.sale.number}
-                                            </div>
+                                data.object.refunds&&data.object.refunds.length?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Возврат:
                                         </div>
-                                    </Link>
+                                        <div className={classes.column}>
+                                            {data.object.refunds.map((refund)=>
+                                                <Link href='/refund/[id]' as={`/refund/${refund._id}`}>
+                                                    <div className={classes.value}>
+                                                        №{refund.number}
+                                                    </div>
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
+                                edit&&profile.role==='admin'&&data.object.status==='обработка'?
+                                    <TextField
+                                        id='percentManager'
+                                        variant='standard'
+                                        label='Новый процент менеджера'
+                                        value={bonusManager}
+                                        onChange={(event) => {
+                                            bonusManager = inputFloat(event.target.value)
+                                            if(bonusManager>=100)
+                                                bonusManager = ''
+                                            setBonusManager(bonusManager)
+                                        }}
+                                        className={classes.input}
+                                    />
+                                    :
+                                    null
+                            }
+                            {
+                                edit?
+                                    <>
+                                    <TextField
+                                        id='date'
+                                        type='datetime-local'
+                                        variant='standard'
+                                        label='Доставка'
+                                        value={delivery}
+                                        onChange={(event) => setDelivery(event.target.value)}
+                                        className={classes.input}
+                                    />
+                                    </>
+                                    :
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Доставка:
+                                        </div>
+                                        <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
+                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Самовывоз'}
+                                        </div>
+                                    </div>
+                            }
+                            {
+                                data.object.deliveryFact?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Доставлен:
+                                        </div>
+                                        <div className={classes.value}>
+                                            {pdDDMMYYHHMM(data.object.deliveryFact)}
+                                        </div>
+                                    </div>
                                     :
                                     null
                             }
@@ -176,6 +274,45 @@ const Order = React.memo((props) => {
                                     </Link>
                                 </div>
                             </div>
+                            {
+                                data.object.cpa?
+                                    <>
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Дизайнер:
+                                        </div>
+                                        <Link href='/cpa/[id]' as={`/cpa/${data.object.cpa._id}`} >
+                                            <div className={classes.value}>
+                                                {data.object.cpa.name} {data.object.percentCpa}%
+                                            </div>
+                                        </Link>
+                                    </div>
+                                    {
+                                        edit&&profile.role==='admin'&&data.object.status==='обработка'?
+                                            <>
+                                            <TextField
+                                                style={{marginTop: '0px!important'}}
+                                                id='percentCpa'
+                                                variant='standard'
+                                                label='Новый процент дизайнера'
+                                                value={percentCpa}
+                                                onChange={(event) => {
+                                                    percentCpa = inputFloat(event.target.value)
+                                                    if(percentCpa>=100)
+                                                        percentCpa = ''
+                                                    setPercentCpa(percentCpa)
+                                                }}
+                                                className={classes.input}
+                                            />
+                                            <br/>
+                                            </>
+                                            :
+                                            null
+                                    }
+                                    </>
+                                    :
+                                    null
+                            }
                             <div className={classes.row}>
                                 <div className={classes.nameField}>
                                     Клиент:
@@ -194,12 +331,38 @@ const Order = React.memo((props) => {
                                     {data.object.typePayment}
                                 </div>
                             </div>
+                            {
+                                /*edit&&data.object.status==='обработка'?
+                                    <FormControl className={classes.input}>
+                                        <InputLabel>Скидка</InputLabel>
+                                        <Input
+                                            placeholder='Скидка'
+                                            value={discount}
+                                            onChange={(event)=>setDiscount(inputFloat(event.target.value))}
+                                            endAdornment={
+                                                <InputAdornment position='end'>
+                                                    <IconButton onClick={()=>setDiscountType(discountType==='%'?'сом':'%')}>
+                                                        {discountType}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            }
+                                        />
+                                    </FormControl>
+                                    :*/
+                                    discount?
+                                        <div className={classes.row}>
+                                            <div className={classes.nameField}>Скидка:&nbsp;</div>
+                                            <div className={classes.value}>{data.object.discount} сом</div>
+                                        </div>
+                                        :
+                                        null
+                            }
                             <div className={classes.row}>
                                 <div className={classes.nameField}>Итого:&nbsp;</div>
-                                <div className={classes.value}>{`${edit?amount:data.object.amount} сом`}</div>
+                                <div className={classes.value}>{`${edit?amountEnd:data.object.amountEnd} сом`}</div>
                             </div>
                             {
-                                edit?
+                                edit&&data.object.installment?
                                     <TextField
                                         id='paid'
                                         variant='standard'
@@ -216,7 +379,28 @@ const Order = React.memo((props) => {
                                     </div>
                             }
                             {
+                                data.object.installment?
+                                    <div className={classes.row} style={{}}>
+                                        <div className={classes.nameField}>Рассрочка:&nbsp;</div>
+                                        <Link
+                                            href={{
+                                                pathname: '/installments',
+                                                query: {_id: data.object.installment._id}
+                                            }}
+                                            as={
+                                                `/installments?_id=${data.object.installment._id}`
+                                            }>
+                                            <div className={classes.value} style={{color: colors[data.object.installment.status], fontWeight: 'bold'}}>
+                                                {data.object.installment.status}
+                                            </div>
+                                        </Link>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 edit?
+                                    <>
                                     <TextField
                                         id='comment'
                                         variant='standard'
@@ -226,55 +410,113 @@ const Order = React.memo((props) => {
                                         value={comment}
                                         onChange={(event)=>{setComment(event.target.value)}}
                                     />
+                                    <TextField
+                                        id='address'
+                                        variant='standard'
+                                        label='Адрес'
+                                        className={classes.input}
+                                        margin='normal'
+                                        value={address}
+                                        onChange={(event)=>{setAddress(event.target.value)}}
+                                    />
+                                    <div className={classes.geo} style={{color: geo?'#183B37':'red'}} onClick={()=>{
+                                        setFullDialog('Геолокация', <Geo geo={geo} setAddressGeo={setGeo}/>)
+                                        showFullDialog(true)
+                                    }}>
+                                        {
+                                            geo?
+                                                'Изменить геолокацию'
+                                                :
+                                                'Задайте геолокацию'
+                                        }
+                                    </div>
+                                    <TextField
+                                        id='addressInfo'
+                                        variant='standard'
+                                        label='Этаж, квартира, лифт, код к подъезду'
+                                        className={classes.input}
+                                        margin='normal'
+                                        value={addressInfo}
+                                        onChange={(event)=>{setAddressInfo(event.target.value)}}
+                                    />
+                                    </>
                                     :
-                                    comment?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>Комментарий:&nbsp;</div>
-                                            <div className={classes.value}>{data.object.comment}</div>
-                                        </div>
-                                        :
-                                        null
+                                    <>
+                                    {
+                                        data.object.comment?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>Комментарий:&nbsp;</div>
+                                                <div className={classes.value}>{data.object.comment}</div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>Адрес:&nbsp;</div>
+                                        <div className={classes.value}>{data.object.address}</div>
+                                    </div>
+                                    {
+                                        data.object.geo?
+                                            <div className={classes.geo} onClick={()=>{
+                                                setFullDialog('Геолокация', <Geo geo={data.object.geo}/>)
+                                                showFullDialog(true)
+                                            }}>
+                                                Посмотреть геолокацию
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    {
+                                        data.object.addressInfo?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>Этаж, квартира, лифт, код к подъезду:&nbsp;</div>
+                                                <div className={classes.value}>{data.object.addressInfo}</div>
+                                            </div>
+                                            :
+                                            null
+                                    }
+                                    </>
                             }
                             <div style={{height: 10}}/>
-                            <div className={classes.nameField}>Позиции({itemsOrder.length}):</div>
+                            <div className={classes.nameField}>Позиции({itemsSale.length}):</div>
                             {
-                                edit?
-                                    itemsOrder.map((itemOrder, idx)=>
-                                        <div className={classes.column} key={`itemsOrder${idx}`}>
+                                edit&&data.object.status==='обработка'?
+                                    itemsSale.map((itemSale, idx)=>
+                                        <div className={classes.column} key={`itemsSale${idx}`}>
                                             <div className={isMobileApp?classes.column:classes.row}>
                                                 <div className={classes.row}>
                                                     <IconButton onClick={()=>{
-                                                        itemsOrder.splice(idx, 1)
-                                                        setItemsOrder([...itemsOrder])
+                                                        itemsSale.splice(idx, 1)
+                                                        setItemsSale([...itemsSale])
                                                     }}>
                                                         <CloseIcon style={{color: 'red'}}/>
                                                     </IconButton>
                                                     <TextField
                                                         id='name'
-                                                        error={!itemOrder.count||itemOrder.count==0}
+                                                        error={!itemSale.count||itemSale.count==0}
                                                         variant='standard'
-                                                        value={itemOrder.name}
+                                                        value={itemSale.name}
                                                         className={classes.input}
                                                         label={`Позиция ${idx+1}`}/>
                                                 </div>
                                                 <div className={classes.row}>
                                                     <TextField
                                                         id='count'
-                                                        error={!itemOrder.count||itemOrder.count==0}
+                                                        error={!itemSale.count||itemSale.count==0}
                                                         variant='standard'
-                                                        value={itemOrder.count}
+                                                        value={itemSale.count}
                                                         className={classes.input}
                                                         onChange={(event) => {
-                                                            itemsOrder[idx].count = inputFloat(event.target.value)
-                                                            itemsOrder[idx].amount = checkFloat(itemsOrder[idx].price * itemsOrder[idx].count)
-                                                            setItemsOrder([...itemsOrder])
+                                                            itemsSale[idx].count = inputFloat(event.target.value)
+                                                            itemsSale[idx].amount = checkFloat(itemsSale[idx].price * itemsSale[idx].count)
+                                                            setItemsSale([...itemsSale])
                                                         }}
                                                         label='Количество'/>
                                                     <TextField
                                                         id='amount'
-                                                        error={!itemOrder.count||itemOrder.count==0}
+                                                        error={!itemSale.count||itemSale.count==0}
                                                         variant='standard'
-                                                        value={itemOrder.amount}
+                                                        value={itemSale.amount}
                                                         className={classes.input}
                                                         label='Итого'/>
                                                 </div>
@@ -282,36 +524,36 @@ const Order = React.memo((props) => {
                                             <Button size='small' onClick={async()=>{
                                                 if(isMobileApp) {
                                                     setFullDialog('Характеристики', <SetCharacteristics
-                                                        setList={setItemsOrder} list={itemsOrder} idx={idx}
-                                                        characteristics={itemOrder.characteristics}/>)
+                                                        setList={setItemsSale} list={itemsSale} idx={idx}
+                                                        characteristics={itemSale.characteristics}/>)
                                                     showFullDialog(true)
                                                 }
                                                 else {
                                                     setMiniDialog('Характеристики', <SetCharacteristics
-                                                        setList={setItemsOrder} list={itemsOrder} idx={idx}
-                                                        characteristics={itemOrder.characteristics}/>)
+                                                        setList={setItemsSale} list={itemsSale} idx={idx}
+                                                        characteristics={itemSale.characteristics}/>)
                                                     showMiniDialog(true)
                                                 }
                                             }} color='primary'>
-                                                Характеристики: {itemOrder.characteristics.length}
+                                                Характеристики: {itemSale.characteristics.length}
                                             </Button>
                                         </div>
                                     )
                                     :
-                                    data.object.itemsOrder.map((itemOrder, idx)=>
-                                        <div className={classes.column} key={`itemsOrder${idx}`}>
-                                            <Link href='/item/[id]' as={`/item/${itemOrder.item}`} >
+                                    data.object.itemsSale.map((itemSale, idx)=>
+                                        <div className={classes.column} key={`itemsSale${idx}`}>
+                                            <Link href='/item/[id]' as={`/item/${itemSale.item}`} >
                                                 <div className={classes.nameField} style={{color: 'black', marginBottom: 5}}>
-                                                    {idx+1}) {itemOrder.name}
+                                                    {idx+1}) {itemSale.name}
                                                 </div>
                                             </Link>
-                                            <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemOrder.characteristics.length?5:10}}>
-                                                {itemOrder.price} сом * {itemOrder.count} {itemOrder.unit} = {itemOrder.amount} сом
+                                            <div className={classes.value} style={{fontWeight: 400, color: 'black', marginBottom: itemSale.characteristics.length?5:10}}>
+                                                {itemSale.price} сом * {itemSale.count} {itemSale.unit} = {itemSale.amount} сом
                                             </div>
                                             {
-                                                itemOrder.characteristics.length?
+                                                itemSale.characteristics.length?
                                                     <div className={classes.value} style={{fontWeight: 400, wordBreak: 'break-word'}}>
-                                                        {itemOrder.characteristics.map((characteristic)=>`${characteristic[0]}: ${characteristic[1]}; `)}
+                                                        {itemSale.characteristics.map((characteristic)=>`${characteristic[0]}: ${characteristic[1]}; `)}
                                                     </div>
                                                     :
                                                     null
@@ -320,14 +562,14 @@ const Order = React.memo((props) => {
                                     )
                             }
                             {
-                                edit?
+                                edit&&data.object.status==='обработка'?
                                     <div className={classes.row}>
                                         <IconButton onClick={()=>{
                                             if(newItem) {
                                                 setNewItem(null)
                                                 let errorNewItem = false
-                                                for(let i = 0; i <itemsOrder.length; i++) {
-                                                    if(itemsOrder[i].item==newItem._id) {
+                                                for(let i = 0; i <itemsSale.length; i++) {
+                                                    if(itemsSale[i].item==newItem._id) {
                                                         errorNewItem = true
                                                         break;
                                                     }
@@ -335,8 +577,8 @@ const Order = React.memo((props) => {
                                                 if(errorNewItem)
                                                     showSnackBar('Позиция уже присутствует')
                                                 else {
-                                                    setItemsOrder([
-                                                        ...itemsOrder,
+                                                    setItemsSale([
+                                                        ...itemsSale,
                                                         {
                                                             name: newItem.name,
                                                             item: newItem._id,
@@ -367,130 +609,317 @@ const Order = React.memo((props) => {
                                     :
                                     null
                             }
-                            {
-                                data.object.status==='обработка'?
-                                    <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
-                                        {
-                                            ['admin', 'менеджер/завсклад', 'менеджер', 'завсклад'].includes(profile.role)?
-                                                edit?
-                                                    <>
-                                                    <Button color='primary' onClick={()=>{
-                                                        setEdit(false)
-                                                    }}>
-                                                        Просмотр
-                                                    </Button>
-                                                    <Button color='primary' onClick={()=>{
-                                                        let itemsOrderCheck = true
-                                                        for(let i=0; i<itemsOrder.length; i++) {
-                                                            if(itemsOrder[i].count<1) {
-                                                                itemsOrderCheck = false
-                                                                break
-                                                            }
-                                                        }
-                                                        if(itemsOrderCheck) {
+                            <div className={isMobileApp?classes.bottomDivM:classes.bottomDivD}>
+                                {
+                                    ['admin', 'менеджер/завсклад', 'менеджер', 'завсклад'].includes(profile.role)?
+                                        edit?
+                                            <>
+                                            <Button color='primary' onClick={()=>{
+                                                setEdit(false)
+                                            }}>
+                                                Просмотр
+                                            </Button>
+                                            <Button color='primary' onClick={()=>{
+                                                let itemsSaleCheck = true
+                                                for(let i=0; i<itemsSale.length; i++) {
+                                                    if(itemsSale[i].count<1) {
+                                                        itemsSaleCheck = false
+                                                        break
+                                                    }
+                                                }
+                                                if(itemsSaleCheck) {
+                                                    if (itemsSale.length) {
+                                                        if (paid <= amountEnd) {
                                                             const action = async () => {
-                                                                if (itemsOrder.length) {
-                                                                    let element = {_id: router.query.id}
-                                                                    if (comment !== data.object.comment) element.comment = comment
-                                                                    if (paid != data.object.paid) element.paid = checkFloat(paid)
-                                                                    if (amount != data.object.amount) element.amount = checkFloat(amount)
-                                                                    if (JSON.stringify(itemsOrder) !== JSON.stringify(data.object.itemsOrder)) {
-                                                                        element.itemsOrder = []
-                                                                        for (let i = 0; i < itemsOrder.length; i++) {
-                                                                            element.itemsOrder.push({
-                                                                                _id: itemsOrder[i]._id,
-                                                                                count: checkFloat(itemsOrder[i].count),
-                                                                                amount: checkFloat(itemsOrder[i].amount),
-                                                                                characteristics: itemsOrder[i].characteristics,
-                                                                                name: itemsOrder[i].name,
-                                                                                unit: itemsOrder[i].unit,
-                                                                                item: itemsOrder[i].item,
-                                                                                price: checkFloat(itemsOrder[i].price),
-                                                                                status: itemsOrder[i].status
-                                                                            })
-                                                                        }
+                                                                let element = {_id: router.query.id}
+                                                                if(percentCpa.length) element.percentCpa = checkFloat(percentCpa)
+                                                                if(bonusManager.length) element.bonusManager = checkFloat(bonusManager)
+                                                                if (address !== data.object.address) element.address = address
+                                                                if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
+                                                                if (comment !== data.object.comment) element.comment = comment
+                                                                if (paid != data.object.paid) element.paid = checkFloat(paid)
+                                                                if (pdDDMMYYHHMM(delivery) !== pdDDMMYYHHMM(data.object.delivery)) element.delivery = delivery
+                                                                if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
+                                                                if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
+                                                                if (amountEnd != data.object.amountEnd) element.amountEnd = checkFloat(amountEnd)
+                                                                if (JSON.stringify(geo) !== JSON.stringify(data.object.geo)) element.geo = geo
+                                                                if (JSON.stringify(itemsSale) !== JSON.stringify(data.object.itemsSale)) {
+                                                                    element.itemsSale = []
+                                                                    for (let i = 0; i < itemsSale.length; i++) {
+                                                                        element.itemsSale.push({
+                                                                            _id: itemsSale[i]._id,
+                                                                            count: checkFloat(itemsSale[i].count),
+                                                                            amount: checkFloat(itemsSale[i].amount),
+                                                                            characteristics: itemsSale[i].characteristics,
+                                                                            name: itemsSale[i].name,
+                                                                            unit: itemsSale[i].unit,
+                                                                            item: itemsSale[i].item,
+                                                                            price: checkFloat(itemsSale[i].price),
+                                                                            status: itemsSale[i].status
+                                                                        })
                                                                     }
-                                                                    let res = await setOrder(element)
-                                                                    if (res && res !== 'ERROR') {
-                                                                        showSnackBar('Успешно', 'success')
-                                                                        Router.reload()
-                                                                    }
-                                                                    else
-                                                                        showSnackBar('Ошибка', 'error')
+                                                                }
+                                                                let res = await setSale(element)
+                                                                if (res && res !== 'ERROR') {
+                                                                    showSnackBar('Успешно', 'success')
+                                                                    Router.reload()
                                                                 }
                                                                 else
-                                                                    showSnackBar('Добавьте позицию')
+                                                                    showSnackBar('Ошибка', 'error')
                                                             }
                                                             setMiniDialog('Вы уверены?', <Confirmation
                                                                 action={action}/>)
                                                             showMiniDialog(true)
                                                         }
                                                         else
-                                                            showSnackBar('Количество не верно')
+                                                            showSnackBar('Оплата больше итого')
+                                                    }
+                                                    else
+                                                        showSnackBar('Добавьте позицию')
+                                                }
+                                                else
+                                                    showSnackBar('Количество не верно')
+                                            }}>
+                                                Сохранить
+                                            </Button>
+                                            </>
+                                            :
+                                            <>
+                                            {
+                                                ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)&&['обработка', 'заказан'].includes(data.object.status)?
+                                                    <Button color='primary' onClick={()=>{
+                                                        setEdit(true)
                                                     }}>
-                                                        Сохранить
+                                                        Редактировать
+                                                    </Button>
+                                                    :
+                                                    null
+                                            }
+                                            {
+                                                ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)&&['обработка', 'заказан'].includes(data.object.status)?
+                                                    <Button color='secondary' onClick={()=>{
+                                                        const action = async() => {
+                                                            let element = {_id: router.query.id, status: 'отмена'}
+                                                            let res = await setSale(element)
+                                                            if(res&&res!=='ERROR') {
+                                                                showSnackBar('Успешно', 'success')
+                                                                Router.reload()
+                                                            }
+                                                            else
+                                                                showSnackBar('Ошибка', 'error')
+                                                        }
+                                                        setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                        showMiniDialog(true)
+                                                    }}>
+                                                        Отменить
+                                                    </Button>
+                                                    :
+                                                    null
+                                            }
+                                            {
+                                                isMobileApp?
+                                                    <>
+                                                    <Menu
+                                                        key='Quick'
+                                                        id='menu-appbar'
+                                                        anchorEl={anchorElQuick}
+                                                        anchorOrigin={{
+                                                            vertical: 'bottom',
+                                                            horizontal: 'right',
+                                                        }}
+                                                        transformOrigin={{
+                                                            vertical: 'bottom',
+                                                            horizontal: 'right',
+                                                        }}
+                                                        open={openQuick}
+                                                        onClose={handleCloseQuick}
+                                                    >
+                                                        {
+                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
+                                                                <>
+                                                                <Button color='primary' onClick={async()=>{
+                                                                    const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
+                                                                    if(_prepareAcceptOrder) {
+                                                                        unsaved.current = {}
+                                                                        setMiniDialog('Распределение', <AcceptOrder
+                                                                            order={data.object}
+                                                                            prepareAcceptOrder={_prepareAcceptOrder}
+                                                                            itemsOrder={itemsSale}/>)
+                                                                        showMiniDialog(true)
+                                                                    }
+                                                                }}>
+                                                                    Заказать
+                                                                </Button>
+                                                                <br/>
+                                                                </>
+                                                                :
+                                                                null
+                                                        }
+                                                        {
+                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'заказан'===data.object.status?
+                                                                <>
+                                                                <Button color='primary' onClick={async()=>{
+                                                                    const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
+                                                                    if(_prepareAcceptOrder) {
+                                                                        unsaved.current = {}
+                                                                        setMiniDialog('Распределение', <AcceptOrder
+                                                                            order={data.object}
+                                                                            prepareAcceptOrder={_prepareAcceptOrder}
+                                                                            itemsOrder={itemsSale}/>)
+                                                                        showMiniDialog(true)
+                                                                    }
+                                                                }}>
+                                                                    На доставку
+                                                                </Button>
+                                                                <br/>
+                                                                </>
+                                                                :
+                                                                null
+                                                        }
+                                                        {
+                                                            data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
+                                                                <>
+                                                                <Button color='primary' onClick={async()=>{
+                                                                    await showLoad(true)
+                                                                    await getSaleDoc({
+                                                                        sale: data.object,
+                                                                        client: await getClient({_id: data.object.client._id}),
+                                                                        itemsSale: data.object.itemsSale,
+                                                                        doc: await getDoc()
+                                                                    })
+                                                                    let res = await getAttachment(data.object._id)
+                                                                    if(res)
+                                                                        window.open(res, '_blank');
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                    if(data.object.installment) {
+                                                                        await getInstallmentDoc({
+                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                            sale: data.object,
+                                                                            client: await getClient({_id: data.object.client._id}),
+                                                                            itemsSale: data.object.itemsSale,
+                                                                            doc: await getDoc()
+                                                                        })
+                                                                        await getVoucherDoc({
+                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                            client: await getClient({_id: data.object.client._id}),
+                                                                            doc: await getDoc()
+                                                                        })
+
+                                                                    }
+
+                                                                    await showLoad(false)
+                                                                }}>
+                                                                    Документы
+                                                                </Button>
+                                                                <br/>
+                                                                </>
+                                                                :
+                                                                null
+                                                        }
+                                                        <Button color='primary' onClick={()=>getUnloadSales({_id: router.query.id})}>
+                                                            Выгрузить
+                                                        </Button>
+                                                    </Menu>
+                                                    <Button className={classes.quickBottomMenu} color='primary' onClick={handleMenuQuick}>
+                                                        Функции
                                                     </Button>
                                                     </>
                                                     :
-                                                    <>
+                                                    <div className={classes.quickBottomMenu}>
                                                     {
-                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
-                                                            <Button color='primary' onClick={()=>{
-                                                                setEdit(true)
-                                                            }}>
-                                                                Редактировать
-                                                            </Button>
-                                                            :
-                                                            null
-                                                    }
-                                                    {
-                                                        ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                                                        ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
+                                                            <>
                                                             <Button color='primary' onClick={async()=>{
-                                                                const _prepareAcceptOrder = await prepareAcceptOrder({_id: router.query.id})
+                                                                const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
                                                                 if(_prepareAcceptOrder) {
                                                                     unsaved.current = {}
                                                                     setMiniDialog('Распределение', <AcceptOrder
                                                                         order={data.object}
                                                                         prepareAcceptOrder={_prepareAcceptOrder}
-                                                                        itemsOrder={itemsOrder}/>)
+                                                                        itemsOrder={itemsSale}/>)
                                                                     showMiniDialog(true)
                                                                 }
                                                             }}>
-                                                                Принять
+                                                                Заказать
                                                             </Button>
+                                                            <br/>
+                                                            </>
                                                             :
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
-                                                            <Button color='secondary' onClick={()=>{
-                                                                const action = async() => {
-                                                                    let element = {_id: router.query.id, status: 'отмена'}
-                                                                    let res = await setOrder(element)
-                                                                    if(res&&res!=='ERROR') {
-                                                                        showSnackBar('Успешно', 'success')
-                                                                        Router.reload()
-                                                                    }
-                                                                    else
-                                                                        showSnackBar('Ошибка', 'error')
+                                                        ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'заказан'===data.object.status?
+                                                            <>
+                                                            <Button color='primary' onClick={async()=>{
+                                                                const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
+                                                                if(_prepareAcceptOrder) {
+                                                                    unsaved.current = {}
+                                                                    setMiniDialog('Распределение', <AcceptOrder
+                                                                        order={data.object}
+                                                                        prepareAcceptOrder={_prepareAcceptOrder}
+                                                                        itemsOrder={itemsSale}/>)
+                                                                    showMiniDialog(true)
                                                                 }
-                                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                                                showMiniDialog(true)
                                                             }}>
-                                                                Отменить
+                                                                На доставку
                                                             </Button>
+                                                            <br/>
+                                                            </>
                                                             :
                                                             null
                                                     }
-                                                    </>
-                                                :
-                                                null
-                                        }
-                                    </div>
-                                    :
-                                    null
-                            }
-                            <UnloadUpload  position={'Z'} unload={()=>getUnloadOrders({_id: router.query.id})}/>
+                                                    {
+                                                        data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
+                                                            <>
+                                                            <Button color='primary' onClick={async()=>{
+                                                                await showLoad(true)
+                                                                await getSaleDoc({
+                                                                    sale: data.object,
+                                                                    client: await getClient({_id: data.object.client._id}),
+                                                                    itemsSale: data.object.itemsSale,
+                                                                    doc: await getDoc()
+                                                                })
+                                                                let res = await getAttachment(data.object._id)
+                                                                if(res)
+                                                                    window.open(res, '_blank');
+                                                                else
+                                                                    showSnackBar('Ошибка', 'error')
+                                                                if(data.object.installment) {
+                                                                    await getInstallmentDoc({
+                                                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                        sale: data.object,
+                                                                        client: await getClient({_id: data.object.client._id}),
+                                                                        itemsSale: data.object.itemsSale,
+                                                                        doc: await getDoc()
+                                                                    })
+                                                                    await getVoucherDoc({
+                                                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                        client: await getClient({_id: data.object.client._id}),
+                                                                        doc: await getDoc()
+                                                                    })
+
+                                                                }
+
+                                                                await showLoad(false)
+                                                            }}>
+                                                                Документы
+                                                            </Button>
+                                                            <br/>
+                                                            </>
+                                                            :
+                                                            null
+                                                    }
+                                                    <Button color='primary' onClick={()=>getUnloadSales({_id: router.query.id})}>
+                                                        Выгрузить
+                                                    </Button>
+                                                    </div>
+                                            }
+                                            </>
+                                        :
+                                        null
+                                }
+                            </div>
                             </>
                             :
                             'Ничего не найдено'
@@ -503,7 +932,7 @@ const Order = React.memo((props) => {
 
 Order.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     await initialApp(ctx, store)
-    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
+    if(!['admin', 'управляющий',  'кассир', 'менеджер', 'доставщик', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role))
         if(ctx.res) {
             ctx.res.writeHead(302, {
                 Location: '/'
@@ -511,7 +940,7 @@ Order.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             ctx.res.end()
         } else
             Router.push('/')
-    let object = await getOrder({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+    let object = await getSale({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
     return {
         data: {
             object

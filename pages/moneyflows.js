@@ -124,6 +124,11 @@ const MoneyFlows = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
+    //useEffect
+    useEffect(()=>{
+        newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
+        setNewElement({...newElement})
+    },[newElement.amount, newElement.exchangeRate])
     //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
@@ -443,7 +448,6 @@ const MoneyFlows = React.memo((props) => {
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
                                             newElement.amount = inputFloat(event.target.value)
-                                            newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
                                             setNewElement({...newElement})
                                         }}
                                     />
@@ -457,7 +461,6 @@ const MoneyFlows = React.memo((props) => {
                                                 newElement.currency = event.target.value
                                                 if(event.target.value==='сом') {
                                                     newElement.exchangeRate = 1
-                                                    newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
                                                 }
                                                 setNewElement({...newElement})
                                             }}>
@@ -484,7 +487,6 @@ const MoneyFlows = React.memo((props) => {
                                                     newElement.unsaved = true
                                                     unsaved.current['new'] = true
                                                     newElement.exchangeRate = inputFloat(event.target.value)
-                                                    newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
                                                     setNewElement({...newElement})
                                                 }}
                                             />

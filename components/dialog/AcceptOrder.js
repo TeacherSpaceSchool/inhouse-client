@@ -5,7 +5,7 @@ import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import * as snackbarActions from '../../src/redux/actions/snackbar'
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
 import Button from '@mui/material/Button';
-import {setOrder} from '../../src/gql/order'
+import {setSale} from '../../src/gql/sale'
 import {addWayItem, getWayItem, setWayItem} from '../../src/gql/wayItem'
 import Confirmation from './Confirmation'
 import Select from '@mui/material/Select';
@@ -124,8 +124,8 @@ const AcceptOrder =  React.memo(
                                     }
                                 }
 
-                                let element = {_id: order._id, status: 'принят'}
-                                let res = await setOrder(element)
+                                let element = {_id: order._id, status: 'заказан'}
+                                let res = await setSale(element)
                                 if(res&&res!=='ERROR') {
                                     showSnackBar('Успешно', 'success')
                                     Router.reload()

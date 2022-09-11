@@ -184,7 +184,7 @@ const AddInstallment =  React.memo(
                             'aria-placeholder': 'description',
                             readOnly: true,
                         }}
-                        style={{marginRight: 10}}
+                        style={{marginRight: remainder?10:0}}
                     />
                     {
                         remainder?

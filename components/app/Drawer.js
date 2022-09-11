@@ -336,7 +336,7 @@ const MyDrawer = React.memo((props) => {
                 <Collapse in={uncover==='Операции'} timeout='auto' unmountOnExit>
                     <List component='div' disablePadding>
                         {
-                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'доставщик', 'завсклад'].includes(profile.role)?
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
                                 <>
                                 <ListItem style={{marginLeft: 16, background: router.pathname.includes('sale')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)

@@ -231,6 +231,12 @@ export default makeStyles()(()=>{
             margin: 10,
             width: 100
         },
+        quickBottomMenu: {
+            display: 'flex',
+            position: 'fixed',
+            bottom: 10,
+            right: 10
+        },
         input: {
             fontSize: '0.875rem',
             margin: '10px !important',

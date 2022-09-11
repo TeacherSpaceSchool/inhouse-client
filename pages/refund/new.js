@@ -108,16 +108,26 @@ const Catalog = React.memo((props) => {
                                     setCurrency(sale?sale.currency:'сом')
                                 }}
                                 getElements={async (search)=>{
-                                    return await getSales({
-                                        store: profile.store,
-                                        items: true,
-                                        search,
-                                        client: client._id,
-                                        status: 'доставлен'
-                                    })
+                                    return [
+                                        ...await getSales({
+                                            store: profile.store,
+                                            items: true,
+                                            search,
+                                            client: client._id,
+                                            //status: 'доставлен'
+                                        }),
+                                        ...await getSales({
+                                            order: true,
+                                            store: profile.store,
+                                            items: true,
+                                            search,
+                                            client: client._id,
+                                            //status: 'доставлен'
+                                        }),
+                                    ]
                                 }}
                                 minLength={0}
-                                label={'Продажа'}
+                                label={'Продажа/На заказ'}
                             />
                             :
                             null

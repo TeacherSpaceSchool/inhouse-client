@@ -6,7 +6,7 @@ import {getReservations, getReservationsCount, getUnloadReservations} from '../s
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYYY } from '../src/lib'
+import { cloneObject, pdDDMMYYYY, pdDDMMYYHHMM } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -45,7 +45,7 @@ const Reservations = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
         })));
         setCount(await getReservationsCount({
@@ -53,7 +53,7 @@ const Reservations = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
             search
         }));
@@ -95,7 +95,7 @@ const Reservations = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
             if(addedList.length>0)
@@ -106,7 +106,7 @@ const Reservations = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, user: true, client: true, store: true, date: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Бронь'>
+        <App filterShow={{status, user: true, client: true, store: true, period: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Бронь'>
             <Head>
                 <title>Бронь</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -120,6 +120,9 @@ const Reservations = React.memo((props) => {
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
+                          <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                            Дата
+                        </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
@@ -129,11 +132,11 @@ const Reservations = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 110, justifyContent: 'start'}}>
                             Срок
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 310px) / 2)', justifyContent: 'start'}}>
-                            Менеджер
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 310px) / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'start'}}>
                             Клиент
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'start'}}>
+                            Менеджер
                         </div>
                     </div>
                     {list.map((element) =>
@@ -144,6 +147,9 @@ const Reservations = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'reservation'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                                    {pdDDMMYYHHMM(element.createdAt)}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
@@ -153,11 +159,11 @@ const Reservations = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 110, justifyContent: 'start', color: ['обработка'].includes(element.status)&&new Date(element.term)<today?'red':'black'}}>
                                     {pdDDMMYYYY(element.term)}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 310px) / 2)', justifyContent: 'start'}}>
-                                    {element.manager.name}
-                                </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 310px) / 2)', justifyContent: 'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'start'}}>
                                     {element.client.name}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'start'}}>
+                                    {element.manager.name}
                                 </div>
                             </div>
                         </Link>
@@ -169,7 +175,7 @@ const Reservations = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
                 search
             })}/>
@@ -202,7 +208,7 @@ Reservations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.timeDif==='late'?{late: true}:store.getState().app.filter.timeDif==='soon'?{soon: true}:store.getState().app.filter.timeDif==='today'?{today: true}:{},
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
@@ -212,7 +218,7 @@ Reservations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.timeDif==='late'?{late: true}:store.getState().app.filter.timeDif==='soon'?{soon: true}:store.getState().app.filter.timeDif==='today'?{today: true}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }

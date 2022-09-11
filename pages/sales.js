@@ -46,7 +46,7 @@ const Sales = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
             ...filter.promotion?{promotion: filter.promotion}:{},
@@ -56,7 +56,7 @@ const Sales = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
             ...filter.promotion?{promotion: filter.promotion}:{},
@@ -100,7 +100,7 @@ const Sales = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
                 ...filter.promotion?{promotion: filter.promotion}:{},
@@ -113,7 +113,7 @@ const Sales = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, promotion: true, user: true, client: true, cpa: true, date: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
+        <App filterShow={{status, promotion: true, user: true, client: true, cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
                 <title>Продажи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -127,6 +127,9 @@ const Sales = React.memo((props) => {
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
+                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                            Дата
+                        </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
@@ -136,11 +139,11 @@ const Sales = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
                             Доставка
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{}, width: 'calc((100% - 330px) / 2)', justifyContent: 'start'}}>
-                            Менеджер
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{}, width: 'calc((100% - 330px) / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
                             Клиент
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                            Менеджер
                         </div>
                     </div>
                     {list.map((element) =>
@@ -151,6 +154,9 @@ const Sales = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'sale'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                                    {pdDDMMYYHHMM(element.createdAt)}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
@@ -160,11 +166,11 @@ const Sales = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'start', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
                                     {element.delivery?pdDDMMYYHHMM(element.delivery):'Самовывоз'}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 330px) / 2)', justifyContent: 'start'}}>
-                                    {element.manager.name}
-                                </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 330px) / 2)', justifyContent: 'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
                                     {element.client.name}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                                    {element.manager.name}
                                 </div>
                             </div>
                         </Link>
@@ -176,7 +182,7 @@ const Sales = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
                 search
@@ -210,7 +216,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
                 ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},
@@ -222,7 +228,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
                 ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},

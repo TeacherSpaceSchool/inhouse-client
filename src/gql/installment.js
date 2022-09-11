@@ -40,7 +40,7 @@ export const getInstallments = async({search, _id, skip, client, status, date, l
                             paid
                             store {_id name}
                             datePaid
-                            sale {_id number}
+                            sale {_id number order}
                         }
                     }`,
             })
@@ -87,7 +87,7 @@ export const addInstallment = async(variables)=>{
                             paid
                             store {_id name}
                             datePaid
-                            sale {_id number}
+                            sale {_id number order}
                         }
                     }`})
         return res.data.addInstallment

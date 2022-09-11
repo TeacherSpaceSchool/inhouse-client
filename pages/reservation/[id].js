@@ -31,7 +31,7 @@ import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
 import SetCharacteristics from '../../components/dialog/SetCharacteristics'
-import UnloadUpload from '../../components/app/UnloadUpload';
+import Menu from '@mui/material/Menu';
 
 const colors = {
     'продан': 'green',
@@ -77,6 +77,14 @@ const Reservation = React.memo((props) => {
         else if(edit)
             unsaved.current[router.query.id] = true
     },[edit])
+    const [anchorElQuick, setAnchorElQuick] = useState(null);
+    const openQuick = Boolean(anchorElQuick);
+    let handleMenuQuick = (event) => {
+        setAnchorElQuick(event.currentTarget);
+    }
+    let handleCloseQuick = () => {
+        setAnchorElQuick(null);
+    }
     return (
         <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':`Бронь №${data.object.number}`:'Ничего не найдено'}>
             <Head>
@@ -494,6 +502,39 @@ const Reservation = React.memo((props) => {
                                                             :
                                                             null
                                                     }
+                                                    {
+                                                        isMobileApp?
+                                                            <>
+                                                            <Menu
+                                                                key='Quick'
+                                                                id='menu-appbar'
+                                                                anchorEl={anchorElQuick}
+                                                                anchorOrigin={{
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'right',
+                                                                }}
+                                                                transformOrigin={{
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'right',
+                                                                }}
+                                                                open={openQuick}
+                                                                onClose={handleCloseQuick}
+                                                            >
+                                                                <Button color='primary' onClick={()=>getUnloadReservations({_id: router.query.id})}>
+                                                                    Выгрузить
+                                                                </Button>
+                                                            </Menu>
+                                                            <Button className={classes.quickBottomMenu} color='primary' onClick={handleMenuQuick}>
+                                                                Функции
+                                                            </Button>
+                                                            </>
+                                                            :
+                                                            <div className={classes.quickBottomMenu}>
+                                                                <Button color='primary' onClick={()=>getUnloadReservations({_id: router.query.id})}>
+                                                                    Выгрузить
+                                                                </Button>
+                                                            </div>
+                                                    }
                                                     </>
                                                 :
                                                 null
@@ -502,7 +543,6 @@ const Reservation = React.memo((props) => {
                                     :
                                     null
                             }
-                            <UnloadUpload position={'Z'} unload={()=>getUnloadReservations({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'

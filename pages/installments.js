@@ -332,9 +332,9 @@ const Installments = React.memo((props) => {
                                 </Link>
                                 {
                                     element.sale?
-                                        <Link href='/sale/[id]' as={`/sale/${element.sale._id}`}>
+                                        <Link href={`/${element.sale.order?'order':'sale'}/[id]`} as={`/${element.sale.order?'order':'sale'}/${element.sale._id}`}>
                                             <a>
-                                                Продажа №{element.sale.number}
+                                                {element.sale.order?'На заказ':'Продажа'} №{element.sale.number}
                                             </a>
                                         </Link>
                                         :

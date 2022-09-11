@@ -1,15 +1,15 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
-export const getUnloadRefunds = async({search, manager, client, store, date, status, _id}, clientGql)=>{
+export const getUnloadRefunds = async({search, manager, client, store, dateStart, dateEnd, status, _id}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {search, manager, client, store, date, status, _id},
+            variables: {search, manager, client, store, dateStart, dateEnd, status, _id},
             query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String, $_id: ID) {
-                        unloadRefunds(search: $search, manager: $manager, client: $client, store: $store, date: $date, status: $status, _id: $_id)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $status: String, $_id: ID) {
+                        unloadRefunds(search: $search, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, _id: $_id)
                     }`,
         })
         return res.data.unloadRefunds
@@ -40,7 +40,7 @@ export const getRefund = async({_id}, client)=>{
                             discount
                             currency
                             status
-                            sale {_id number}
+                            sale {_id number order}
                         }
                     }`,
             })
@@ -50,15 +50,15 @@ export const getRefund = async({_id}, client)=>{
     }
 }
 
-export const getRefunds = async({search, skip, limit, manager, client, store, date, status}, clientGql)=>{
+export const getRefunds = async({search, skip, limit, manager, client, store, dateStart, dateEnd, status}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-                variables: {search, skip, limit, manager, client, store, date, status},
+                variables: {search, skip, limit, manager, client, store, dateStart, dateEnd, status},
                 query: gql`
-                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
-                        refunds(search: $search, skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, date: $date, status: $status) {
+                    query ($search: String, $skip: Int, $limit: Int, $manager: ID, $client: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $status: String) {
+                        refunds(search: $search, skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status) {
                             _id
                             createdAt
                             number
@@ -69,7 +69,7 @@ export const getRefunds = async({search, skip, limit, manager, client, store, da
                             comment
                             currency
                             status
-                            sale {_id number}
+                            sale {_id number order}
                         }
                     }`,
             })
@@ -79,15 +79,15 @@ export const getRefunds = async({search, skip, limit, manager, client, store, da
     }
 }
 
-export const getRefundsCount = async({search, manager, client, store, date, status}, clientGql)=>{
+export const getRefundsCount = async({search, manager, client, store, dateStart, dateEnd, status}, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
             .query({
-                variables: {search, manager, client, store, date, status},
+                variables: {search, manager, client, store, dateStart, dateEnd, status},
                 query: gql`
-                    query ($search: String, $manager: ID, $client: ID, $store: ID, $date: Date, $status: String) {
-                        refundsCount(search: $search, manager: $manager, client: $client, store: $store, date: $date, status: $status)
+                    query ($search: String, $manager: ID, $client: ID, $store: ID, $dateStart: Date, $dateEnd: Date, $status: String) {
+                        refundsCount(search: $search, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status)
                     }`,
             })
         return res.data.refundsCount

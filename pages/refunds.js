@@ -6,7 +6,7 @@ import {getRefunds, getRefundsCount, getUnloadRefunds} from '../src/gql/refund'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject } from '../src/lib'
+import { cloneObject, pdDDMMYYHHMM } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -43,14 +43,14 @@ const Refunds = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
         })));
         setCount(await getRefundsCount({
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.date?{date: filter.date}:{},
+            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             search
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
@@ -87,7 +87,7 @@ const Refunds = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -97,7 +97,7 @@ const Refunds = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, user: true, client: true, store: true, date: true}} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
+        <App filterShow={{status, user: true, client: true, store: true, period: true}} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
             <Head>
                 <title>Возврат</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -111,17 +111,20 @@ const Refunds = React.memo((props) => {
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead} >
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                            Дата
+                        </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Номер
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 200px) / 2)', justifyContent: 'start'}}>
-                            Менеджер
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 200px) / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'start'}}>
                             Клиент
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'start'}}>
+                            Менеджер
                         </div>
                     </div>
                     {list.map((element) =>
@@ -132,17 +135,20 @@ const Refunds = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'refund'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                                    {pdDDMMYYHHMM(element.createdAt)}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                                     {element.number}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 200px) / 2)', justifyContent: 'start'}}>
-                                    {element.manager.name}
-                                </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 200px) / 2)', justifyContent: 'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'start'}}>
                                     {element.client.name}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'start'}}>
+                                    {element.manager.name}
                                 </div>
                             </div>
                         </Link>
@@ -154,7 +160,7 @@ const Refunds = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.date?{date: filter.date}:{},
+                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 search
             })}/>
             <div className='count'>
@@ -182,7 +188,7 @@ Refunds.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             list: cloneObject(await getRefunds({
                 skip: 0,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
                 ...store.getState().app.filter.manager?{manager: store.getState().app.filter.manager._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
@@ -191,7 +197,7 @@ Refunds.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getRefundsCount({
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
-                ...store.getState().app.filter.date?{date: store.getState().app.filter.date}:{},
+                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
                 ...store.getState().app.filter.manager?{manager: store.getState().app.filter.manager._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},

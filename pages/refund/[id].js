@@ -26,7 +26,7 @@ import { wrapper } from '../../src/redux/configureStore'
 import { pdDDMMYYHHMM } from '../../src/lib'
 import Link from 'next/link';
 import AcceptRefund from '../../components/dialog/AcceptRefund'
-import UnloadUpload from '../../components/app/UnloadUpload';
+import Menu from '@mui/material/Menu';
 
 const colors = {
     'обработка': 'orange',
@@ -57,6 +57,14 @@ const Refund = React.memo((props) => {
         else if(edit)
             unsaved.current[router.query.id] = true
     },[edit])
+    const [anchorElQuick, setAnchorElQuick] = useState(null);
+    const openQuick = Boolean(anchorElQuick);
+    let handleMenuQuick = (event) => {
+        setAnchorElQuick(event.currentTarget);
+    }
+    let handleCloseQuick = () => {
+        setAnchorElQuick(null);
+    }
     return (
         <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':`Возврат №${data.object.number}`:'Ничего не найдено'}>
             <Head>
@@ -129,7 +137,7 @@ const Refund = React.memo((props) => {
                                     {pdDDMMYYHHMM(data.object.createdAt)}
                                 </div>
                             </div>
-                            <Link href='/sale/[id]' as={`/sale/${data.object.sale._id}`}>
+                            <Link href={`/${data.object.sale.order?'order':'sale'}/[id]`} as={`/${data.object.sale.order?'order':'sale'}/${data.object.sale._id}`}>
                                 <div className={classes.row}>
                                     <div className={classes.nameField}>
                                         Продажа:
@@ -266,30 +274,6 @@ const Refund = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)?
-                                                            <Button color='primary' onClick={async()=>{
-                                                                const warehouses = await getWarehouses({store: data.object.store._id})
-                                                                const acceptRefund = {}
-                                                                for(let i = 0; i <data.object.itemsRefund.length; i++) {
-                                                                    acceptRefund[data.object.itemsRefund[i].item] = []
-                                                                    for(let i1 = 0; i1 <warehouses.length; i1++) {
-                                                                        acceptRefund[data.object.itemsRefund[i].item].push({
-                                                                            _id: warehouses[i1]._id,
-                                                                            name: warehouses[i1].name,
-                                                                            count: ''
-                                                                        })
-                                                                    }
-                                                                }
-                                                                unsaved.current = {}
-                                                                setMiniDialog('Распределение', <AcceptRefund _acceptRefund={acceptRefund} items={data.object.itemsRefund} _id={data.object._id}/>)
-                                                                showMiniDialog(true)
-                                                            }}>
-                                                                Принять
-                                                            </Button>
-                                                            :
-                                                            null
-                                                    }
-                                                    {
                                                         ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&!data.object.paymentConfirmation?
                                                             <Button color='secondary' onClick={()=>{
                                                                 const action = async() => {
@@ -310,6 +294,93 @@ const Refund = React.memo((props) => {
                                                             :
                                                             null
                                                     }
+                                                    {
+                                                        isMobileApp?
+                                                            <>
+                                                            <Menu
+                                                                key='Quick'
+                                                                id='menu-appbar'
+                                                                anchorEl={anchorElQuick}
+                                                                anchorOrigin={{
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'right',
+                                                                }}
+                                                                transformOrigin={{
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'right',
+                                                                }}
+                                                                open={openQuick}
+                                                                onClose={handleCloseQuick}
+                                                            >
+                                                                {
+                                                                    ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)?
+                                                                        <>
+                                                                        <Button color='primary' onClick={async()=>{
+                                                                            const warehouses = await getWarehouses({store: data.object.store._id})
+                                                                            const acceptRefund = {}
+                                                                            for(let i = 0; i <data.object.itemsRefund.length; i++) {
+                                                                                acceptRefund[data.object.itemsRefund[i].item] = []
+                                                                                for(let i1 = 0; i1 <warehouses.length; i1++) {
+                                                                                    acceptRefund[data.object.itemsRefund[i].item].push({
+                                                                                        _id: warehouses[i1]._id,
+                                                                                        name: warehouses[i1].name,
+                                                                                        count: ''
+                                                                                    })
+                                                                                }
+                                                                            }
+                                                                            unsaved.current = {}
+                                                                            setMiniDialog('Распределение', <AcceptRefund _acceptRefund={acceptRefund} items={data.object.itemsRefund} _id={data.object._id}/>)
+                                                                            showMiniDialog(true)
+                                                                        }}>
+                                                                            Принять
+                                                                        </Button>
+                                                                        <br/>
+                                                                        </>
+                                                                        :
+                                                                        null
+                                                                }
+                                                                <Button color='primary' onClick={()=>getUnloadRefunds({_id: router.query.id})}>
+                                                                    Выгрузить
+                                                                </Button>
+                                                            </Menu>
+                                                            <Button className={classes.quickBottomMenu} color='primary' onClick={handleMenuQuick}>
+                                                                Функции
+                                                            </Button>
+                                                            </>
+                                                            :
+                                                            <div className={classes.quickBottomMenu}>
+                                                                {
+                                                                    ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)?
+                                                                        <>
+                                                                        <Button color='primary' onClick={async()=>{
+                                                                            const warehouses = await getWarehouses({store: data.object.store._id})
+                                                                            const acceptRefund = {}
+                                                                            for(let i = 0; i <data.object.itemsRefund.length; i++) {
+                                                                                acceptRefund[data.object.itemsRefund[i].item] = []
+                                                                                for(let i1 = 0; i1 <warehouses.length; i1++) {
+                                                                                    acceptRefund[data.object.itemsRefund[i].item].push({
+                                                                                        _id: warehouses[i1]._id,
+                                                                                        name: warehouses[i1].name,
+                                                                                        count: ''
+                                                                                    })
+                                                                                }
+                                                                            }
+                                                                            unsaved.current = {}
+                                                                            setMiniDialog('Распределение', <AcceptRefund _acceptRefund={acceptRefund} items={data.object.itemsRefund} _id={data.object._id}/>)
+                                                                            showMiniDialog(true)
+                                                                        }}>
+                                                                            Принять
+                                                                        </Button>
+                                                                        <br/>
+                                                                        </>
+                                                                        :
+                                                                        null
+                                                                }
+                                                                <Button color='primary' onClick={()=>getUnloadRefunds({_id: router.query.id})}>
+                                                                    Выгрузить
+                                                                </Button>
+                                                            </div>
+                                                    }
                                                     </>
                                                 :
                                                 null
@@ -318,7 +389,6 @@ const Refund = React.memo((props) => {
                                     :
                                     null
                             }
-                            <UnloadUpload position={'Z'} unload={()=>getUnloadRefunds({_id: router.query.id})}/>
                             </>
                             :
                             'Ничего не найдено'
