@@ -227,7 +227,7 @@ const Filter =  React.memo(
                                 <FormControlLabel value='installment' control={<Radio/>} label='Рассрочка'/>
                                 <FormControlLabel value='sale' control={<Radio/>} label='Продажа'/>
                                 <FormControlLabel value='reservation' control={<Radio/>} label='Бронь'/>
-                                <FormControlLabel value='order' control={<Radio/>} label='Заказ'/>
+                                <FormControlLabel value='order' control={<Radio/>} label='На заказ'/>
                             </RadioGroup>
                         </FormControl>
                         :

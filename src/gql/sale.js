@@ -32,7 +32,7 @@ export const getSale = async({_id}, client)=>{
                             number
                             manager {_id name}
                             client {_id name}
-                            deliveryFact
+                            deliverymans {_id name}
                             promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit}
                             discount 
@@ -82,6 +82,7 @@ export const getSales = async({search, skip, items, order, limit, promotion, man
                             number
                             manager {_id name}
                             client {_id name}
+                            deliverymans {_id name}
                             promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit images}
                             discount 
@@ -191,8 +192,8 @@ export const setSale = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $percentManager: Float, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
-                        setSale(_id: $_id, percentManager: $percentManager, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
+                    mutation ($_id: ID!, $deliverymans: [ID], $percentManager: Float, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
+                        setSale(_id: $_id, deliverymans: $deliverymans, percentManager: $percentManager, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
                     }`})
         return res.data.setSale
     } catch(err){

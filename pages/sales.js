@@ -21,11 +21,12 @@ import UnloadUpload from '../components/app/UnloadUpload';
 const colors = {
     'обработка': 'orange',
     'доставлен': 'green',
+    'на доставку': '#00A875',
     'отгружен': 'blue',
     'возврат': 'red',
     'отмена': 'red'
 }
-const status = ['все', 'обработка', 'доставлен', 'отгружен', 'возврат', 'отмена']
+const status = ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена']
 
 const Sales = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -127,22 +128,22 @@ const Sales = React.memo((props) => {
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
-                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Дата
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
                             Статус
                         </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                             Номер
                         </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                            Дата
+                        </div>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                             Доставка
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                             Клиент
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                             Менеджер
                         </div>
                     </div>
@@ -154,22 +155,22 @@ const Sales = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'sale'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
+                                <div className={classes.tableCell} style={{width: 110, justifyContent: 'center', fontWeight: 'bold', color: colors[element.status]}}>
+                                    {element.status}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {element.number}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                                     {pdDDMMYYHHMM(element.createdAt)}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start', fontWeight: 'bold', color: colors[element.status]}}>
-                                    {element.status}
-                                </div>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
-                                    {element.number}
-                                </div>
-                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'start', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
                                     {element.delivery?pdDDMMYYHHMM(element.delivery):'Самовывоз'}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                                     {element.client.name}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 460px) / 2)'}, justifyContent: 'start'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                                     {element.manager.name}
                                 </div>
                             </div>

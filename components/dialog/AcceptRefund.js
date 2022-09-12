@@ -25,7 +25,7 @@ const AcceptRefund =  React.memo(
             <div className={classes.main} style={{width}}>
                 {
                     items.map((item, idx) =>
-                        <div classname={classes.column} key={`Shipment${idx}`} style={{width}}>
+                        <div className={classes.column} key={`Shipment${idx}`} style={{width}}>
                             <b>{item.name}: {item.count} {item.unit}</b>
                             <br/>
                             {

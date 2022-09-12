@@ -51,6 +51,7 @@ const MyDrawer = React.memo((props) => {
             ['/wayitems'].includes(router.pathname)||
             router.pathname.includes('refund')||
             router.pathname.includes('order')||
+            router.pathname.includes('deliver')||
             router.pathname.includes('reservation')||
             router.pathname.includes('sale')?
                 'Операции'
@@ -317,6 +318,7 @@ const MyDrawer = React.memo((props) => {
                             background:
                                 ['/wayitems'].includes(router.pathname)||
                                 router.pathname.includes('refund')||
+                                router.pathname.includes('deliver')||
                                 router.pathname.includes('order')||
                                 router.pathname.includes('reservation')||
                                 router.pathname.includes('sale')?
@@ -397,6 +399,23 @@ const MyDrawer = React.memo((props) => {
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
                                     <ListItemText primary='Возвраты' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('deliver')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
+                                        Router.push('/deliveries')
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Доставка' />
                                 </ListItem>
                                 <Divider/>
                                 </>

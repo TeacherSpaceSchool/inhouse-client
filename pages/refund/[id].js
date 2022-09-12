@@ -140,7 +140,7 @@ const Refund = React.memo((props) => {
                             <Link href={`/${data.object.sale.order?'order':'sale'}/[id]`} as={`/${data.object.sale.order?'order':'sale'}/${data.object.sale._id}`}>
                                 <div className={classes.row}>
                                     <div className={classes.nameField}>
-                                        Продажа:
+                                        {data.object.sale.order?'На заказ':'Продажа'}:
                                     </div>
                                     <div className={classes.value}>
                                         №{data.object.sale.number}
@@ -318,7 +318,13 @@ const Refund = React.memo((props) => {
                                                                         :
                                                                         null
                                                                 }
-                                                                <Button color='primary' onClick={()=>getUnloadRefunds({_id: router.query.id})}>
+                                                                <Button color='primary' onClick={async ()=>{
+                                                                    let res = await getUnloadRefunds({_id: router.query.id})
+                                                                    if(res)
+                                                                        window.open(res, '_blank');
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }}>
                                                                     Выгрузить
                                                                 </Button>
                                                             </Menu>
@@ -352,7 +358,13 @@ const Refund = React.memo((props) => {
                                                                         :
                                                                         null
                                                                 }
-                                                                <Button color='primary' onClick={()=>getUnloadRefunds({_id: router.query.id})}>
+                                                                <Button color='primary' onClick={async ()=>{
+                                                                    let res = await getUnloadRefunds({_id: router.query.id})
+                                                                    if(res)
+                                                                        window.open(res, '_blank');
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }}>
                                                                     Выгрузить
                                                                 </Button>
                                                             </>

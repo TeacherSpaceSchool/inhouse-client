@@ -272,7 +272,7 @@ const Reservation = React.memo((props) => {
                                         null
                             }
                             <div style={{height: 10}}/>
-                            <div className={classes.nameField}>Позиции({itemsReservation.length}):</div>
+                            <div className={classes.nameField}>Позиции({edit?itemsReservation.length:data.object.itemsReservation.length}):</div>
                             {
                                 edit?
                                     itemsReservation.map((itemReservation, idx)=>
@@ -499,7 +499,13 @@ const Reservation = React.memo((props) => {
                                                                 open={openQuick}
                                                                 onClose={handleCloseQuick}
                                                             >
-                                                                <Button color='primary' onClick={()=>getUnloadReservations({_id: router.query.id})}>
+                                                                <Button color='primary' onClick={async ()=>{
+                                                                    let res = await getUnloadReservations({_id: router.query.id})
+                                                                    if(res)
+                                                                        window.open(res, '_blank');
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }}>
                                                                     Выгрузить
                                                                 </Button>
                                                             </Menu>
@@ -509,7 +515,13 @@ const Reservation = React.memo((props) => {
                                                             </>
                                                             :
                                                             <div>
-                                                                <Button color='primary' onClick={()=>getUnloadReservations({_id: router.query.id})}>
+                                                                <Button color='primary' onClick={async ()=>{
+                                                                    let res = await getUnloadReservations({_id: router.query.id})
+                                                                    if(res)
+                                                                        window.open(res, '_blank');
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }}>
                                                                     Выгрузить
                                                                 </Button>
                                                             </div>

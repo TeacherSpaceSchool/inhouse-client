@@ -52,6 +52,7 @@ const colors = {
     'активна': 'orange',
     'оплачен': 'green',
     'перерасчет': 'red',
+    'на доставку': '#00A875',
     'отгружен': 'blue',
     'отмена': 'red'
 }
@@ -227,14 +228,6 @@ const Sale = React.memo((props) => {
                                         null
                                 }
                             </div>
-                            <div className={classes.row}>
-                                <div className={classes.nameField}>
-                                    Создан:
-                                </div>
-                                <div className={classes.value}>
-                                    {pdDDMMYYHHMM(data.object.createdAt)}
-                                </div>
-                            </div>
                             {
                                 data.object.promotion?
                                     <div className={classes.row}>
@@ -259,25 +252,6 @@ const Sale = React.memo((props) => {
                                                 <Link href='/refund/[id]' as={`/refund/${refund._id}`}>
                                                     <div className={classes.value}>
                                                         №{refund.number}
-                                                    </div>
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </div>
-                                    :
-                                    null
-                            }
-                            {
-                                data.object.orders&&data.object.orders.length?
-                                    <div className={classes.row}>
-                                        <div className={classes.nameField} style={{width: 80}}>
-                                            На заказ:
-                                        </div>
-                                        <div className={classes.column}>
-                                            {data.object.orders.map((order)=>
-                                                <Link href='/order/[id]' as={`/order/${order._id}`}>
-                                                    <div className={classes.value}>
-                                                        №{order.number}
                                                     </div>
                                                 </Link>
                                             )}
@@ -325,8 +299,6 @@ const Sale = React.memo((props) => {
                             }
                             {
                                 edit?
-                                    <>
-                                    <br/>
                                     <TextField
                                         id='date'
                                         type='datetime-local'
@@ -336,7 +308,6 @@ const Sale = React.memo((props) => {
                                         onChange={(event) => setDelivery(event.target.value)}
                                         className={classes.input}
                                     />
-                                    </>
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
@@ -598,7 +569,7 @@ const Sale = React.memo((props) => {
                                     </>
                             }
                             <div style={{height: 10}}/>
-                            <div className={classes.nameField}>Позиции({itemsSale.length}):</div>
+                            <div className={classes.nameField}>Позиции({edit?itemsSale.length:data.object.itemsSale}):</div>
                             {
                                 edit&&data.object.status==='обработка'?
                                     itemsSale.map((itemSale, idx)=>
@@ -818,23 +789,6 @@ const Sale = React.memo((props) => {
                                                     null
                                             }
                                             {
-                                                ['admin', 'завсклад', 'менеджер/завсклад'].includes(profile.role)&&data.object.status==='обработка'?
-                                                    <Button color='primary' onClick={async()=>{
-                                                        let items = cloneObject(data.object.itemsSale), shipment = {}
-                                                        for(let i = 0; i <items.length; i++) {
-                                                            items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
-                                                            shipment[items[i].item] = {}
-                                                        }
-                                                        unsaved.current = {}
-                                                        setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
-                                                        showMiniDialog(true)
-                                                    }}>
-                                                        Отгрузить
-                                                    </Button>
-                                                    :
-                                                    null
-                                            }
-                                            {
                                                 isMobileApp?
                                                     <>
                                                     <Menu
@@ -855,6 +809,44 @@ const Sale = React.memo((props) => {
                                                         {
                                                             ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
                                                                 [
+                                                                    !data.object.delivery?
+                                                                        <Button color='primary' onClick={async()=>{
+                                                                            let items = cloneObject(data.object.itemsSale), shipment = {}
+                                                                            for(let i = 0; i <items.length; i++) {
+                                                                                items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
+                                                                                shipment[items[i].item] = {}
+                                                                            }
+                                                                            unsaved.current = {}
+                                                                            setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
+                                                                            showMiniDialog(true)
+                                                                        }}>
+                                                                            Отгрузить
+                                                                        </Button>
+                                                                        :
+                                                                        <Button color='primary' onClick={async()=>{
+                                                                            const action = async() => {
+                                                                                let element = {_id: router.query.id, status: 'на доставку'}
+                                                                                let res = await setSale(element)
+                                                                                if(res&&res!=='ERROR') {
+                                                                                    showSnackBar('Успешно', 'success')
+                                                                                    Router.push(`/delivery/${router.query.id}`)
+                                                                                }
+                                                                                else
+                                                                                    showSnackBar('Ошибка', 'error')
+                                                                            }
+                                                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                                            showMiniDialog(true)
+                                                                        }}>
+                                                                            На доставку
+                                                                        </Button>
+                                                                    , <br/>
+                                                                ]
+                                                                :
+                                                                null
+                                                        }
+                                                        {
+                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
+                                                                [
                                                                     <Button color='primary' onClick={async()=>{
                                                                         let currentItems = cloneObject(data.object.itemsSale)
                                                                         let newItems = []
@@ -872,27 +864,6 @@ const Sale = React.memo((props) => {
                                                                         showMiniDialog(true)
                                                                     }}>
                                                                         Разделить
-                                                                    </Button>,
-                                                                    <br/>
-                                                                ]
-                                                                :
-                                                                null
-                                                        }
-                                                        {
-                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
-                                                                [
-                                                                    <Button color='primary' onClick={async()=>{
-                                                                        const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
-                                                                        if(_prepareAcceptOrder) {
-                                                                            unsaved.current = {}
-                                                                            setMiniDialog('Распределение', <AcceptOrder
-                                                                                order={data.object}
-                                                                                prepareAcceptOrder={_prepareAcceptOrder}
-                                                                                itemsOrder={itemsSale}/>)
-                                                                            showMiniDialog(true)
-                                                                        }
-                                                                    }}>
-                                                                        На доставку
                                                                     </Button>,
                                                                     <br/>
                                                                 ]
@@ -940,7 +911,13 @@ const Sale = React.memo((props) => {
                                                                 :
                                                                 null
                                                         }
-                                                        <Button color='primary' onClick={()=>getUnloadSales({_id: router.query.id})}>
+                                                        <Button color='primary' onClick={async ()=>{
+                                                            let res = await getUnloadSales({_id: router.query.id})
+                                                            if(res)
+                                                                window.open(res, '_blank');
+                                                            else
+                                                                showSnackBar('Ошибка', 'error')
+                                                        }}>
                                                             Выгрузить
                                                         </Button>
                                                     </Menu>
@@ -950,6 +927,41 @@ const Sale = React.memo((props) => {
                                                     </>
                                                     :
                                                     <div>
+                                                        {
+                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
+                                                                data.object.delivery?
+                                                                    <Button color='primary' onClick={async()=>{
+                                                                        const action = async() => {
+                                                                            let element = {_id: router.query.id, status: 'на доставку'}
+                                                                            let res = await setSale(element)
+                                                                            if(res&&res!=='ERROR') {
+                                                                                showSnackBar('Успешно', 'success')
+                                                                                Router.push(`/delivery/${router.query.id}`)
+                                                                            }
+                                                                            else
+                                                                                showSnackBar('Ошибка', 'error')
+                                                                        }
+                                                                        setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                                        showMiniDialog(true)
+                                                                    }}>
+                                                                        На доставку
+                                                                    </Button>
+                                                                    :
+                                                                    <Button color='primary' onClick={async()=>{
+                                                                        let items = cloneObject(data.object.itemsSale), shipment = {}
+                                                                        for(let i = 0; i <items.length; i++) {
+                                                                            items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
+                                                                            shipment[items[i].item] = {}
+                                                                        }
+                                                                        unsaved.current = {}
+                                                                        setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
+                                                                        showMiniDialog(true)
+                                                                    }}>
+                                                                        Отгрузить
+                                                                    </Button>
+                                                                :
+                                                                null
+                                                        }
                                                         {
                                                             ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
                                                                 <Button color='primary' onClick={async()=>{
@@ -969,24 +981,6 @@ const Sale = React.memo((props) => {
                                                                     showMiniDialog(true)
                                                                 }}>
                                                                     Разделить
-                                                                </Button>
-                                                                :
-                                                                null
-                                                        }
-                                                        {
-                                                            ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
-                                                                <Button color='primary' onClick={async()=>{
-                                                                    const _prepareAcceptOrder = await prepareAcceptOrder(router.query.id)
-                                                                    if(_prepareAcceptOrder) {
-                                                                        unsaved.current = {}
-                                                                        setMiniDialog('Распределение', <AcceptOrder
-                                                                            order={data.object}
-                                                                            prepareAcceptOrder={_prepareAcceptOrder}
-                                                                            itemsOrder={itemsSale}/>)
-                                                                        showMiniDialog(true)
-                                                                    }
-                                                                }}>
-                                                                    На доставку
                                                                 </Button>
                                                                 :
                                                                 null
@@ -1029,7 +1023,13 @@ const Sale = React.memo((props) => {
                                                                 :
                                                                 null
                                                         }
-                                                        <Button color='primary' onClick={()=>getUnloadSales({_id: router.query.id})}>
+                                                        <Button color='primary' onClick={async ()=>{
+                                                            let res = await getUnloadSales({_id: router.query.id})
+                                                            if(res)
+                                                                window.open(res, '_blank');
+                                                            else
+                                                                showSnackBar('Ошибка', 'error')
+                                                        }}>
                                                             Выгрузить
                                                         </Button>
                                                     </div>
