@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "2gis-maps": "^3.7.1",
+    "2gis-maps": "^3.7.0",
     "@apollo/client": "^3.5.10",
     "@emotion/cache": "^11.7.1",
     "@emotion/react": "^11.9.0",

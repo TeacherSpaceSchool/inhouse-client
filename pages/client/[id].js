@@ -171,12 +171,12 @@ const Client = React.memo((props) => {
                                                value={address}
                                                className={classes.input}
                                     />
-                                    <div className={classes.geo} style={{color: geo?'#183B37':'red'}} onClick={()=>{
+                                    <div className={classes.geo} style={{color: geo&&geo.length?'#183B37':'red'}} onClick={()=>{
                                         setFullDialog('Геолокация', <Geo geo={geo} setAddressGeo={setGeo}/>)
                                         showFullDialog(true)
                                     }}>
                                         {
-                                            geo?
+                                            geo&&geo.length?
                                                 'Изменить геолокацию'
                                                 :
                                                 'Задайте геолокацию'
@@ -331,7 +331,7 @@ const Client = React.memo((props) => {
                                         </div>
                                     </div>
                                     {
-                                        geo?
+                                        geo&&geo.length?
                                             <div className={classes.geo} onClick={()=>{
                                                 setFullDialog('Геолокация', <Geo geo={geo}/>)
                                                 showFullDialog(true)

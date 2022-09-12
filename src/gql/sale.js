@@ -40,6 +40,7 @@ export const getSale = async({_id}, client)=>{
                             paymentConfirmation
                             cpa {_id name}
                             geo
+                            divide
                             percentCpa 
                             bonusManager 
                             bonusCpa 
@@ -85,6 +86,7 @@ export const getSales = async({search, skip, items, order, limit, promotion, man
                             itemsSale {_id name item count price amount characteristics status unit images}
                             discount 
                             geo
+                            divide
                             order
                             prepaid
                             cpa {_id name}
@@ -189,8 +191,8 @@ export const setSale = async(variables, client)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($_id: ID!, $bonusManager: Float, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
-                        setSale(_id: $_id, bonusManager: $bonusManager, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
+                    mutation ($_id: ID!, $percentManager: Float, $geo: [Float], $itemsSale: [ItemFromListInput], $discount: Float, $percentCpa: Float, $amountStart: Float, $amountEnd: Float, $address: String, $addressInfo: String, $comment: String, $paid: Float, $delivery: Date, $status: String) {
+                        setSale(_id: $_id, percentManager: $percentManager, geo: $geo, itemsSale: $itemsSale, discount: $discount, percentCpa: $percentCpa, amountStart: $amountStart, amountEnd: $amountEnd, address: $address, addressInfo: $addressInfo, comment: $comment, paid: $paid, delivery: $delivery, status: $status) 
                     }`})
         return res.data.setSale
     } catch(err){
@@ -208,6 +210,21 @@ export const addSale = async(variables)=>{
                         addSale(client: $client, geo: $geo, order: $order, prepaid: $prepaid, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, reservations: $reservations) 
                     }`})
         return res.data.addSale
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const divideSale = async(variables)=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            variables,
+            mutation : gql`
+                    mutation ($_id: ID!, $newItems: [ItemFromListInput]!, $currentItems: [ItemFromListInput]!) {
+                        divideSale(_id: $_id, newItems: $newItems, currentItems: $currentItems) 
+                    }`})
+        return res.data.divideSale
     } catch(err){
         console.error(err)
     }

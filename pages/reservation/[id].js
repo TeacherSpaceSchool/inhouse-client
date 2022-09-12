@@ -482,27 +482,6 @@ const Reservation = React.memo((props) => {
                                                             null
                                                     }
                                                     {
-                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
-                                                            <Button color='secondary' onClick={()=>{
-                                                                const action = async() => {
-                                                                    let element = {_id: router.query.id, status: 'отмена'}
-                                                                    let res = await setReservation(element)
-                                                                    if(res&&res!=='ERROR') {
-                                                                        showSnackBar('Успешно', 'success')
-                                                                        Router.reload()
-                                                                    }
-                                                                    else
-                                                                        showSnackBar('Ошибка', 'error')
-                                                                }
-                                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
-                                                                showMiniDialog(true)
-                                                            }}>
-                                                                Отменить
-                                                            </Button>
-                                                            :
-                                                            null
-                                                    }
-                                                    {
                                                         isMobileApp?
                                                             <>
                                                             <Menu
@@ -524,16 +503,37 @@ const Reservation = React.memo((props) => {
                                                                     Выгрузить
                                                                 </Button>
                                                             </Menu>
-                                                            <Button className={classes.quickBottomMenu} color='primary' onClick={handleMenuQuick}>
+                                                            <Button color='primary' onClick={handleMenuQuick}>
                                                                 Функции
                                                             </Button>
                                                             </>
                                                             :
-                                                            <div className={classes.quickBottomMenu}>
+                                                            <div>
                                                                 <Button color='primary' onClick={()=>getUnloadReservations({_id: router.query.id})}>
                                                                     Выгрузить
                                                                 </Button>
                                                             </div>
+                                                    }
+                                                    {
+                                                        ['admin', 'менеджер/завсклад', 'менеджер'].includes(profile.role)?
+                                                            <Button className={classes.rightBottomButton} color='secondary' onClick={()=>{
+                                                                const action = async() => {
+                                                                    let element = {_id: router.query.id, status: 'отмена'}
+                                                                    let res = await setReservation(element)
+                                                                    if(res&&res!=='ERROR') {
+                                                                        showSnackBar('Успешно', 'success')
+                                                                        Router.reload()
+                                                                    }
+                                                                    else
+                                                                        showSnackBar('Ошибка', 'error')
+                                                                }
+                                                                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                                showMiniDialog(true)
+                                                            }}>
+                                                                Отменить
+                                                            </Button>
+                                                            :
+                                                            null
                                                     }
                                                     </>
                                                 :

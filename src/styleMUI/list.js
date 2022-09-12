@@ -231,7 +231,7 @@ export default makeStyles()(()=>{
             margin: 10,
             width: 100
         },
-        quickBottomMenu: {
+        rightBottomButton: {
             display: 'flex',
             position: 'fixed',
             bottom: 10,

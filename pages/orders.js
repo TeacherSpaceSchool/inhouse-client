@@ -20,7 +20,7 @@ import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
     'обработка': 'orange',
-    'заказан': 'orange',
+    'заказан': 'indigo',
     'доставлен': 'green',
     'отгружен': 'blue',
     'возврат': 'red',

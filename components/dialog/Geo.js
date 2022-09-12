@@ -19,7 +19,7 @@ const Geo =  React.memo(
         const map = useRef(null);
         const lockMove = useRef(false);
         const marker = useRef(null);
-        let [newGeo, setNewGeo] = useState(geo?geo:[42.8700000, 74.5900000]);
+        let [newGeo, setNewGeo] = useState(geo&&geo.length?geo:[42.8700000, 74.5900000]);
         let getGeo = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position)=>{

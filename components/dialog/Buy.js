@@ -297,12 +297,12 @@ const BuyBasket =  React.memo(
                             onChange={(event) => setAddress(event.target.value)}
                             className={classes.input}
                         />
-                        <div className={classes.geo} style={{color: geo?'#183B37':'red'}} onClick={()=>{
+                        <div className={classes.geo} style={{color: geo&&geo.length?'#183B37':'red'}} onClick={()=>{
                             setFullDialog('Геолокация', <Geo geo={geo} setAddressGeo={setGeo}/>)
                             showFullDialog(true)
                         }}>
                             {
-                                geo?
+                                geo&&geo.length?
                                     'Изменить геолокацию'
                                     :
                                     'Задайте геолокацию'

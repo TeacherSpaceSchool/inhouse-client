@@ -263,6 +263,8 @@ const Catalog = React.memo((props) => {
                                                 <div className={basketStyle.classes.counterbtn} onClick={() => {
                                                     if(basket[element._id]) {
                                                         basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
+                                                        if(basket[element._id].count<0)
+                                                            basket[element._id].count = 0
                                                         if (basket[element._id].count === 0)
                                                             delete basket[element._id]
                                                         setBasket({...basket})
@@ -279,7 +281,7 @@ const Catalog = React.memo((props) => {
                                                             count: 0
                                                         }
                                                     basket[element._id].count = inputFloat(event.target.value)
-                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)))
+                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
                                                         basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
                                                     setBasket({...basket})
                                                 }}/>

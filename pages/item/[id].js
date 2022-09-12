@@ -290,7 +290,14 @@ const Item = React.memo((props) => {
                                             <Input
                                                 placeholder='Скидка'
                                                 value={discount}
-                                                onChange={(event)=>setDiscount(inputFloat(event.target.value))}
+                                                onChange={(event)=>{
+                                                    discount = inputFloat(event.target.value)
+                                                    if(discount>100&&typeDiscount==='%')
+                                                        discount = 100
+                                                    else if(discount>priceKGS&&typeDiscount==='сом')
+                                                        discount = priceKGS
+                                                    setDiscount(discount)
+                                                }}
                                                 endAdornment={
                                                     <InputAdornment position='end'>
                                                         <IconButton onClick={()=>{
