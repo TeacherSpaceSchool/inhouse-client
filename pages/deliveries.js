@@ -133,9 +133,6 @@ const Deliveries = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                             Доставка
                         </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Тип
-                        </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Доставщики
                         </div>
@@ -144,6 +141,9 @@ const Deliveries = React.memo((props) => {
                         </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Адрес
+                        </div>
+                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                            Телефоны
                         </div>
                     </div>
                     {list.map((element) =>
@@ -159,9 +159,6 @@ const Deliveries = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: new Date(element.delivery)<today?'red':'black'}}>
                                     {element.delivery?pdDDMMYYHHMM(element.delivery):'Не указано'}
-                                </div>
-                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: !['отмена', 'доставлен'].includes(element.status)&&new Date(element.delivery)<today?'red':'black'}}>
-                                    {element.paid<element.amounEnd?'Рассрочка\n':''}{element.order?'Заказ':'Наличка'}
                                 </div>
                                 <div className={classes.tableCell} style={{flexDirection: 'column', gap: '5px', width: 250, alignItems: 'center'}}>
                                     {element.deliverymans?element.deliverymans.map((deliveryman)=>
@@ -180,6 +177,9 @@ const Deliveries = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     {element.address}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                                    {element.client.phones?element.client.phones.map(phone=>`${phone}\n`):''}
                                 </div>
                             </div>
                         </Link>

@@ -363,6 +363,10 @@ const Delivery = React.memo((props) => {
                                             :
                                             null
                                     }
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>Телефоны:&nbsp;</div>
+                                        <div className={classes.value}>{data.object.client.phones.map(phone=><a href={`+996${phone}`}>+996{`${phone}\n`}</a>)}</div>
+                                    </div>
                                     </>
                             }
                             <div style={{height: 10}}/>

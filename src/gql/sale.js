@@ -49,7 +49,7 @@ export const getSale = async({_id}, client)=>{
                             number
                             selfDelivery
                             manager {_id name}
-                            client {_id name}
+                            client {_id name phones}
                             deliverymans {_id name}
                             promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit}
@@ -99,7 +99,7 @@ export const getSales = async({search, skip, items, order, limit, promotion, man
                             createdAt
                             number
                             manager {_id name}
-                            client {_id name}
+                            client {_id name phones}
                             deliverymans {_id name}
                             promotion {_id name}
                             itemsSale {_id name item count price amount characteristics status unit images cost type category factory size}
