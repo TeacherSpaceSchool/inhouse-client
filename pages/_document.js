@@ -10,7 +10,6 @@ export default class MyDocument extends Document {
             <Html lang="en">
             <Head>
                 <meta charSet='utf-8' />
-                {/* PWA primary color */}
                 <meta name="theme-color" content={theme.palette.primary.main} />
                 <link rel="shortcut icon" href="/favicon.ico" />
                 <link
@@ -25,7 +24,6 @@ export default class MyDocument extends Document {
                 <link rel='apple-touch-icon' href='/192x192.png'/>
                 <meta name='msapplication-square310x310logo' content='/192x192.png'/>
                 <meta name='google' content='notranslate'/>
-                {/* Inject MUI styles first to match with the prepend: true configuration. */}
                 {this.props.emotionStyleTags}
             </Head>
             <body>

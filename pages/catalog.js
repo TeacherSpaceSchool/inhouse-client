@@ -278,7 +278,7 @@ const Catalog = React.memo((props) => {
                                                             ...element,
                                                             priceKGSCount: 0,
                                                             priceAfterDiscountKGSCount: 0,
-                                                            count: 0
+                                                            count: 0,
                                                         }
                                                     basket[element._id].count = inputFloat(event.target.value)
                                                     if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
@@ -291,7 +291,7 @@ const Catalog = React.memo((props) => {
                                                             ...element,
                                                             priceKGSCount: 0,
                                                             priceAfterDiscountKGSCount: 0,
-                                                            count: 0
+                                                            count: 0,
                                                         }
                                                     let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
                                                     if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
@@ -402,7 +402,12 @@ const Catalog = React.memo((props) => {
                                         price: checkFloat(basket[keys[i]].priceAfterDiscountKGS),
                                         amount: checkFloat(basket[keys[i]].priceAfterDiscountKGSCount),
                                         characteristics: basket[keys[i]].characteristics,
-                                        status: 'обработка'
+                                        status: 'обработка',
+                                        cost: basket[keys[i]].primeCostKGS,
+                                        type: basket[keys[i]].type,
+                                        category: basket[keys[i]].category.name,
+                                        factory: basket[keys[i]].factory.name,
+                                        size: basket[keys[i]].size,
                                     })
                                 }
                                 let prepaid = 0, _reservations = []

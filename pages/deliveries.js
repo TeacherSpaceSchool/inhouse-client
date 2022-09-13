@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getSales, getSalesCount, getUnloadSales} from '../src/gql/sale'
+import {getSales, getSalesCount, getUnloadDeliveries} from '../src/gql/sale'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -28,7 +28,7 @@ const Deliveries = React.memo((props) => {
     const {classes} = pageListStyle();
     //props
     const { data } = props;
-    const { search, filter, isMobileApp } = props.app;
+    const { search, filter } = props.app;
     //настройка
     let [today, setToday] = useState();
     const initialRender = useRef(true);
@@ -133,6 +133,9 @@ const Deliveries = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                             Доставка
                         </div>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                            Тип
+                        </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Доставщики
                         </div>
@@ -154,8 +157,11 @@ const Deliveries = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 110, justifyContent: 'center', fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
-                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Самовывоз'}
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: new Date(element.delivery)<today?'red':'black'}}>
+                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Не указано'}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: !['отмена', 'доставлен'].includes(element.status)&&new Date(element.delivery)<today?'red':'black'}}>
+                                    {element.paid<element.amounEnd?'Рассрочка\n':''}{element.order?'Заказ':'Наличка'}
                                 </div>
                                 <div className={classes.tableCell} style={{flexDirection: 'column', gap: '5px', width: 250, alignItems: 'center'}}>
                                     {element.deliverymans?element.deliverymans.map((deliveryman)=>
@@ -180,7 +186,7 @@ const Deliveries = React.memo((props) => {
                     )}
                 </div>
             </Card>
-            <UnloadUpload unload={()=>getUnloadSales({
+            <UnloadUpload unload={()=>getUnloadDeliveries({
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},

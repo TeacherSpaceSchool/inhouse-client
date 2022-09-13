@@ -118,7 +118,7 @@ const Orders = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, user: true, client: true, cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
+        <App filterShow={{status, user: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
             <Head>
                 <title>На заказ</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -168,8 +168,9 @@ const Orders = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                                     {pdDDMMYYHHMM(element.createdAt)}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
-                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Самовывоз'}
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: !['отмена', 'доставлен'].includes(element.status)&&new Date(element.delivery)<today?'red':'black'}}>
+                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Не указано'}
+                                    {element.selfDelivery?'\nСамовывоз':''}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                                     {element.client.name}

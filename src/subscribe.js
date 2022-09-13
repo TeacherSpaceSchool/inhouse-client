@@ -22,7 +22,6 @@ export let checkDisableSubscribe = () => {
 }
 
 export let register = (update) => {
-// Installing service worker
     return new Promise(async (resolve) => {
         if ('serviceWorker' in navigator && 'PushManager' in window) {
             navigator.serviceWorker.ready.then((swReg) => {
@@ -84,7 +83,6 @@ export let unregister = () => {
     }
 }
 
-// Url Encription
 function urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
@@ -100,10 +98,8 @@ function urlB64ToUint8Array(base64String) {
     return outputArray;
 }
 
-// Send request to database for add new subscriber
 function saveSubscription(subscription) {
     let xmlHttp = new XMLHttpRequest();
-    //put here API address
     xmlHttp.open('POST', `${urlSubscribe}/register`);
     xmlHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8', );
     xmlHttp.setRequestHeader('Authorization', 'Bearer '+getJWT(document.cookie), );

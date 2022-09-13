@@ -86,11 +86,11 @@ const Reservation = React.memo((props) => {
         setAnchorElQuick(null);
     }
     return (
-        <App unsaved={unsaved} pageName={data.object!==null?router.query.id==='new'?'Добавить':`Бронь №${data.object.number}`:'Ничего не найдено'}>
+        <App unsaved={unsaved} pageName={data.object!==null?`Бронь №${data.object.number}`:'Ничего не найдено'}>
             <Head>
-                <title>{data.object!==null?router.query.id==='new'?'Добавить':`Бронь №${data.object.number}`:'Ничего не найдено'}</title>
+                <title>{data.object!==null?`Бронь №${data.object.number}`:'Ничего не найдено'}</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
-                <meta property='og:title' content={data.object!==null?router.query.id==='new'?'Добавить':`Бронь №${data.object.number}`:'Ничего не найдено'} />
+                <meta property='og:title' content={data.object!==null?`Бронь №${data.object.number}`:'Ничего не найдено'} />
                 <meta property='og:description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
                 <meta property='og:type' content='website'/>
                 <meta property='og:image' content={`${urlMain}/512x512.png`} />
@@ -382,6 +382,11 @@ const Reservation = React.memo((props) => {
                                                             amount: newItem.priceAfterDiscountKGS,
                                                             characteristics: newItem.characteristics,
                                                             status: 'обработка',
+                                                            cost: newItem.primeCostKGS,
+                                                            type: newItem.type,
+                                                            category: newItem.category.name,
+                                                            factory: newItem.factory.name,
+                                                            size: newItem.size,
                                                         }
                                                     ])
                                                 }

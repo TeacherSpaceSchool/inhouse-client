@@ -114,7 +114,7 @@ const Catalog = React.memo((props) => {
                                             items: true,
                                             search,
                                             client: client._id,
-                                            //status: 'доставлен'
+                                            status: 'доставлен'
                                         }),
                                         ...await getSales({
                                             order: true,
@@ -122,8 +122,8 @@ const Catalog = React.memo((props) => {
                                             items: true,
                                             search,
                                             client: client._id,
-                                            //status: 'доставлен'
-                                        }),
+                                            status: 'доставлен'
+                                        })
                                     ]
                                 }}
                                 minLength={0}
@@ -237,7 +237,12 @@ const Catalog = React.memo((props) => {
                                         price: basket[keys[i]].price,
                                         amount: basket[keys[i]].amount,
                                         characteristics: basket[keys[i]].characteristics,
-                                        status: 'обработка'
+                                        status: 'обработка',
+                                        cost: basket[keys[i]].cost,
+                                        type: basket[keys[i]].type,
+                                        category: basket[keys[i]].category,
+                                        factory: basket[keys[i]].factory,
+                                        size: basket[keys[i]].size,
                                     })
                                 }
 

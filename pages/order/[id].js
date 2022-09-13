@@ -41,6 +41,9 @@ import { getInstallments } from '../../src/gql/installment'
 import Menu from '@mui/material/Menu';
 import dynamic from 'next/dynamic';
 import { getBalanceItems } from '../../src/gql/balanceItem'
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Shipment from '../../components/dialog/Shipment'
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
 
 const colors = {
@@ -74,6 +77,7 @@ const Order = React.memo((props) => {
     let [discountType, setDiscountType] = useState('сом');
     let [percentManager, setPercentManager] = useState('');
     let [percentCpa, setPercentCpa] = useState('');
+    let [selfDelivery, setSelfDelivery] = useState(false);
     let [geo, setGeo] = useState(data.object?cloneObject(data.object.geo):null);
     let [amountStart, setAmountStart] = useState(data.object.amountStart);
     let [amountEnd, setAmountEnd] = useState(data.object.amountEnd);
@@ -238,22 +242,28 @@ const Order = React.memo((props) => {
                             }
                             {
                                 edit?
-                                    <TextField
-                                        id='date'
-                                        type='datetime-local'
-                                        variant='standard'
-                                        label='Доставка'
-                                        value={delivery}
-                                        onChange={(event) => setDelivery(event.target.value)}
-                                        className={classes.input}
-                                    />
+                                    <>
+                                    <div className={isMobileApp?classes.column:classes.row}>
+                                        <TextField
+                                            id='date'
+                                            type='datetime-local'
+                                            variant='standard'
+                                            label='Доставка'
+                                            value={delivery}
+                                            onChange={(event) => setDelivery(event.target.value)}
+                                            className={classes.input}
+                                        />
+                                        <FormControlLabel control={<Checkbox checked={selfDelivery} onChange={(event) => setSelfDelivery(event.target.checked)}/>} label='Самовывоз' />
+                                    </div>
+                                    </>
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Доставка:
                                         </div>
-                                        <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
-                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Самовывоз'}
+                                        <div className={classes.value} style={{ color: !['отмена', 'доставлен'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
+                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Не указано'}
+                                            {data.object.selfDelivery?' Самовывоз':''}
                                         </div>
                                     </div>
                             }
@@ -654,6 +664,7 @@ const Order = React.memo((props) => {
                                                                 if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
                                                                 if (comment !== data.object.comment) element.comment = comment
                                                                 if (paid != data.object.paid) element.paid = checkFloat(paid)
+                                                                if (selfDelivery != data.object.selfDelivery) element.selfDelivery = selfDelivery
                                                                 if (pdDDMMYYHHMM(delivery) !== pdDDMMYYHHMM(data.object.delivery)) element.delivery = delivery
                                                                 if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
                                                                 if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
@@ -753,7 +764,7 @@ const Order = React.memo((props) => {
                                                         {
                                                             ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'заказан'===data.object.status?
                                                                 [
-                                                                    !data.object.delivery?
+                                                                    !data.object.selfDelivery?
                                                                         <Button color='primary' onClick={async()=>{
                                                                             const action = async() => {
                                                                                 let element = {_id: router.query.id, status: 'на доставку'}
@@ -772,20 +783,16 @@ const Order = React.memo((props) => {
                                                                         </Button>
                                                                         :
                                                                         <Button color='primary' onClick={async()=>{
-                                                                            const action = async() => {
-                                                                                let element = {_id: router.query.id, status: 'на доставку'}
-                                                                                let res = await setSale(element)
-                                                                                if(res&&res!=='ERROR') {
-                                                                                    showSnackBar('Успешно', 'success')
-                                                                                    Router.push(`/delivery/${router.query.id}`)
-                                                                                }
-                                                                                else
-                                                                                    showSnackBar('Ошибка', 'error')
+                                                                            let items = cloneObject(data.object.itemsSale), shipment = {}
+                                                                            for(let i = 0; i <items.length; i++) {
+                                                                                items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
+                                                                                shipment[items[i].item] = {}
                                                                             }
-                                                                            setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                                                                            unsaved.current = {}
+                                                                            setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
                                                                             showMiniDialog(true)
                                                                         }}>
-                                                                            На доставку
+                                                                            Отгрузить
                                                                         </Button>
                                                                     , <br/>
                                                                 ]
@@ -805,6 +812,7 @@ const Order = React.memo((props) => {
                                                                             }
                                                                         }
                                                                         setMiniDialog('Разделить заказ', <DivideSaleOrder
+                                                                            installment={data.object.installment}
                                                                             type='order'
                                                                             _id={router.query.id}
                                                                             currentItems={currentItems}
@@ -895,7 +903,7 @@ const Order = React.memo((props) => {
                                                     }
                                                     {
                                                         ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'заказан'===data.object.status?
-                                                            data.object.delivery?
+                                                            !data.object.selfDelivery?
                                                                 <Button color='primary' onClick={async()=>{
                                                                     const action = async() => {
                                                                         let element = {_id: router.query.id, status: 'на доставку'}
@@ -940,6 +948,7 @@ const Order = React.memo((props) => {
                                                                     }
                                                                 }
                                                                 setMiniDialog('Разделить заказ', <DivideSaleOrder
+                                                                    installment={data.object.installment}
                                                                     type='order'
                                                                     _id={router.query.id}
                                                                     currentItems={currentItems}

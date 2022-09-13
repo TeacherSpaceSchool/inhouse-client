@@ -114,7 +114,7 @@ const Sales = React.memo((props) => {
     }
     //render
     return (
-        <App filterShow={{status, promotion: true, user: true, client: true, cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
+        <App filterShow={{status, promotion: true, user: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
                 <title>Продажи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -164,8 +164,9 @@ const Sales = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                                     {pdDDMMYYHHMM(element.createdAt)}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: ['обработка'].includes(element.status)&&element.delivery&&new Date(element.delivery)<today?'red':'black'}}>
-                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Самовывоз'}
+                                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center', color: !['отмена', 'доставлен'].includes(element.status)&&new Date(element.delivery)<today?'red':'black'}}>
+                                    {element.delivery?pdDDMMYYHHMM(element.delivery):'Не указано'}
+                                    {element.selfDelivery?'\nСамовывоз':''}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                                     {element.client.name}
@@ -186,6 +187,7 @@ const Sales = React.memo((props) => {
                 ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
+                ...filter.promotion?{promotion: filter.promotion}:{},
                 search
             })}/>
             <div className='count'>

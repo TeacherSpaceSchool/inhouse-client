@@ -27,6 +27,8 @@ import TableViewIcon from '@mui/icons-material/TableView';
 import SettingsIcon from '@mui/icons-material/Settings';
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import ClearDB from '../../components/dialog/ClearDB'
+import DownloadStatistic from '../../components/dialog/DownloadStatistic'
+import { getUnloadSales } from '../../src/gql/sale';
 
 const MyDrawer = React.memo((props) => {
     const { unsaved, full } = props
@@ -774,6 +776,94 @@ const MyDrawer = React.memo((props) => {
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
                                     <ListItemText primary='Статистика дизайнеров' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет по продажам', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadSales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.delivery?{delivery: filter.delivery}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion}:{},
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                delivery: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена']
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет по продажам' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет по продажам доход', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadSales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.delivery?{delivery: filter.delivery}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion}:{},
+                                                    cost: true
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                delivery: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
+                                                store: true
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет по продажам доход' />
                                 </ListItem>
                                 <Divider/>
                                 </>

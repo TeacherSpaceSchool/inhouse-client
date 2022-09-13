@@ -37,7 +37,6 @@ import Link from 'next/link';
 import Shipment from '../../components/dialog/Shipment'
 import Menu from '@mui/material/Menu';
 import dynamic from 'next/dynamic';
-import DownloadIcon from '@mui/icons-material/Download';
 import { getUsers } from '../../src/gql/user'
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
 
@@ -106,42 +105,6 @@ const Delivery = React.memo((props) => {
             </Head>
             <Card className={classes.page}>
                 <div className={classes.status}>
-                    {
-                        data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
-                            <DownloadIcon onClick={async()=>{
-                                await showLoad(true)
-                                await getSaleDoc({
-                                    sale: data.object,
-                                    client: await getClient({_id: data.object.client._id}),
-                                    itemsSale: data.object.itemsSale,
-                                    doc: await getDoc()
-                                })
-                                let res = await getAttachment(data.object._id)
-                                if(res)
-                                    window.open(res, '_blank');
-                                else
-                                    showSnackBar('Ошибка', 'error')
-                                if(data.object.installment) {
-                                    await getInstallmentDoc({
-                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                        sale: data.object,
-                                        client: await getClient({_id: data.object.client._id}),
-                                        itemsSale: data.object.itemsSale,
-                                        doc: await getDoc()
-                                    })
-                                    await getVoucherDoc({
-                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                        client: await getClient({_id: data.object.client._id}),
-                                        doc: await getDoc()
-                                    })
-
-                                }
-
-                                await showLoad(false)
-                            }} style={{ color: '#183B37'}}/>
-                            :
-                            null
-                    }
                     {
                         ['admin'].includes(profile.role)&&data.object&&data.object._id?
                             <HistoryIcon onClick={async()=>{
@@ -229,8 +192,8 @@ const Delivery = React.memo((props) => {
                                         <div className={classes.nameField}>
                                             Доставка:
                                         </div>
-                                        <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
-                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Самовывоз'}
+                                        <div className={classes.value} style={{ color: !['отмена', 'доставлен'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
+                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Не указано'}
                                         </div>
                                     </div>
                             }

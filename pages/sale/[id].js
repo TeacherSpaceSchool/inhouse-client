@@ -41,8 +41,9 @@ import SetCharacteristics from '../../components/dialog/SetCharacteristics'
 import Shipment from '../../components/dialog/Shipment'
 import Menu from '@mui/material/Menu';
 import dynamic from 'next/dynamic';
-import DownloadIcon from '@mui/icons-material/Download';
 import DivideSaleOrder from '../../components/dialog/DivideSaleOrder';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
 
 const colors = {
@@ -69,6 +70,7 @@ const Sale = React.memo((props) => {
     let [edit, setEdit] = useState(false);
     let [discount, setDiscount] = useState(data.object.discount);
     let [discountType, setDiscountType] = useState('сом');
+    let [selfDelivery, setSelfDelivery] = useState(data.object.selfDelivery);
     let [paid, setPaid] = useState(data.object.paid);
     let [percentManager, setPercentManager] = useState('');
     let [percentCpa, setPercentCpa] = useState('');
@@ -131,42 +133,6 @@ const Sale = React.memo((props) => {
             </Head>
             <Card className={classes.page}>
                 <div className={classes.status}>
-                    {
-                        data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
-                            <DownloadIcon onClick={async()=>{
-                                await showLoad(true)
-                                await getSaleDoc({
-                                    sale: data.object,
-                                    client: await getClient({_id: data.object.client._id}),
-                                    itemsSale: data.object.itemsSale,
-                                    doc: await getDoc()
-                                })
-                                let res = await getAttachment(data.object._id)
-                                if(res)
-                                    window.open(res, '_blank');
-                                else
-                                    showSnackBar('Ошибка', 'error')
-                                if(data.object.installment) {
-                                    await getInstallmentDoc({
-                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                        sale: data.object,
-                                        client: await getClient({_id: data.object.client._id}),
-                                        itemsSale: data.object.itemsSale,
-                                        doc: await getDoc()
-                                    })
-                                    await getVoucherDoc({
-                                        installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                        client: await getClient({_id: data.object.client._id}),
-                                        doc: await getDoc()
-                                    })
-
-                                }
-
-                                await showLoad(false)
-                            }} style={{ color: '#183B37'}}/>
-                            :
-                            null
-                    }
                     {
                         ['admin'].includes(profile.role)&&data.object&&data.object._id?
                             <HistoryIcon onClick={async()=>{
@@ -299,22 +265,26 @@ const Sale = React.memo((props) => {
                             }
                             {
                                 edit?
-                                    <TextField
-                                        id='date'
-                                        type='datetime-local'
-                                        variant='standard'
-                                        label='Доставка'
-                                        value={delivery}
-                                        onChange={(event) => setDelivery(event.target.value)}
-                                        className={classes.input}
-                                    />
+                                    <div className={isMobileApp?classes.column:classes.row}>
+                                        <TextField
+                                            id='date'
+                                            type='datetime-local'
+                                            variant='standard'
+                                            label='Доставка'
+                                            value={delivery}
+                                            onChange={(event) => setDelivery(event.target.value)}
+                                            className={classes.input}
+                                        />
+                                        <FormControlLabel control={<Checkbox checked={selfDelivery} onChange={(event) => setSelfDelivery(event.target.checked)}/>} label='Самовывоз' />
+                                    </div>
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>
                                             Доставка:
                                         </div>
-                                        <div className={classes.value} style={{ color: data.object.delivery&&['обработка'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
-                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Самовывоз'}
+                                        <div className={classes.value} style={{ color: !['отмена', 'доставлен'].includes(data.object.status)&&new Date(delivery)<today?'red':'black'}}>
+                                            {data.object.delivery?pdDDMMYYHHMM(data.object.delivery):'Не указано'}
+                                            {data.object.selfDelivery?' Самовывоз':''}
                                         </div>
                                     </div>
                             }
@@ -569,7 +539,7 @@ const Sale = React.memo((props) => {
                                     </>
                             }
                             <div style={{height: 10}}/>
-                            <div className={classes.nameField}>Позиции({edit?itemsSale.length:data.object.itemsSale}):</div>
+                            <div className={classes.nameField}>Позиции({edit?itemsSale.length:data.object.itemsSale.length}):</div>
                             {
                                 edit&&data.object.status==='обработка'?
                                     itemsSale.map((itemSale, idx)=>
@@ -679,6 +649,11 @@ const Sale = React.memo((props) => {
                                                             amount: newItem.priceAfterDiscountKGS,
                                                             characteristics: newItem.characteristics,
                                                             status: 'обработка',
+                                                            cost: newItem.primeCostKGS,
+                                                            type: newItem.type,
+                                                            category: newItem.category.name,
+                                                            factory: newItem.factory.name,
+                                                            size: newItem.size,
                                                         }
                                                     ])
                                                 }
@@ -730,6 +705,7 @@ const Sale = React.memo((props) => {
                                                                 if (addressInfo !== data.object.addressInfo) element.addressInfo = addressInfo
                                                                 if (comment !== data.object.comment) element.comment = comment
                                                                 if (paid != data.object.paid) element.paid = checkFloat(paid)
+                                                                if (selfDelivery != data.object.selfDelivery) element.selfDelivery = selfDelivery
                                                                 if (pdDDMMYYHHMM(delivery) !== pdDDMMYYHHMM(data.object.delivery)) element.delivery = delivery
                                                                 if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
                                                                 if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
@@ -809,20 +785,7 @@ const Sale = React.memo((props) => {
                                                         {
                                                             ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
                                                                 [
-                                                                    !data.object.delivery?
-                                                                        <Button color='primary' onClick={async()=>{
-                                                                            let items = cloneObject(data.object.itemsSale), shipment = {}
-                                                                            for(let i = 0; i <items.length; i++) {
-                                                                                items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
-                                                                                shipment[items[i].item] = {}
-                                                                            }
-                                                                            unsaved.current = {}
-                                                                            setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
-                                                                            showMiniDialog(true)
-                                                                        }}>
-                                                                            Отгрузить
-                                                                        </Button>
-                                                                        :
+                                                                    !data.object.selfDelivery?
                                                                         <Button color='primary' onClick={async()=>{
                                                                             const action = async() => {
                                                                                 let element = {_id: router.query.id, status: 'на доставку'}
@@ -838,6 +801,19 @@ const Sale = React.memo((props) => {
                                                                             showMiniDialog(true)
                                                                         }}>
                                                                             На доставку
+                                                                        </Button>
+                                                                        :
+                                                                        <Button color='primary' onClick={async()=>{
+                                                                            let items = cloneObject(data.object.itemsSale), shipment = {}
+                                                                            for(let i = 0; i <items.length; i++) {
+                                                                                items[i].balance = await getBalanceItems({item: items[i].item, store: data.object.store._id})
+                                                                                shipment[items[i].item] = {}
+                                                                            }
+                                                                            unsaved.current = {}
+                                                                            setMiniDialog('Отгрузить', <Shipment _id={data.object._id} items={items} _shipment={shipment}/>)
+                                                                            showMiniDialog(true)
+                                                                        }}>
+                                                                            Отгрузить
                                                                         </Button>
                                                                     , <br/>
                                                                 ]
@@ -857,6 +833,7 @@ const Sale = React.memo((props) => {
                                                                             }
                                                                         }
                                                                         setMiniDialog('Разделить продажу', <DivideSaleOrder
+                                                                            installment={data.object.installment}
                                                                             type='order'
                                                                             _id={router.query.id}
                                                                             currentItems={currentItems}
@@ -929,7 +906,7 @@ const Sale = React.memo((props) => {
                                                     <div>
                                                         {
                                                             ['admin', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&'обработка'===data.object.status?
-                                                                data.object.delivery?
+                                                                !data.object.selfDelivery?
                                                                     <Button color='primary' onClick={async()=>{
                                                                         const action = async() => {
                                                                             let element = {_id: router.query.id, status: 'на доставку'}
@@ -974,6 +951,7 @@ const Sale = React.memo((props) => {
                                                                         }
                                                                     }
                                                                     setMiniDialog('Разделить заказ', <DivideSaleOrder
+                                                                        installment={data.object.installment}
                                                                         type='order'
                                                                         _id={router.query.id}
                                                                         currentItems={currentItems}

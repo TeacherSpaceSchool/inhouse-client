@@ -18,6 +18,8 @@ import Router from 'next/router'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import dynamic from 'next/dynamic'
 import {endConsultation} from '../../src/gql/consultation'
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 const Geo = dynamic(import('./Geo'), { ssr: false });
 import {setConsultation} from '../../src/gql/consultation'
 
@@ -40,6 +42,7 @@ const BuyBasket =  React.memo(
         let [date, setDate] = useState();
         let [geo, setGeo] = useState(client.geo);
         let [cpa, setCpa] = useState();
+        let [selfDelivery, setSelfDelivery] = useState(false);
         let [promotion, setPromotion] = useState();
         let [remainder, setRemainder] = useState(0);
         let [monthInstallment, setMonthInstallment] = useState('');
@@ -272,6 +275,7 @@ const BuyBasket =  React.memo(
                 }
                 {
                     ['order', 'reservation', 'sale'].includes(type)?
+                        <div className={isMobileApp?classes.column:classes.row}>
                         <TextField
                             id='date'
                             error={!date&&type==='reservation'}
@@ -279,9 +283,17 @@ const BuyBasket =  React.memo(
                             variant='standard'
                             label={type==='reservation'?'Срок':'Доставка'}
                             value={date}
+                            style={{marginRight: type==='reservation'?0:20}}
                             onChange={(event) => setDate(event.target.value)}
                             className={classes.input}
                         />
+                        {
+                            ['order', 'sale'].includes(type)?
+                                <FormControlLabel control={<Checkbox checked={selfDelivery} onChange={(event) => setSelfDelivery(event.target.checked)}/>} label='Самовывоз' />
+                                :
+                                null
+                        }
+                        </div>
                         :
                         null
                 }
@@ -440,6 +452,7 @@ const BuyBasket =  React.memo(
                                             currency,
                                             paid: checkFloat(paid),
                                             prepaid,
+                                            selfDelivery,
                                             delivery: date,
                                             reservations: reservations,
                                             ...type==='order'?{order: true}:{}

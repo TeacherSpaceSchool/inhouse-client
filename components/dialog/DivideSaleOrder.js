@@ -18,10 +18,11 @@ const DivideSaleOrder =  React.memo(
         const { isMobileApp } = props.app;
         const { showSnackBar } = props.snackbarActions;
         const width = isMobileApp? (window.innerWidth-113) : 500
-        const { _id, currentItems, _newItems, type } = props;
+        const { _id, currentItems, _newItems, type, installment } = props;
         let [newItems, setNewItems] = useState(_newItems);
         return (
             <div className={classes.main} style={{width}}>
+                {installment?<b>Рассрочка будет отвязанна</b>:null}
                 {
                     newItems.map((newItem, idx) =>
                         <TextField
