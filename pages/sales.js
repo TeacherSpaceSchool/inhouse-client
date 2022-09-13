@@ -50,7 +50,7 @@ const Sales = React.memo((props) => {
             ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
-            ...filter.promotion?{promotion: filter.promotion}:{},
+            ...filter.promotion?{promotion: filter.promotion._id}:{},
         })));
         setCount(await getSalesCount({
             ...filter.store?{store: filter.store._id}:{},
@@ -60,7 +60,7 @@ const Sales = React.memo((props) => {
             ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
-            ...filter.promotion?{promotion: filter.promotion}:{},
+            ...filter.promotion?{promotion: filter.promotion._id}:{},
             search
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
@@ -104,7 +104,7 @@ const Sales = React.memo((props) => {
                 ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
-                ...filter.promotion?{promotion: filter.promotion}:{},
+                ...filter.promotion?{promotion: filter.promotion._id}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -187,7 +187,7 @@ const Sales = React.memo((props) => {
                 ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
-                ...filter.promotion?{promotion: filter.promotion}:{},
+                ...filter.promotion?{promotion: filter.promotion._id}:{},
                 search
             })}/>
             <div className='count'>
@@ -222,7 +222,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
-                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},
+                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion._id}:{},
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getSalesCount({
@@ -234,7 +234,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
-                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion}:{},
+                ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion._id}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

@@ -1,6 +1,74 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getUnloadBonusCpaSales = async({manager, promotion, client, cpa, dateStart, dateEnd, status, store}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {manager, promotion, client, cpa, dateStart, dateEnd, status, store},
+            query: gql`
+                    query ($manager: ID, $promotion: ID, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $status: String, $store: ID) {
+                        unloadBonusCpaSales(manager: $manager, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, store: $store)
+                    }`,
+        })
+        return res.data.unloadBonusCpaSales
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadBonusManagerSales = async({manager, promotion, client, cpa, dateStart, dateEnd, status, store}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {manager, promotion, client, cpa, dateStart, dateEnd, status, store},
+            query: gql`
+                    query ($manager: ID, $promotion: ID, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $status: String, $store: ID) {
+                        unloadBonusManagerSales(manager: $manager, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, store: $store)
+                    }`,
+        })
+        return res.data.unloadBonusManagerSales
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadClientSales = async({manager, promotion, client, cpa, dateStart, dateEnd, status, store}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {manager, promotion, client, cpa, dateStart, dateEnd, status, store},
+            query: gql`
+                    query ($manager: ID, $promotion: ID, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $status: String, $store: ID) {
+                        unloadClientSales(manager: $manager, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, store: $store)
+                    }`,
+        })
+        return res.data.unloadClientSales
+    } catch(err){
+        console.error(err)
+    }
+}
+
+export const getUnloadFactorySales = async({manager, promotion, type, category, client, cpa, dateStart, dateEnd, status, store}, clientGql)=>{
+    let res
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        res = await clientGql.query({
+            variables: {manager, promotion, type, category, client, cpa, dateStart, dateEnd, status, store},
+            query: gql`
+                    query ($manager: ID, $promotion: ID, $type: String, $category: String, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $status: String, $store: ID) {
+                        unloadFactorySales(manager: $manager, type: $type, category: $category, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, store: $store)
+                    }`,
+        })
+        return res.data.unloadFactorySales
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getUnloadDeliveries = async({search, order, manager, client, promotion, cpa, dateStart, dateEnd, delivery, status, store, _id}, clientGql)=>{
     let res
     try{

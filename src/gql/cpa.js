@@ -139,37 +139,3 @@ export const uploadCpa = async(variables)=>{
         console.error(err)
     }
 }
-
-export const getUnloadStatisticCpa = async({cpa, dateStart, dateEnd, store}, client)=>{
-    let res
-    try{
-        client = client? client : getClientGql()
-        res = await client.query({
-            variables: {cpa, dateStart, dateEnd, store},
-            query: gql`
-                    query($cpa: ID, $dateStart: Date!, $dateEnd: Date, $store: ID) {
-                        unloadStatisticCpa(cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, store: $store)
-                    }`,
-        })
-        return res.data.unloadStatisticCpa
-    } catch(err){
-        console.error(err)
-    }
-}
-
-export const getStatisticCpa = async({cpa, dateStart, dateEnd, store, skip}, client)=>{
-    try{
-        client = client? client : getClientGql()
-        let res = await client
-            .query({
-                variables: {cpa, dateStart, dateEnd, store, skip},
-                query: gql`
-                    query($cpa: ID, $dateStart: Date!, $dateEnd: Date, $store: ID, $skip: Int) {
-                        statisticCpa(cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, store: $store, skip: $skip) 
-                    }`,
-            })
-        return res.data.statisticCpa
-    } catch(err){
-        console.error(err)
-    }
-}

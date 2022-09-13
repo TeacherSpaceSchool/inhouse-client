@@ -28,7 +28,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import * as mini_dialogActions from '../../src/redux/actions/mini_dialog'
 import ClearDB from '../../components/dialog/ClearDB'
 import DownloadStatistic from '../../components/dialog/DownloadStatistic'
-import { getUnloadSales } from '../../src/gql/sale';
+import { getUnloadSales, getUnloadBonusManagerSales, getUnloadBonusCpaSales, getUnloadClientSales, getUnloadFactorySales } from '../../src/gql/sale';
 
 const MyDrawer = React.memo((props) => {
     const { unsaved, full } = props
@@ -45,7 +45,7 @@ const MyDrawer = React.memo((props) => {
         ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
         router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
         router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
-        router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname&&'/statisticcpa'!==router.pathname||
+        router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname||
         router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('balanceitemdays')&&!router.pathname.includes('wayitems')||
         router.pathname.includes('user')?
             'Данные'
@@ -61,7 +61,7 @@ const MyDrawer = React.memo((props) => {
                 ['/bonusmanagers', '/bonuscpas', '/balanceclients', '/salarys', '/moneyflows', '/installments', '/moneyrecipients', '/moneyarticles', '/cashboxes', '/doc'].includes(router.pathname)?
                     'Бухгалтерия'
                     :
-                    ['/consultations', '/statisticcpa'].includes(router.pathname)?
+                    ['/consultations'].includes(router.pathname)?
                         'Статистика'
                         :
                         ['/balanceitems', '/balanceitemdays', '/storebalanceitems', '/warehouses'].includes(router.pathname)?
@@ -123,7 +123,7 @@ const MyDrawer = React.memo((props) => {
                                 ['/categories', '/typecharacteristics', '/characteristics', '/promotions', '/factorys'].includes(router.pathname)||
                                 router.pathname.includes('store')&&!router.pathname.includes('storebalanceitems')||
                                 router.pathname.includes('client')&&!router.pathname.includes('balanceclients')||
-                                router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname&&'/statisticcpa'!==router.pathname||
+                                router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname||
                                 router.pathname.includes('item')&&!router.pathname.includes('balanceitems')&&!router.pathname.includes('balanceitemdays')&&!router.pathname.includes('wayitems')||
                                 router.pathname.includes('user')?
                                     'rgba(24, 59, 55, .1)'
@@ -195,7 +195,7 @@ const MyDrawer = React.memo((props) => {
                         {
                             ['admin', ', менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                                 <>
-                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname&&'/statisticcpa'!==router.pathname?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('cpa')&&'/bonuscpas'!==router.pathname?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)
                                     if(!unsaved||JSON.stringify(unsaved.current)==='{}')
                                         Router.push('/cpas')
@@ -732,7 +732,7 @@ const MyDrawer = React.memo((props) => {
                         <>
                         <ListItem style={{
                             background:
-                                ['/consultations', '/statisticcpa'].includes(router.pathname)?
+                                ['/consultations'].includes(router.pathname)?
                                     'rgba(24, 59, 55, .1)'
                                     :
                                     '#ffffff'
@@ -768,23 +768,6 @@ const MyDrawer = React.memo((props) => {
                         {
                             ['admin', 'управляющий'].includes(profile.role)?
                                 <>
-                                <ListItem style={{marginLeft: 16, background: router.pathname==='/statisticcpa'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
-                                    showDrawer(false)
-                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}')
-                                        Router.push('/statisticcpa')
-                                    else
-                                        showSnackBar('Сохраните изменения или обновите страницу')
-                                }}>
-                                    <ListItemText primary='Статистика дизайнеров' />
-                                </ListItem>
-                                <Divider/>
-                                </>
-                                :
-                                null
-                        }
-                        {
-                            ['admin', 'управляющий'].includes(profile.role)?
-                                <>
                                 <ListItem style={{marginLeft: 16}} button onClick={()=>{
                                     showDrawer(false)
                                     if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
@@ -799,7 +782,7 @@ const MyDrawer = React.memo((props) => {
                                                     ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                                                     ...filter.cpa?{cpa: filter.cpa._id}:{},
                                                     ...filter.delivery?{delivery: filter.delivery}:{},
-                                                    ...filter.promotion?{promotion: filter.promotion}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
                                                 })
                                             }}
                                             filterShow={{
@@ -842,7 +825,7 @@ const MyDrawer = React.memo((props) => {
                                                     ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
                                                     ...filter.cpa?{cpa: filter.cpa._id}:{},
                                                     ...filter.delivery?{delivery: filter.delivery}:{},
-                                                    ...filter.promotion?{promotion: filter.promotion}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
                                                     cost: true
                                                 })
                                             }}
@@ -864,6 +847,182 @@ const MyDrawer = React.memo((props) => {
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
                                     <ListItemText primary='Отчет по продажам доход' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет продаж по фабрикам', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadFactorySales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    ...filter.category?{category: filter.category._id}:{},
+                                                    ...filter.typeItem?{type: filter.typeItem}:{},
+                                                    cost: true
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                category: true,
+                                                typeItem: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
+                                                store: true
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет продаж по фабрикам' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет по бонусам менеджеров', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadBonusManagerSales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    cost: true
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
+                                                store: true
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет по бонусам менеджеров' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет по бонусам клиентов', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadClientSales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    cost: true
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
+                                                store: true
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет по бонусам клиентов' />
+                                </ListItem>
+                                <Divider/>
+                                </>
+                                :
+                                null
+                        }
+                        {
+                            ['admin', 'управляющий'].includes(profile.role)?
+                                <>
+                                <ListItem style={{marginLeft: 16}} button onClick={()=>{
+                                    showDrawer(false)
+                                    if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
+                                        setMiniDialog('Отчет по бонусам дизайнеров', <DownloadStatistic
+                                            unload={async (filter)=>{
+                                                return await getUnloadBonusCpaSales({
+                                                    order: false,
+                                                    ...filter.store?{store: filter.store._id}:{},
+                                                    ...filter.user?{manager: filter.user._id}:{},
+                                                    ...filter.client?{client: filter.client._id}:{},
+                                                    ...filter.status?{status: filter.status}:{},
+                                                    ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                                                    ...filter.cpa?{cpa: filter.cpa._id}:{},
+                                                    ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    cost: true
+                                                })
+                                            }}
+                                            filterShow={{
+                                                user: true,
+                                                userRole: 'менеджер',
+                                                promotion: true,
+                                                client: true,
+                                                cpa: true,
+                                                period: true,
+                                                status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
+                                                store: true
+                                            }}
+                                        />)
+                                        showMiniDialog(true)
+                                    }
+                                    else
+                                        showSnackBar('Сохраните изменения или обновите страницу')
+                                }}>
+                                    <ListItemText primary='Отчет по бонусам дизайнеров' />
                                 </ListItem>
                                 <Divider/>
                                 </>
