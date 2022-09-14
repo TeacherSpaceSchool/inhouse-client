@@ -14,7 +14,7 @@ export const getConsultations = async({skip, manager, store, active, dateStart, 
                             createdAt
                             manager {name _id}
                             store {name _id}
-                            client {name _id}
+                            client {name _id address geo}
                             operation
                             info
                             end

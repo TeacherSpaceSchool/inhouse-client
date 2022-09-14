@@ -96,6 +96,8 @@ const Order = React.memo((props) => {
         for (let i = 0; i < itemsSale.length; i++) {
             amountStart = checkFloat(amountStart + itemsSale[i].amount)
         }
+        /*discount = checkFloat(amountStart/100*30)
+        setDiscount(discount)*/
         setAmountStart(amountStart)
     },[itemsSale])
     useEffect(()=>{
@@ -296,10 +298,21 @@ const Order = React.memo((props) => {
                                     <Link href='/user/[id]' as={`/user/${data.object.manager._id}`} >
                                         {data.object.manager.name}
                                     </Link>
-                                    &nbsp;&nbsp;&nbsp;
-                                    {data.object.bonusManager}
                                 </div>
                             </div>
+                            {
+                                ['admin', 'управляющий'].includes(profile.role)?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Бонус менеджера:
+                                        </div>
+                                        <div className={classes.value}>
+                                            {data.object.bonusManager}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
                             {
                                 data.object.cpa?
                                     <>
@@ -313,6 +326,19 @@ const Order = React.memo((props) => {
                                             </div>
                                         </Link>
                                     </div>
+                                    {
+                                        ['admin', 'управляющий'].includes(profile.role)?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Бонус дизайнера:
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {data.object.bonusCpa}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     {
                                         edit&&profile.role==='admin'&&data.object.status==='обработка'?
                                             <>
@@ -358,6 +384,15 @@ const Order = React.memo((props) => {
                                 </div>
                             </div>
                             {
+                                discount?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>До скидки:&nbsp;</div>
+                                        <div className={classes.value}>{amountStart} сом</div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 /*edit&&data.object.status==='обработка'?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
@@ -375,16 +410,16 @@ const Order = React.memo((props) => {
                                         />
                                     </FormControl>
                                     :*/
-                                    discount?
-                                        <div className={classes.row}>
-                                            <div className={classes.nameField}>Скидка:&nbsp;</div>
-                                            <div className={classes.value}>{data.object.discount} сом</div>
-                                        </div>
-                                        :
-                                        null
+                                discount?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>Скидка:&nbsp;</div>
+                                        <div className={classes.value}>{discount} сом</div>
+                                    </div>
+                                    :
+                                    null
                             }
                             <div className={classes.row}>
-                                <div className={classes.nameField}>Итого:&nbsp;</div>
+                                <div className={classes.nameField}>{discount?'После скидки':'Итого'}:&nbsp;</div>
                                 <div className={classes.value}>{`${edit?amountEnd:data.object.amountEnd} сом`}</div>
                             </div>
                             {

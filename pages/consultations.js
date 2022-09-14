@@ -172,10 +172,10 @@ Consultations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) 
             list: cloneObject(await getConsultations({
                 skip: 0,
                 date: store.getState().app.filter.date,
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getConsultationsCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

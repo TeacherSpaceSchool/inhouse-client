@@ -77,7 +77,7 @@ const MoneyFlows = React.memo((props) => {
         info: '',
         exchangeRate: 1,
         moneyArticle: data.defaultMoneyArticle['Не указано'],
-        cashbox: profile.cashbox
+        cashbox: filter.cashbox
     });
     //получение данных
     let [list, setList] = useState(data.list);
@@ -302,7 +302,7 @@ const MoneyFlows = React.memo((props) => {
                                                                 exchangeRate: 1,
                                                                 info: '',
                                                                 amount: '',
-                                                                cashbox: profile.cashbox,
+                                                                cashbox: filter.cashbox,
                                                                 moneyArticle: data.defaultMoneyArticle['Не указано']
                                                             })
                                                             delete unsaved.current['new']
@@ -365,7 +365,10 @@ const MoneyFlows = React.memo((props) => {
                                                 placeholder={'Касса/Банк'}
                                             />
                                             :
-                                            newElement.cashbox.name
+                                            newElement.cashbox?
+                                                newElement.cashbox.name
+                                                :
+                                                null
                                     }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 200, flexDirection: 'column', justifyContent: !newElement.recipient?'center':'start', color: !newElement.recipient||(newElement.typeRecipient==='Касса'&&newElement.cashbox&&newElement.cashbox._id===newElement.recipient._id)?'red':'black'}}
@@ -892,6 +895,7 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
             Router.push('/')
         }
     store.getState().app.sort = 'amount'
+    store.getState().app.filter.cashbox = store.getState().user.profile.cashbox
     return {
         data: {
             defaultMoneyArticle: {
@@ -902,7 +906,8 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
             add: store.getState().user.profile.add&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin', 'кассир'].includes(store.getState().user.profile.role),
             list: cloneObject(await getMoneyFlows({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
+                ...store.getState().app.filter.cashbox?{store: store.getState().app.filter.cashbox._id}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...ctx.query.sale?{sale: ctx.query.sale}:{},
                 ...ctx.query.installment?{installment: ctx.query.installment}:{},
                 ...ctx.query.reservation?{reservation: ctx.query.reservation}:{},
@@ -911,7 +916,8 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 skip: 0
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getMoneyFlowsCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
+                ...store.getState().app.filter.cashbox?{store: store.getState().app.filter.cashbox._id}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...ctx.query.sale?{sale: ctx.query.sale}:{},
                 ...ctx.query.reservation?{reservation: ctx.query.reservation}:{},
                 ...ctx.query.order?{order: ctx.query.order}:{},

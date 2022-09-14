@@ -581,7 +581,7 @@ Reservation.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =>
         } else
             Router.push('/')
     let object = await getReservation({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
-    let _storeBalanceItems = await getStoreBalanceItems({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+    let _storeBalanceItems = await getStoreBalanceItems({...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
     let storeBalanceItems = {}
     for(let i = 0; i <_storeBalanceItems.length; i++)
         storeBalanceItems[_storeBalanceItems[i].item._id] = _storeBalanceItems[i].free

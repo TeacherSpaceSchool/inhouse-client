@@ -37,7 +37,7 @@ const Tasks = React.memo((props) => {
     //настройка
     const initialRender = useRef(true);
     let [today, setToday] = useState();
-    let [showStat, setShowStat] = useState(false);
+    let [showStat, setShowStat] = useState(true);
     //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);

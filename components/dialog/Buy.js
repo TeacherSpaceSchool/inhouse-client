@@ -38,7 +38,7 @@ const BuyBasket =  React.memo(
         let [currency, setCurrency] = useState(_currency?_currency:'сом');
         let [typePayment, setTypePayment] = useState('Наличными');
         let [renew, setRenew] = useState(false);
-        let [paid, setPaid] = useState(prepaid?amountStart-prepaid:amountStart);
+        let [paid, setPaid] = useState(type==='reservation'?0:prepaid?amountStart-prepaid:amountStart);
         let [date, setDate] = useState();
         let [geo, setGeo] = useState(client.geo);
         let [cpa, setCpa] = useState();
@@ -59,7 +59,8 @@ const BuyBasket =  React.memo(
             if(amountEnd<0)
                 amountEnd = 0
             setAmountEnd(amountEnd)
-            setPaid(prepaid?amountEnd-prepaid:amountEnd)
+            if(type!=='reservation')
+                setPaid(prepaid?amountEnd-prepaid:amountEnd)
         }, [typePayment, discount, discountType]);
         useEffect(() => {
             monthInstallment = checkFloat(monthInstallment)
@@ -393,7 +394,7 @@ const BuyBasket =  React.memo(
                                     setConsultation({
                                         info: consultation.info,
                                         statusClient: consultation.statusClient,
-                                        client: consultation.client?consultation.client._id:null,
+                                        client: client._id,
                                         operation: 'бронь'
                                     })
                                     res = await addReservation({
@@ -411,7 +412,7 @@ const BuyBasket =  React.memo(
                                     setConsultation({
                                         info: consultation.info,
                                         statusClient: consultation.statusClient,
-                                        client: consultation.client?consultation.client._id:null,
+                                        client: client._id,
                                         operation: 'возврат'
                                     })
                                     res = await addRefund({
@@ -433,7 +434,7 @@ const BuyBasket =  React.memo(
                                         setConsultation({
                                             info: consultation.info,
                                             statusClient: consultation.statusClient,
-                                            client: consultation.client?consultation.client._id:null,
+                                            client: client._id,
                                             operation: `${type==='order'?'на заказ':'продажа'}${(paid + prepaid) < amountEnd?'-рассрочка':''}`
                                         })
                                         res = await addSale({

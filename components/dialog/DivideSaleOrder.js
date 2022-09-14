@@ -57,7 +57,12 @@ const DivideSaleOrder =  React.memo(
                                 unit: _newItems[i].unit,
                                 item: _newItems[i].item,
                                 price: checkFloat(_newItems[i].price),
-                                status: _newItems[i].status
+                                status: _newItems[i].status,
+                                cost: _newItems[i].cost,
+                                type: _newItems[i].type,
+                                category: _newItems[i].category,
+                                factory: _newItems[i].factory,
+                                size: _newItems[i].size,
                             }
                             _newItems[i].amount = checkFloat(_newItems[i].count * _newItems[i].price)
 
@@ -69,7 +74,12 @@ const DivideSaleOrder =  React.memo(
                                 unit: _currentItems[i].unit,
                                 item: _currentItems[i].item,
                                 price: checkFloat(_currentItems[i].price),
-                                status: _currentItems[i].status
+                                status: _currentItems[i].status,
+                                cost: _currentItems[i].cost,
+                                type: _currentItems[i].type,
+                                category: _currentItems[i].category,
+                                factory: _currentItems[i].factory,
+                                size: _currentItems[i].size,
                             }
                             _currentItems[i].amount = checkFloat(_currentItems[i].count * _currentItems[i].price)
 

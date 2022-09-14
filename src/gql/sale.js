@@ -120,7 +120,7 @@ export const getSale = async({_id}, client)=>{
                             client {_id name phones}
                             deliverymans {_id name}
                             promotion {_id name}
-                            itemsSale {_id name item count price amount characteristics status unit}
+                            itemsSale {_id name item count price amount characteristics status unit cost type category factory size}
                             discount 
                             order
                             paymentConfirmation

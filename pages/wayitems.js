@@ -636,7 +636,7 @@ WayItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
     store.getState().app.sort = 'amount'
     let list = cloneObject(await getWayItems({
             skip: 0,
-            ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+            ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
         },  ctx.req?await getClientGqlSsr(ctx.req):undefined))
     const edit = store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role)
     for(let i=0; i<list.length; i++) {
@@ -652,7 +652,7 @@ WayItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             deleted: store.getState().user.profile.deleted&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             list,
             count: await getWayItemsCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

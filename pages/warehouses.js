@@ -115,7 +115,7 @@ const Warehouses = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add?
+                        data.add&&!search?
                             <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -332,10 +332,10 @@ Warehouses.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
             deleted: store.getState().user.profile.deleted&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             list: cloneObject(await getWarehouses({
                 skip: 0,
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getWarehousesCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

@@ -320,6 +320,19 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
+                                ['admin', 'управляющий'].includes(profile.role)?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Бонус менеджера:
+                                        </div>
+                                        <div className={classes.value}>
+                                            {data.object.bonusManager}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 data.object.cpa?
                                     <>
                                     <div className={classes.row}>
@@ -332,6 +345,19 @@ const Sale = React.memo((props) => {
                                             </div>
                                         </Link>
                                     </div>
+                                    {
+                                        ['admin', 'управляющий'].includes(profile.role)?
+                                            <div className={classes.row}>
+                                                <div className={classes.nameField}>
+                                                    Бонус дизайнера:
+                                                </div>
+                                                <div className={classes.value}>
+                                                    {data.object.bonusCpa}
+                                                </div>
+                                            </div>
+                                            :
+                                            null
+                                    }
                                     {
                                         edit&&profile.role==='admin'&&data.object.status==='обработка'?
                                             <>
@@ -377,6 +403,15 @@ const Sale = React.memo((props) => {
                                 </div>
                             </div>
                             {
+                                discount?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>До скидки:&nbsp;</div>
+                                        <div className={classes.value}>{amountStart} сом</div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 /*edit&&data.object.status==='обработка'?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
@@ -403,7 +438,7 @@ const Sale = React.memo((props) => {
                                         null
                             }
                             <div className={classes.row}>
-                                <div className={classes.nameField}>Итого:&nbsp;</div>
+                                <div className={classes.nameField}>{discount?'После скидки':'Итого'}:&nbsp;</div>
                                 <div className={classes.value}>{`${edit?amountEnd:data.object.amountEnd} сом`}</div>
                             </div>
                             {
@@ -834,7 +869,7 @@ const Sale = React.memo((props) => {
                                                                         }
                                                                         setMiniDialog('Разделить продажу', <DivideSaleOrder
                                                                             installment={data.object.installment}
-                                                                            type='order'
+                                                                            type='sale'
                                                                             _id={router.query.id}
                                                                             currentItems={currentItems}
                                                                             _newItems={newItems}/>)
@@ -952,7 +987,7 @@ const Sale = React.memo((props) => {
                                                                     }
                                                                     setMiniDialog('Разделить заказ', <DivideSaleOrder
                                                                         installment={data.object.installment}
-                                                                        type='order'
+                                                                        type='sale'
                                                                         _id={router.query.id}
                                                                         currentItems={currentItems}
                                                                         _newItems={newItems}/>)
@@ -1059,7 +1094,7 @@ Sale.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         } else
             Router.push('/')
     let object = await getSale({_id: ctx.query.id}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
-    let _storeBalanceItems = await getStoreBalanceItems({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+    let _storeBalanceItems = await getStoreBalanceItems({...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined)
     _storeBalanceItems = _storeBalanceItems?_storeBalanceItems:[]
     let storeBalanceItems = {}
     for(let i = 0; i <_storeBalanceItems.length; i++)

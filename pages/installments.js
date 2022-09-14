@@ -453,11 +453,11 @@ Installments.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
             list: cloneObject(await getInstallments({
                 skip: 0,
                 ...ctx.query._id?{_id: ctx.query._id}:{},
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getInstallmentsCount({
                 ...ctx.query._id?{_id: ctx.query._id}:{},
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
             ...ctx.query._id?{_id: ctx.query._id}:{},
         }

@@ -358,8 +358,8 @@ Cashboxes.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             edit: store.getState().user.profile.edit&&['admin'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
-            list: cloneObject(await getCashboxes({skip: 0, ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getCashboxesCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            list: cloneObject(await getCashboxes({skip: 0, ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getCashboxesCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })

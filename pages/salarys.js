@@ -820,9 +820,9 @@ Salarys.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             list: cloneObject(await getSalarys({
                 date,
                 skip: 0,
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getSalarysCount({date, ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            count: await getSalarysCount({date, ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })

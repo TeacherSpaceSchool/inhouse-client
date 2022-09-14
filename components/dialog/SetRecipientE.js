@@ -319,13 +319,22 @@ const SetRecipientE =  React.memo(
                             if(res==='OK') {
                                 showSnackBar('Успешно', 'success')
 
-                                if(!recipient) list[idx].client = null
-                                else if(type==='Клиент'&&recipient) list[idx].client = recipient
-                                else if(type==='Сотрудник'&&recipient) list[idx].employment = recipient
-                                else if(type==='Касса'&&recipient) list[idx].cashboxRecipient = recipient
-                                else if(type==='Получатель денег'&&recipient) list[idx].moneyRecipient = recipient
+                                if(!recipient) {
+                                    list[idx].client = null
+                                    list[idx].employment = null
+                                    list[idx].cashboxRecipient = null
+                                    list[idx].moneyRecipient = null
+                                }
+                                else if(type==='Клиент') list[idx].client = recipient
+                                else if(type==='Сотрудник') list[idx].employment = recipient
+                                else if(type==='Касса') list[idx].cashboxRecipient = recipient
+                                else if(type==='Получатель денег') list[idx].moneyRecipient = recipient
 
-                                if(clientOperation&&typeClientOperation==='Продажа') list[idx].sale = clientOperation
+                                if(!clientOperation) {
+                                    list[idx].installment = null
+                                    list[idx].installmentMonth = null
+                                }
+                                else if(clientOperation&&typeClientOperation==='Продажа') list[idx].sale = clientOperation
                                 else if(clientOperation&&typeClientOperation==='На заказ') list[idx].order = clientOperation
                                 else if(clientOperation&&typeClientOperation==='Бронь') list[idx].reservation = clientOperation
                                 else if(clientOperation&&typeClientOperation==='Возврат') list[idx].refund = clientOperation

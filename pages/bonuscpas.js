@@ -746,11 +746,11 @@ BonusCpas.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             add: store.getState().user.profile.add&&['admin'].includes(store.getState().user.profile.role),
             deleted: store.getState().user.profile.deleted&&['admin'].includes(store.getState().user.profile.role),
             list: cloneObject(await getBonusCpas({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 skip: 0
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getBonusCpasCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

@@ -201,10 +201,10 @@ StoreBalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(c
         data: {
             list: cloneObject(await getBalanceItemDays({
                 skip: 0,
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getBalanceItemDaysCount({
-                ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{},
+                ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };

@@ -15,16 +15,13 @@ import MenuItem from '@mui/material/MenuItem';
 import Router from 'next/router'
 import TextField from '@mui/material/TextField';
 
-const typesS = ['вручную', 'автоматически']
-const types = ['вручную']
-const typesAllS = ['вручную', 'автоматически', 'имеющийся']
-const typesAll = ['вручную', 'имеющийся']
+const types = ['вручную', 'автоматически']
+const typesAll = ['вручную', 'автоматически', 'имеющийся']
 
 const AcceptOrder =  React.memo(
     (props) =>{
         const {classes} = dialogContentStyle()
         const { showMiniDialog, setMiniDialog } = props.mini_dialogActions;
-        const { profile } = props.user;
         const { isMobileApp } = props.app;
         const { showSnackBar } = props.snackbarActions;
         const { prepareAcceptOrder, itemsOrder, order } = props;
@@ -42,7 +39,7 @@ const AcceptOrder =  React.memo(
                                     acceptOrder[idx] = event.target.value
                                     setAcceptOrder([...acceptOrder])
                                 }}>
-                                    {(prepareAcceptOrder[idx]?profile.store?typesAllS:typesAll:profile.store?typesS:types).map((element)=>
+                                    {(prepareAcceptOrder[idx]?typesAll:types).map((element)=>
                                         <MenuItem key={element} value={element}>{element}</MenuItem>
                                     )}
                                 </Select>

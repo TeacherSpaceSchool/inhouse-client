@@ -124,13 +124,13 @@ const BalanceItems = React.memo((props) => {
                     <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
                         <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
-                            Модель
+                            Магазин
                         </div>
                         <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
                             Склад
                         </div>
                         <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
-                            Магазин
+                            Модель
                         </div>
                         <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                             Остаток
@@ -176,25 +176,24 @@ const BalanceItems = React.memo((props) => {
                                         </Badge>
                                     </IconButton>
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
                                     <AutocomplectOnline
-                                        element={newElement.item}
-                                        error={!newElement.item&&newElement.unsaved}
-                                        setElement={(item)=>{
+                                        error={!newElement.store}
+                                        element={newElement.store}
+                                        setElement={store=>{
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
-                                            newElement.item = item
+                                            if(!store) {
+                                                newElement.item = null
+                                                newElement.warehouse = null
+                                            }
+                                            newElement.store = store
                                             setNewElement({...newElement})
                                         }}
                                         getElements={async (search)=>{
-                                            if(newElement.warehouse)
-                                                return await getItemsForBalanceItem({search, warehouse: newElement.warehouse._id})
-                                            else {
-                                                showSnackBar('Укажите склад')
-                                                return []
-                                            }
+                                            return await getStores({search})
                                         }}
-                                        placeholder={'Модель'}
+                                        minLength={0}
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)'}}>
@@ -224,24 +223,25 @@ const BalanceItems = React.memo((props) => {
                                         minLength={0}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)'}}>
                                     <AutocomplectOnline
-                                        error={!newElement.store}
-                                        element={newElement.store}
-                                        setElement={store=>{
+                                        element={newElement.item}
+                                        error={!newElement.item&&newElement.unsaved}
+                                        setElement={(item)=>{
                                             newElement.unsaved = true
                                             unsaved.current['new'] = true
-                                            if(!store) {
-                                                newElement.item = null
-                                                newElement.warehouse = null
-                                            }
-                                            newElement.store = store
+                                            newElement.item = item
                                             setNewElement({...newElement})
                                         }}
                                         getElements={async (search)=>{
-                                            return await getStores({search})
+                                            if(newElement.warehouse)
+                                                return await getItemsForBalanceItem({search, warehouse: newElement.warehouse._id})
+                                            else {
+                                                showSnackBar('Укажите склад')
+                                                return []
+                                            }
                                         }}
-                                        minLength={0}
+                                        placeholder={'Модель'}
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150}}>
@@ -397,8 +397,8 @@ BalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
         data: {
             edit: store.getState().user.profile.edit&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
             add: store.getState().user.profile.add&&['admin', 'менеджер/завсклад', 'завсклад'].includes(store.getState().user.profile.role),
-            list: cloneObject(await getBalanceItems({skip: 0, ...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
-            count: await getBalanceItemsCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            list: cloneObject(await getBalanceItems({skip: 0, ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}},  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
+            count: await getBalanceItemsCount({...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{}}, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
     };
 })

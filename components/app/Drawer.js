@@ -957,7 +957,7 @@ const MyDrawer = React.memo((props) => {
                                 <ListItem style={{marginLeft: 16}} button onClick={()=>{
                                     showDrawer(false)
                                     if(!unsaved||JSON.stringify(unsaved.current)==='{}') {
-                                        setMiniDialog('Отчет по бонусам клиентов', <DownloadStatistic
+                                        setMiniDialog('Отчет по продажам клиентов', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadClientSales({
                                                     order: false,
@@ -987,7 +987,7 @@ const MyDrawer = React.memo((props) => {
                                     else
                                         showSnackBar('Сохраните изменения или обновите страницу')
                                 }}>
-                                    <ListItemText primary='Отчет по бонусам клиентов' />
+                                    <ListItemText primary='Отчет по продажам клиентов' />
                                 </ListItem>
                                 <Divider/>
                                 </>
