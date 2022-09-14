@@ -86,15 +86,15 @@ export const getUnloadDeliveries = async({search, order, manager, client, promot
     }
 }
 
-export const getUnloadSales = async({search, order, manager, client, promotion, cost, cpa, dateStart, dateEnd, delivery, status, store, _id}, clientGql)=>{
+export const getUnloadSales = async({search, order, type, category, manager, client, promotion, cost, cpa, dateStart, dateEnd, delivery, status, store, _id}, clientGql)=>{
     let res
     try{
         clientGql = clientGql? clientGql : getClientGql()
         res = await clientGql.query({
-            variables: {search, manager, order, client, promotion, cpa, dateStart, cost, dateEnd, delivery, status, store, _id},
+            variables: {search, manager, order, type, category, client, promotion, cpa, dateStart, cost, dateEnd, delivery, status, store, _id},
             query: gql`
-                    query ($search: String, $manager: ID, $order: Boolean, $cost: Boolean, $promotion: ID, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $delivery: Date, $status: String, $store: ID, $_id: ID) {
-                        unloadSales(search: $search, manager: $manager, order: $order, cost: $cost, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, delivery: $delivery, status: $status, store: $store, _id: $_id)
+                    query ($search: String, $manager: ID, $type: String, $category: String, $order: Boolean, $cost: Boolean, $promotion: ID, $client: ID, $cpa: ID, $dateStart: Date, $dateEnd: Date, $delivery: Date, $status: String, $store: ID, $_id: ID) {
+                        unloadSales(search: $search, manager: $manager, type: $type, category: $category, order: $order, cost: $cost, promotion: $promotion, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, delivery: $delivery, status: $status, store: $store, _id: $_id)
                     }`,
         })
         return res.data.unloadSales

@@ -783,6 +783,8 @@ const MyDrawer = React.memo((props) => {
                                                     ...filter.cpa?{cpa: filter.cpa._id}:{},
                                                     ...filter.delivery?{delivery: filter.delivery}:{},
                                                     ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    ...filter.category?{category: filter.category._id}:{},
+                                                    ...filter.typeItem?{type: filter.typeItem}:{},
                                                 })
                                             }}
                                             filterShow={{
@@ -791,6 +793,8 @@ const MyDrawer = React.memo((props) => {
                                                 promotion: true,
                                                 client: true,
                                                 cpa: true,
+                                                category: true,
+                                                typeItem: true,
                                                 period: true,
                                                 delivery: true,
                                                 status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена']
@@ -826,6 +830,8 @@ const MyDrawer = React.memo((props) => {
                                                     ...filter.cpa?{cpa: filter.cpa._id}:{},
                                                     ...filter.delivery?{delivery: filter.delivery}:{},
                                                     ...filter.promotion?{promotion: filter.promotion._id}:{},
+                                                    ...filter.category?{category: filter.category._id}:{},
+                                                    ...filter.typeItem?{type: filter.typeItem}:{},
                                                     cost: true
                                                 })
                                             }}
@@ -836,6 +842,8 @@ const MyDrawer = React.memo((props) => {
                                                 client: true,
                                                 cpa: true,
                                                 period: true,
+                                                category: true,
+                                                typeItem: true,
                                                 delivery: true,
                                                 status: ['все', 'обработка', 'доставлен', 'на доставку', 'отгружен', 'возврат', 'отмена'],
                                                 store: true
