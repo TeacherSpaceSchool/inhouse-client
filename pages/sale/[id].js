@@ -63,7 +63,6 @@ const Sale = React.memo((props) => {
     const unsaved = useRef();
     let [edit, setEdit] = useState(false);
     let [discount, setDiscount] = useState(data.object.discount);
-    let [discountType, setDiscountType] = useState('сом');
     let [selfDelivery, setSelfDelivery] = useState(data.object.selfDelivery);
     let [paid, setPaid] = useState(data.object.paid);
     let [percentManager, setPercentManager] = useState('');
@@ -95,13 +94,13 @@ const Sale = React.memo((props) => {
         setAmountStart(amountStart)
     },[itemsSale])
     useEffect(()=>{
-        amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
+        amountEnd = checkFloat(amountStart - discount)
         if(amountEnd<0)
             amountEnd = 0
         setAmountEnd(amountEnd)
         if(!data.object.installment)
             setPaid(amountEnd-checkFloat(data.object.prepaid))
-    },[amountStart, discount, discountType])
+    },[amountStart, discount])
     useEffect(()=>{
         if(!unsaved.current)
             unsaved.current = {}
@@ -418,8 +417,8 @@ const Sale = React.memo((props) => {
                                             onChange={(event)=>setDiscount(inputFloat(event.target.value))}
                                             endAdornment={
                                                 <InputAdornment position='end'>
-                                                    <IconButton onClick={()=>setDiscountType(discountType==='%'?'сом':'%')}>
-                                                        {discountType}
+                                                    <IconButton >
+                                                        сом
                                                     </IconButton>
                                                 </InputAdornment>
                                             }
@@ -429,14 +428,14 @@ const Sale = React.memo((props) => {
                                     discount?
                                         <div className={classes.row}>
                                             <div className={classes.nameField}>Скидка:&nbsp;</div>
-                                            <div className={classes.value}>{data.object.discount} сом</div>
+                                            <div className={classes.value}>{edit?discount:data.object.discount} сом</div>
                                         </div>
                                         :
                                         null
                             }
                             <div className={classes.row}>
                                 <div className={classes.nameField}>{discount?'После скидки':'Итого'}:&nbsp;</div>
-                                <div className={classes.value}>{`${edit?amountEnd:data.object.amountEnd} сом`}</div>
+                                <div className={classes.value}>{edit?amountEnd:data.object.amountEnd} сом</div>
                             </div>
                             {
                                 data.object.prepaid?
