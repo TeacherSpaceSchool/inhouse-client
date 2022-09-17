@@ -3,11 +3,8 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getSale, setSale, getAttachment, getUnloadSales } from '../../src/gql/sale'
-import { getClient } from '../../src/gql/client'
-import { getDoc } from '../../src/gql/doc'
+import { getSale, setSale, getAttachmentSale, getUnloadSales } from '../../src/gql/sale'
 import { getItems } from '../../src/gql/item'
-import { getInstallments } from '../../src/gql/installment'
 import { getStoreBalanceItems } from '../../src/gql/storeBalanceItem'
 import { getBalanceItems } from '../../src/gql/balanceItem'
 import pageListStyle from '../../src/styleMUI/list'
@@ -29,9 +26,6 @@ import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
 import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdtDatePicker } from '../../src/lib'
-import { getSaleDoc } from '../../src/doc/sale'
-import { getVoucherDoc } from '../../src/doc/voucher'
-import { getInstallmentDoc } from '../../src/doc/installment'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -91,10 +85,13 @@ const Sale = React.memo((props) => {
             today.setHours(0, 0, 0, 0)
             setToday(today)
         }
+        let discountPrecent = discount*100/amountStart
         amountStart = 0
         for (let i = 0; i < itemsSale.length; i++) {
             amountStart = checkFloat(amountStart + itemsSale[i].amount)
         }
+        discount = checkFloat(amountStart/100*discountPrecent)
+        setDiscount(discount)
         setAmountStart(amountStart)
     },[itemsSale])
     useEffect(()=>{
@@ -103,7 +100,7 @@ const Sale = React.memo((props) => {
             amountEnd = 0
         setAmountEnd(amountEnd)
         if(!data.object.installment)
-            setPaid(amountEnd)
+            setPaid(amountEnd-checkFloat(data.object.prepaid))
     },[amountStart, discount, discountType])
     useEffect(()=>{
         if(!unsaved.current)
@@ -450,14 +447,14 @@ const Sale = React.memo((props) => {
                                     </div>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>К оплате:&nbsp;</div>
-                                        <div className={classes.value}>{`${checkFloat(data.object.amountEnd-data.object.prepaid)} сом`}</div>
+                                        <div className={classes.value}>{edit?checkFloat(amountEnd-data.object.prepaid):checkFloat(data.object.amountEnd-data.object.prepaid)} сом</div>
                                     </div>
                                     </>
                                     :
                                     null
                             }
                             {
-                                edit&&data.object.status==='обработка'?
+                                edit&&data.object.status==='обработка'&&data.object.installment?
                                     <TextField
                                         error={paid>amountEnd}
                                         id='paid'
@@ -471,7 +468,7 @@ const Sale = React.memo((props) => {
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>Оплачено:&nbsp;</div>
-                                        <div className={classes.value}>{data.object.paid} {data.object.currency}</div>
+                                        <div className={classes.value}>{edit?paid:data.object.paid} {data.object.currency}</div>
                                     </div>
                             }
                             {
@@ -729,8 +726,7 @@ const Sale = React.memo((props) => {
                                                             break
                                                         }
                                                     }
-
-                                                    if(itemsSaleCheck) {
+                                                    if(itemsSaleCheck&&paid>=0&&(!data.object.installment||paid<(amountEnd-checkFloat(data.object.prepaid)))) {
                                                         if (paid <= amountEnd) {
                                                             const action = async () => {
                                                                 let element = {_id: router.query.id}
@@ -887,33 +883,11 @@ const Sale = React.memo((props) => {
                                                                 [
                                                                     <Button color='primary' onClick={async()=>{
                                                                     await showLoad(true)
-                                                                    await getSaleDoc({
-                                                                        sale: data.object,
-                                                                        client: await getClient({_id: data.object.client._id}),
-                                                                        itemsSale: data.object.itemsSale,
-                                                                        doc: await getDoc()
-                                                                    })
-                                                                    let res = await getAttachment(data.object._id)
+                                                                    let res = await getAttachmentSale(data.object._id)
                                                                     if(res)
                                                                         window.open(res, '_blank');
                                                                     else
                                                                         showSnackBar('Ошибка', 'error')
-                                                                    if(data.object.installment) {
-                                                                        await getInstallmentDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            sale: data.object,
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
-                                                                            doc: await getDoc()
-                                                                        })
-                                                                        await getVoucherDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            doc: await getDoc()
-                                                                        })
-
-                                                                    }
-
                                                                     await showLoad(false)
                                                                 }}>
                                                                         Документы
@@ -1002,33 +976,11 @@ const Sale = React.memo((props) => {
                                                             data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                                 <Button color='primary' onClick={async()=>{
                                                                     await showLoad(true)
-                                                                    await getSaleDoc({
-                                                                        sale: data.object,
-                                                                        client: await getClient({_id: data.object.client._id}),
-                                                                        itemsSale: data.object.itemsSale,
-                                                                        doc: await getDoc()
-                                                                    })
-                                                                    let res = await getAttachment(data.object._id)
+                                                                    let res = await getAttachmentSale(data.object._id)
                                                                     if(res)
                                                                         window.open(res, '_blank');
                                                                     else
                                                                         showSnackBar('Ошибка', 'error')
-                                                                    if(data.object.installment) {
-                                                                        await getInstallmentDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            sale: data.object,
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
-                                                                            doc: await getDoc()
-                                                                        })
-                                                                        await getVoucherDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            doc: await getDoc()
-                                                                        })
-
-                                                                    }
-
                                                                     await showLoad(false)
                                                                 }}>
                                                                     Документы

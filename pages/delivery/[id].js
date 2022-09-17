@@ -3,10 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getSale, setSale, getAttachment, getUnloadSales } from '../../src/gql/sale'
-import { getClient } from '../../src/gql/client'
-import { getDoc } from '../../src/gql/doc'
-import { getInstallments } from '../../src/gql/installment'
+import { getSale, setSale, getUnloadSales, getAttachmentSale } from '../../src/gql/sale'
 import { getBalanceItems } from '../../src/gql/balanceItem'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -27,7 +24,7 @@ import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
 import { pdDDMMYYHHMM, cloneObject, pdtDatePicker } from '../../src/lib'
-import { getSaleDoc } from '../../src/doc/sale'
+import { getOrderDoc } from '../../src/doc/order'
 import { getVoucherDoc } from '../../src/doc/voucher'
 import { getInstallmentDoc } from '../../src/doc/installment'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
@@ -506,36 +503,14 @@ const Delivery = React.memo((props) => {
                                                             data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                                 [
                                                                     <Button color='primary' onClick={async()=>{
-                                                                    await showLoad(true)
-                                                                    await getSaleDoc({
-                                                                        sale: data.object,
-                                                                        client: await getClient({_id: data.object.client._id}),
-                                                                        itemsSale: data.object.itemsSale,
-                                                                        doc: await getDoc()
-                                                                    })
-                                                                    let res = await getAttachment(data.object._id)
-                                                                    if(res)
-                                                                        window.open(res, '_blank');
-                                                                    else
-                                                                        showSnackBar('Ошибка', 'error')
-                                                                    if(data.object.installment) {
-                                                                        await getInstallmentDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            sale: data.object,
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
-                                                                            doc: await getDoc()
-                                                                        })
-                                                                        await getVoucherDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            doc: await getDoc()
-                                                                        })
-
-                                                                    }
-
-                                                                    await showLoad(false)
-                                                                }}>
+                                                                        await showLoad(true)
+                                                                        let res = await getAttachmentSale(data.object._id)
+                                                                        if(res)
+                                                                            window.open(res, '_blank');
+                                                                        else
+                                                                            showSnackBar('Ошибка', 'error')
+                                                                        await showLoad(false)
+                                                                    }}>
                                                                         Документы
                                                                     </Button>,
                                                                     <br/>
@@ -598,33 +573,11 @@ const Delivery = React.memo((props) => {
                                                             data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                                 <Button color='primary' onClick={async()=>{
                                                                     await showLoad(true)
-                                                                    await getSaleDoc({
-                                                                        sale: data.object,
-                                                                        client: await getClient({_id: data.object.client._id}),
-                                                                        itemsSale: data.object.itemsSale,
-                                                                        doc: await getDoc()
-                                                                    })
-                                                                    let res = await getAttachment(data.object._id)
+                                                                    let res = await getAttachmentSale(data.object._id)
                                                                     if(res)
                                                                         window.open(res, '_blank');
                                                                     else
                                                                         showSnackBar('Ошибка', 'error')
-                                                                    if(data.object.installment) {
-                                                                        await getInstallmentDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            sale: data.object,
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
-                                                                            doc: await getDoc()
-                                                                        })
-                                                                        await getVoucherDoc({
-                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            doc: await getDoc()
-                                                                        })
-
-                                                                    }
-
                                                                     await showLoad(false)
                                                                 }}>
                                                                     Документы

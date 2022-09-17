@@ -28,18 +28,16 @@ import { getClientGqlSsr } from '../../src/apollo'
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
     const basketStyle = basketStyleFile();
-    //props
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
     const {  profile } = props.user;
     const {  isMobileApp, consultation } = props.app;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    //настройка
     const initialRender = useRef(true);
     let [client, setClient] = useState(consultation.client);
     let [sale, setSale] = useState(null);
     let [currency, setCurrency] = useState('сом');
-    //корзина
+    let [discountPrecent, setDiscountPrecent] = useState(0);
     let [basket, setBasket] = useState({});
     let [amountStart, setAmountStart] = useState(0);
     let [allCount, setAllCount] = useState(0);
@@ -59,7 +57,6 @@ const Catalog = React.memo((props) => {
         else
             initialRender.current = false
     },[basket])
-    //useEffect
     useEffect(()=>{
         setConsultation({
             info: consultation.info,
@@ -67,7 +64,6 @@ const Catalog = React.memo((props) => {
             client: client?client._id:null
         })
     },[client])
-    //render
     return (
         <App pageName='Каталог'>
             <Head>
@@ -89,6 +85,7 @@ const Catalog = React.memo((props) => {
                         setElement={client=>{
                             setClient(client)
                             setSale(null)
+                            setDiscountPrecent(0)
                             setBasket({})
                         }}
                         getElements={async (search)=>{
@@ -104,6 +101,16 @@ const Catalog = React.memo((props) => {
                                 element={sale}
                                 setElement={sale=>{
                                     setSale(sale)
+                                    if(sale&&sale.discount)
+                                        discountPrecent = sale.discount*100/sale.amountStart
+                                    else
+                                        discountPrecent = 0
+                                    if(sale)
+                                        for(let i = 0; i <sale.itemsSale.length; i++) {
+                                            sale.itemsSale[i].priceStart = sale.itemsSale[i].price
+                                            sale.itemsSale[i].price = checkFloat(sale.itemsSale[i].price - sale.itemsSale[i].price/100*discountPrecent)
+                                        }
+                                    setDiscountPrecent(discountPrecent)
                                     setBasket({})
                                     setCurrency(sale?sale.currency:'сом')
                                 }}
@@ -145,9 +152,21 @@ const Catalog = React.memo((props) => {
                                         }}/>
                                         <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
                                             <div className={basketStyle.classes.name}>
+                                                {discountPrecent?<span className={basketStyle.classes.discount}>-{discountPrecent}%&nbsp;</span>:''}
                                                 {element.name}
                                             </div>
                                             <div className={classes.row} style={{marginBottom: 10}}>
+                                                {
+                                                    discountPrecent?
+                                                        <>
+                                                        <strike className={basketStyle.classes.priceBeforeDiscount}>
+                                                            {element.priceStart}
+                                                        </strike>
+                                                        &nbsp;
+                                                        </>
+                                                        :
+                                                        null
+                                                }
                                                 <div className={basketStyle.classes.price}>
                                                     {`${basket[element.item]&&basket[element.item].amount?basket[element.item].amount:element.price} сом`}
                                                 </div>
@@ -246,7 +265,7 @@ const Catalog = React.memo((props) => {
                                     })
                                 }
 
-                                setMiniDialog('Оформление', <Buy _discount={checkFloat(sale.discount*100/sale.amountStart)} client={client} sale={sale._id} _currency={currency} items={items} type={'refund'}
+                                setMiniDialog('Оформление', <Buy client={client} sale={sale._id} _currency={currency} items={items} type={'refund'}
                                                                  amountStart={amountStart}/>)
                                 showMiniDialog(true)
                             }

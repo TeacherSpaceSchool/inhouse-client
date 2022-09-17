@@ -35,20 +35,17 @@ import {getConsultations, setConsultation} from '../src/gql/consultation'
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
     const basketStyle = basketStyleFile();
-    //props
     const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
     const { data } = props;
     const { search, filter, isMobileApp, consultation } = props.app;
     const { profile } = props.user;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    //настройка
     const initialRender = useRef(true);
     let [client, setClient] = useState(consultation.client);
-    let [reservations, setReservations] = useState([]);
-    let [itemsReservations, setItemsReservations] = useState({});
-    let [installmentsDebt, setInstallmentsDebt] = useState(0);
-    //корзина
+    let [reservations, setReservations] = useState(data.reservations);
+    let [itemsReservations, setItemsReservations] = useState(data.itemsReservations);
+    let [installmentsDebt, setInstallmentsDebt] = useState(data.installmentsDebt);
     const localStorageBasket = useRef(true);
     let [basket, setBasket] = useState({});
     let [amountStart, setAmountStart] = useState(0);
@@ -75,7 +72,6 @@ const Catalog = React.memo((props) => {
             localStorageBasket.current = false
         }
     },[process.browser])
-    //получение данных
     let [list, setList] = useState(data.list);
     const getList = async ()=>{
         setList(cloneObject(await getItems({
@@ -89,7 +85,6 @@ const Catalog = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -98,16 +93,13 @@ const Catalog = React.memo((props) => {
     },[filter])
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current)
-                initialRender.current = false;
-            else {
+            if(!initialRender.current) {
                 if(searchTimeOut.current)
                     clearTimeout(searchTimeOut.current)
                 searchTimeOut.current = setTimeout(async () => await getList(), 500)
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -124,59 +116,63 @@ const Catalog = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //useEffect
     useEffect(()=>{
-        (async()=>{
-            if(data.type==='sale') {
-                if (client) {
-                    let installments = [
-                        ...await getInstallments({
-                            store: profile.store,
-                            client: client._id,
-                            status: 'безнадежна'
-                        }),
-                        ...await getInstallments({
-                            store: profile.store,
-                            client: client._id,
-                            status: 'активна'
-                        }),
-                    ]
-                    installmentsDebt = 0
-                    for(let i = 0; i <installments.length; i++) {
-                        installmentsDebt += installments[i].debt
-                    }
-                    setInstallmentsDebt(installmentsDebt)
-                    reservations = await getReservations({
-                        store: profile.store,
-                        manager: profile._id,
-                        client: client._id,
-                        status: 'обработка',
-                        items: true
-                    })
-                    setReservations(reservations)
-                    for (let i = 0; i < reservations.length; i++) {
-                        for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
-                            if (!itemsReservations[reservations[i].itemsReservation[i1].item])
-                                itemsReservations[reservations[i].itemsReservation[i1].item] = 0
-                            itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
+        if(initialRender.current)
+            initialRender.current = false;
+        else {
+            console.log(1);
+            (async () => {
+                if (data.type === 'sale') {
+                    if (client) {
+                        let installments = [
+                            ...await getInstallments({
+                                store: profile.store,
+                                client: client._id,
+                                status: 'безнадежна'
+                            }),
+                            ...await getInstallments({
+                                store: profile.store,
+                                client: client._id,
+                                status: 'активна'
+                            }),
+                        ]
+                        installmentsDebt = 0
+                        for (let i = 0; i < installments.length; i++) {
+                            installmentsDebt += installments[i].debt
                         }
+                        setInstallmentsDebt(installmentsDebt)
+                        reservations = await getReservations({
+                            store: profile.store,
+                            manager: profile._id,
+                            client: client._id,
+                            status: 'обработка',
+                            items: true
+                        })
+                        setReservations(reservations)
+                        itemsReservations = {}
+                        for (let i = 0; i < reservations.length; i++) {
+                            for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
+                                if (!itemsReservations[reservations[i].itemsReservation[i1].item])
+                                    itemsReservations[reservations[i].itemsReservation[i1].item] = 0
+                                itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
+                            }
+                        }
+                        setItemsReservations(itemsReservations)
                     }
-                    setItemsReservations(itemsReservations)
+                    else {
+                        setReservations([])
+                        setItemsReservations({})
+                        setInstallmentsDebt(0)
+                    }
                 }
-                else {
-                    setReservations([])
-                    setItemsReservations({})
-                    setInstallmentsDebt(0)
-                }
-            }
-            setConsultation({
-                info: consultation.info,
-                statusClient: consultation.statusClient,
-                client: client?client._id:null
-            })
-        })()
+                setConsultation({
+                    info: consultation.info,
+                    statusClient: consultation.statusClient,
+                    client: client ? client._id : null
+                })
+            })()
+        }
     },[client])
-    //render
     return (
         <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Каталог'>
             <Head>
@@ -237,10 +233,7 @@ const Catalog = React.memo((props) => {
                                         }}/>
                                         <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
                                             <div className={basketStyle.classes.name}>
-                                                <span className={basketStyle.classes.discount}>
-                                                    {element.discount!==0?`-${element.discount}${element.typeDiscount}`:''}
-                                                </span>
-                                                &nbsp;
+                                                {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
                                                 {element.name}
                                             </div>
                                             <div className={classes.row} style={{marginBottom: 10}}>
@@ -454,8 +447,44 @@ Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             ctx.res.end()
         } else
             Router.push('/')
+    let reservations = [], itemsReservations = {}, installmentsDebt = 0
+    if(store.getState().app.consultation.client) {
+        let installments = [
+            ...await getInstallments({
+                store: store.getState().user.profile.store,
+                client: store.getState().app.consultation.client._id,
+                status: 'безнадежна'
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+            ...await getInstallments({
+                store: store.getState().user.profile.store,
+                client: store.getState().app.consultation.client._id,
+                status: 'активна'
+            }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
+        ]
+        installmentsDebt = 0
+        for(let i = 0; i <installments.length; i++) {
+            installmentsDebt += installments[i].debt
+        }
+        reservations = await getReservations({
+            store: store.getState().user.profile.store,
+            manager: store.getState().user.profile._id,
+            client: store.getState().app.consultation.client._id,
+            status: 'обработка',
+            items: true
+        }, ctx.req?await getClientGqlSsr(ctx.req):undefined)
+        for (let i = 0; i < reservations.length; i++) {
+            for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
+                if (!itemsReservations[reservations[i].itemsReservation[i1].item])
+                    itemsReservations[reservations[i].itemsReservation[i1].item] = 0
+                itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
+            }
+        }
+    }
     return {
         data: {
+            installmentsDebt,
+            reservations,
+            itemsReservations,
             type: ctx.query.type,
             list: cloneObject(await getItems({
                 skip: 0,

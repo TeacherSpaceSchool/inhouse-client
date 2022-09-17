@@ -56,14 +56,11 @@ const currencies = ['сом', 'доллар', 'рубль', 'тенге', 'юа�
 
 const MoneyFlows = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { filter, search } = props.app;
-    const { profile } = props.user;
     const { showLoad } = props.appActions;
-    //настройка
     let [today, setToday] = useState();
     const unsaved = useRef({});
     const initialRender = useRef(true);
@@ -79,7 +76,6 @@ const MoneyFlows = React.memo((props) => {
         moneyArticle: data.defaultMoneyArticle['Не указано'],
         cashbox: filter.cashbox
     });
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getMoneyFlowsCountWithFilter = async ()=>{
@@ -124,12 +120,10 @@ const MoneyFlows = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //useEffect
     useEffect(()=>{
         newElement.amountEnd = checkFloat(newElement.amount * newElement.exchangeRate)
         setNewElement({...newElement})
     },[newElement.amount, newElement.exchangeRate])
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -159,7 +153,6 @@ const MoneyFlows = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -186,12 +179,10 @@ const MoneyFlows = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     return (
         <App searchShow={true} full unsaved={unsaved} filterShow={{period: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>

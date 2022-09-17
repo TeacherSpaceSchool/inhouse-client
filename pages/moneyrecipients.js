@@ -31,18 +31,15 @@ const uploadText = 'Формат xlsx:\n_id или текущее названи
 
 const MoneyRecipients = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { search } = props.app;
-    //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
         name: '',
     });
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -52,7 +49,6 @@ const MoneyRecipients = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -65,7 +61,6 @@ const MoneyRecipients = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -76,12 +71,10 @@ const MoneyRecipients = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     return (
         <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Получатели денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>

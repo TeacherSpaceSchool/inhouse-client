@@ -28,13 +28,10 @@ const status = ['все', 'обработка', 'принят', 'продан', 
 
 const Reservations = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, filter, isMobileApp } = props.app;
-    //настройка
     let [today, setToday] = useState();
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -61,7 +58,6 @@ const Reservations = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -84,7 +80,6 @@ const Reservations = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -104,7 +99,6 @@ const Reservations = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{status, user: true, userRole: 'менеджер', client: true, store: true, period: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Бронь'>
             <Head>

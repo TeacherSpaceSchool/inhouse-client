@@ -48,12 +48,10 @@ const uploadText = 'Формат xlsx:' +
 
 const BonusManagers = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { isMobileApp, filter } = props.app;
-    //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
@@ -63,7 +61,6 @@ const BonusManagers = React.memo((props) => {
         orderInstallment: [],
         promotion: []
     });
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -73,7 +70,6 @@ const BonusManagers = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     useEffect(()=>{
         (async()=>{
             if(initialRender.current)
@@ -82,7 +78,6 @@ const BonusManagers = React.memo((props) => {
                 await getList()
         })()
     },[filter])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -93,12 +88,10 @@ const BonusManagers = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     return (
         <App unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} pageName='Бонус менеджера' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>

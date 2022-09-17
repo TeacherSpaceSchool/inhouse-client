@@ -46,17 +46,14 @@ const status = ['все', 'активна', 'оплачен', 'отмена', '�
 
 const Installments = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const unsaved = useRef({});
     const { data } = props;
     const { filter, search } = props.app;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    //настройка
     let [today, setToday] = useState();
     const initialRender = useRef(true);
     const [showComment, setShowComment] = useState(false);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -83,7 +80,6 @@ const Installments = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -105,7 +101,6 @@ const Installments = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -125,12 +120,10 @@ const Installments = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     return (
         <App searchShow={true} full unsaved={unsaved} filterShow={{client: true, store: true, status, date: true, timeDif: true }} checkPagination={checkPagination} pageName='Рассрочки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>

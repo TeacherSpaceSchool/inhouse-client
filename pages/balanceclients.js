@@ -17,12 +17,9 @@ import UnloadUpload from '../components/app/UnloadUpload';
 
 const BalanceClients = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, isMobileApp, filter } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -32,7 +29,6 @@ const BalanceClients = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -51,7 +47,6 @@ const BalanceClients = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -62,7 +57,6 @@ const BalanceClients = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{debtor: true}} checkPagination={checkPagination} searchShow={true} pageName='Баланс клиентов'>
             <Head>

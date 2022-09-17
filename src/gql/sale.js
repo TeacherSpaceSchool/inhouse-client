@@ -223,7 +223,7 @@ export const getSalesCount = async({search, manager, order, client, promotion, c
     }
 }
 
-export const getAttachment = async(_id, clientGql)=>{
+export const getAttachmentSale = async(_id, clientGql)=>{
     try{
         clientGql = clientGql? clientGql : getClientGql()
         let res = await clientGql
@@ -231,10 +231,10 @@ export const getAttachment = async(_id, clientGql)=>{
                 variables: {_id},
                 query: gql`
                     query ($_id: ID!) {
-                        getAttachment(_id: $_id)
+                        getAttachmentSale(_id: $_id)
                     }`,
             })
-        return res.data.getAttachment
+        return res.data.getAttachmentSale
     } catch(err){
         console.error(err)
     }
@@ -294,8 +294,8 @@ export const addSale = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($client: ID!, $prepaid: Float, $order: Boolean, $promotion: ID, $selfDelivery: Boolean, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date, $reservations: [ID]!) {
-                        addSale(client: $client, geo: $geo, order: $order, prepaid: $prepaid, selfDelivery: $selfDelivery, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, reservations: $reservations) 
+                    mutation ($client: ID!, $installment: Boolean, $prepaid: Float, $order: Boolean, $promotion: ID, $selfDelivery: Boolean, $geo: [Float], $itemsSale: [ItemFromListInput]!, $discount: Float!, $cpa:  ID, $amountStart: Float!, $amountEnd: Float!, $typePayment: String!,  $address: String!, $addressInfo: String!, $comment: String!, $currency: String, $paid: Float!, $delivery: Date, $reservations: [ID]!) {
+                        addSale(client: $client, installment: $installment, geo: $geo, order: $order, prepaid: $prepaid, selfDelivery: $selfDelivery, promotion: $promotion, itemsSale: $itemsSale, discount: $discount, cpa:  $cpa, amountStart: $amountStart, amountEnd: $amountEnd, typePayment: $typePayment,  address: $address, addressInfo: $addressInfo, comment: $comment, currency: $currency, paid: $paid, delivery: $delivery, reservations: $reservations) 
                     }`})
         return res.data.addSale
     } catch(err){

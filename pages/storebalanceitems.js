@@ -39,12 +39,9 @@ const sorts = [
 
 const StoreBalanceItems = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { isMobileApp, filter, sort } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -54,7 +51,6 @@ const StoreBalanceItems = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     useEffect(()=>{
         (async()=>{
             if(initialRender.current)
@@ -63,7 +59,6 @@ const StoreBalanceItems = React.memo((props) => {
                 await getList()
         })()
     },[filter, sort])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -74,7 +69,6 @@ const StoreBalanceItems = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App checkPagination={checkPagination} filterShow={{item: true, store: true}} sorts={sorts} pageName='Баланс моделей'>
             <Head>

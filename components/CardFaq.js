@@ -19,7 +19,6 @@ const CardFaq = React.memo((props) => {
     const {classes} = cardFaqStyle();
     const { element, setList, list, idx, edit, deleted } = props;
     const { isMobileApp } = props.app;
-    //addCard
     let [file, setFile] = useState(undefined);
     let handleChangeFile = ((event) => {
         if(event.target.files[0]&&event.target.files[0].size/1024/1024<50){

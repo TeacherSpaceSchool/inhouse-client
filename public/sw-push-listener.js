@@ -1,5 +1,4 @@
 let notificationUrl = 'https://salyk.store';
-//notification registered feature for getting update automatically from server api
 self.addEventListener('push', function (event) {
     let _data = event.data ?
         event.data.json()
@@ -18,7 +17,6 @@ self.addEventListener('push', function (event) {
     );
 });
 
-//notification url redirect event click
 self.addEventListener('notificationclick', function (event) {
     event.notification.close();
 

@@ -31,18 +31,15 @@ const uploadText = 'Формат xlsx:\n_id или текущее названи
 
 const Promotions = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { search } = props.app;
-    //настройка
     const initialRender = useRef(true);
     const unsaved = useRef({});
     let [newElement, setNewElement] = useState({
         name: ''
     });
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -53,7 +50,6 @@ const Promotions = React.memo((props) => {
         paginationWork.current = true
         unsaved.current = {}
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -66,7 +62,6 @@ const Promotions = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -77,12 +72,10 @@ const Promotions = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     return (
         <App checkPagination={checkPagination} unsaved={unsaved} searchShow={true} pageName='Акции' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>

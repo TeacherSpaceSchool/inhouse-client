@@ -2,7 +2,7 @@ import htmlDocx from 'html-docx-js/dist/html-docx';
 import { pdDDMMYYYY } from '../../src/lib'
 import numberToWord from '../../src/numberToWord'
 
-export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
+export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     let items = ''
     for(let i=0; i<itemsSale.length; i++) {
         items += `${itemsSale[i].name} - ${itemsSale[i].count} ${itemsSale[i].unit}; `
@@ -42,7 +42,7 @@ export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
     <p style="text-align:center;font-size:10pt">
       <strong>3. УСЛОВИЯ ПЛАТЕЖА И ПОСТАВКИ</strong>
     </p>
-    <span style="text-align:justify;font-size:10pt">3.1 Расчеты за приобретаемый товар: Покупатель <strong>производит <span>${precentPaid}%</span> оплату</strong>, что составляет <strong>${sale.paid} (${await numberToWord(sale.paid, 'all')})</strong> сом. </span>
+    <span style="text-align:justify;font-size:10pt">3.1 Расчеты за приобретаемый товар: Покупатель <strong>производит <span>${precentPaid}%</span> оплату</strong>, что составляет <strong>${sale.paid} (${await numberToWord(sale.paid, 'all')})</strong> сом, Покупатель внесет до прихода мебели на склад г. Бишкек. </span>
     <br>
     <span style="text-align:justify;font-size:10pt">3.2 Товар вывозится только после <strong>${precentPaid}% оплаты</strong> суммы настоящего Договора. </span>
     <br>
@@ -55,7 +55,7 @@ export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
     <br>
     <span style="text-align:justify;font-size:10pt">2) Подготовить поверхность помещения для произведения сборки мебели;</span>
     <br>
-    <span style="text-align:justify;font-size:10pt">3) Уведомить Продавца в случае изменения условий Приложения №1 (комплектации, отделки, цвета обивки товара, и т.д.), с обязательным внесением изменений в Приложение.</span>
+    <span style="text-align:justify;font-size:10pt">3) Уведомить Продавца в случае изменения условий Приложения №1 (комплектации, отделки, цвета обивки товара, и т.д.) в течение 3 (трех) дней, со дня составления договора купли-продажи, с обязательным внесением изменений в Приложение.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">4) Проинформировать Продавца в течение 5 (пяти) дней с момента получения заказа, в случае если прибывший товар оказывается явно бракованным или не соответствует спецификации Приложения №1.</span>
     <br>
@@ -85,8 +85,6 @@ export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
     <span style="text-align:justify;font-size:10pt">5.1. Продавец гарантирует качество товара сроком на один год, при условии соблюдения Покупателем норм хранения и правильной эксплуатации мебели.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">5.2. Продавец передает товар лично Покупателю или лицу, действующему в его интересах и предъявившему Договор и Доверенность от Покупателя.</span>
-    <br>
-    <span style="text-align:justify;font-size:10pt">5.3. В случаях просрочки доставки заказа Продавцом оплачивается пеня 0,1% от суммы товара, но не более 5% от суммы договора.</span>
     <br>
     <p style="text-align:center;font-size:10pt">
       <strong>6. ОТВЕТСТВЕННОСТЬ СТОРОН</strong>
@@ -180,11 +178,11 @@ export const getSaleDoc = async ({sale, client, itemsSale, doc})=>{
     </table>
     `);
     const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a'); // Or maybe get it from the current document
+    const link = document.createElement('a');
     const id = 'donwloadSaleDocs'
     link.id = id
     link.href = blobUrl;
     link.download = `Договор купли-продажи №${sale.number}.docx`;
-    document.body.appendChild(link); // Or append it whereever you want
+    document.body.appendChild(link);
     document.getElementById(id).click()
 };

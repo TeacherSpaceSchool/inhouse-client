@@ -291,7 +291,7 @@ const SetRecipient =  React.memo(
                                                 newElement.clientOperation = clientOperation
                                                 newElement.operation = 'расход'
                                                 if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
+                                                    newElement.amount = clientOperation.amount
                                                 else
                                                     newElement.amount = ''
                                                 setClientOperation(clientOperation)

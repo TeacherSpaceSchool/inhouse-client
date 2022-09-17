@@ -33,7 +33,6 @@ import dynamic from 'next/dynamic';
 const Scan = dynamic(import('../dialog/Scan'), { ssr: false });
 
 const MyAppBar = React.memo((props) => {
-    //props
     const initialRender = useRef(true);
     const {classes} = appbarStyle();
     const { sorts, pageName, searchShow, unread, filterShow, qrScannerShow} = props
@@ -42,7 +41,6 @@ const MyAppBar = React.memo((props) => {
     const { authenticated } = props.user;
     const { setMiniDialog, showMiniDialog, setFullDialog, showFullDialog } = props.mini_dialogActions;
     const { logout } = props.userActions;
-    //state
     const [anchorElMobileMenu, setAnchorElMobileMenu] = React.useState(null);
     const openMobileMenu = Boolean(anchorElMobileMenu);
     let handleMobileMenu = (event) => {

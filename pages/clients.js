@@ -24,12 +24,9 @@ const uploadText = 'Формат xlsx:\n_id или текущее имя кли�
 
 const Clients = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, filter, isMobileApp } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -39,7 +36,6 @@ const Clients = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -57,7 +53,6 @@ const Clients = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -68,7 +63,6 @@ const Clients = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{level: true}} checkPagination={checkPagination} searchShow={true} pageName='Клиенты'>
             <Head>

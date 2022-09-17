@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useRef, useEffect } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getRefund, setRefund, getUnloadRefunds } from '../../src/gql/refund'
+import { getRefund, setRefund, getUnloadRefunds, getAttachmentRefund } from '../../src/gql/refund'
 import { getWarehouses } from '../../src/gql/warehouse'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -23,7 +23,7 @@ import { getClientGqlSsr } from '../../src/apollo'
 import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
-import { pdDDMMYYHHMM } from '../../src/lib'
+import {checkFloat, pdDDMMYYHHMM} from '../../src/lib'
 import Link from 'next/link';
 import AcceptRefund from '../../components/dialog/AcceptRefund'
 import Menu from '@mui/material/Menu';
@@ -49,6 +49,7 @@ const Refund = React.memo((props) => {
     const unsaved = useRef();
     let [edit, setEdit] = useState(false);
     let [comment, setComment] = useState(data.object.comment);
+    const { showLoad } = props.appActions;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const router = useRouter()
     useEffect(()=>{
@@ -175,6 +176,15 @@ const Refund = React.memo((props) => {
                                     </Link>
                                 </div>
                             </div>
+                            {
+                                data.object.discount?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>До уценки:&nbsp;</div>
+                                        <div className={classes.value}>{checkFloat(data.object.amount+data.object.discount)} сом</div>
+                                    </div>
+                                    :
+                                    null
+                            }
                             {
                                 data.object.discount?
                                     <div className={classes.row}>
@@ -318,6 +328,25 @@ const Refund = React.memo((props) => {
                                                                         :
                                                                         null
                                                                 }
+                                                                {
+                                                                    data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
+                                                                        [
+                                                                            <Button color='primary' onClick={async()=>{
+                                                                                await showLoad(true)
+                                                                                let res = await getAttachmentRefund(data.object._id)
+                                                                                if(res)
+                                                                                    window.open(res, '_blank');
+                                                                                else
+                                                                                    showSnackBar('Ошибка', 'error')
+                                                                                await showLoad(false)
+                                                                            }}>
+                                                                                Документы
+                                                                            </Button>,
+                                                                            <br/>
+                                                                        ]
+                                                                        :
+                                                                        null
+                                                                }
                                                                 <Button color='primary' onClick={async ()=>{
                                                                     let res = await getUnloadRefunds({_id: router.query.id})
                                                                     if(res)
@@ -355,6 +384,25 @@ const Refund = React.memo((props) => {
                                                                         }}>
                                                                             Принять
                                                                         </Button>
+                                                                        :
+                                                                        null
+                                                                }
+                                                                {
+                                                                    data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
+                                                                        [
+                                                                            <Button color='primary' onClick={async()=>{
+                                                                                await showLoad(true)
+                                                                                let res = await getAttachmentRefund(data.object._id)
+                                                                                if(res)
+                                                                                    window.open(res, '_blank');
+                                                                                else
+                                                                                    showSnackBar('Ошибка', 'error')
+                                                                                await showLoad(false)
+                                                                            }}>
+                                                                                Документы
+                                                                            </Button>,
+                                                                            <br/>
+                                                                        ]
                                                                         :
                                                                         null
                                                                 }

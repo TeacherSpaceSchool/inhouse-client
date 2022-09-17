@@ -21,12 +21,9 @@ import UnloadUpload from '../components/app/UnloadUpload';
 
 const Consultations = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { filter } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -47,7 +44,6 @@ const Consultations = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     useEffect(()=>{
         (async()=>{
             if(initialRender.current)
@@ -56,7 +52,6 @@ const Consultations = React.memo((props) => {
                 await getList()
         })()
     },[filter])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -73,7 +68,6 @@ const Consultations = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, period: true}} checkPagination={checkPagination} pageName='Консультации'>
             <Head>

@@ -31,14 +31,11 @@ const status = ['все', 'отложен', 'обработка', 'в проце
 
 const Tasks = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, isMobileApp, filter } = props.app;
-    //настройка
     const initialRender = useRef(true);
     let [today, setToday] = useState();
     let [showStat, setShowStat] = useState(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -59,7 +56,6 @@ const Tasks = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -82,7 +78,6 @@ const Tasks = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -99,7 +94,6 @@ const Tasks = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
             <Head>

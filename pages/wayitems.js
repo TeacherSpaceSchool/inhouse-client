@@ -48,13 +48,11 @@ const colors = {
 
 const WayItems = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
     const { filter } = props.app;
     const { profile } = props.user;
-    //настройка
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [today, setToday] = useState();
@@ -63,7 +61,6 @@ const WayItems = React.memo((props) => {
         amount: '',
         bookings: []
     });
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -96,7 +93,6 @@ const WayItems = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     useEffect(()=>{
         (async()=>{
             if(initialRender.current) {
@@ -109,7 +105,6 @@ const WayItems = React.memo((props) => {
                 await getList()
         })()
     },[filter])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -134,12 +129,10 @@ const WayItems = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //быстрое меню
     const [anchorElQuick, setAnchorElQuick] = useState(null);
     const [menuItems, setMenuItems] = useState(null);
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
-    //render
     useEffect(()=>{
         let used = 0
         for(let i=0; i<newElement.bookings.length; i++)

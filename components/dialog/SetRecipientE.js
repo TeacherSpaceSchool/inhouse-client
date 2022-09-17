@@ -313,7 +313,7 @@ const SetRecipientE =  React.memo(
                                 ...clientOperation&&typeClientOperation==='Возврат'?{refund: clientOperation._id}:{},
                                 ...clientOperation&&typeClientOperation==='Рассрочка'&&installmentMonth?{
                                     installment: clientOperation._id, 
-                                    installmentMonth
+                                    installmentMonth: installmentMonth.month
                                 }:{},
                             })
                             if(res==='OK') {
@@ -333,6 +333,10 @@ const SetRecipientE =  React.memo(
                                 if(!clientOperation) {
                                     list[idx].installment = null
                                     list[idx].installmentMonth = null
+                                    list[idx].sale = null
+                                    list[idx].order = null
+                                    list[idx].reservation = null
+                                    list[idx].refund = null
                                 }
                                 else if(clientOperation&&typeClientOperation==='Продажа') list[idx].sale = clientOperation
                                 else if(clientOperation&&typeClientOperation==='На заказ') list[idx].order = clientOperation
@@ -340,7 +344,7 @@ const SetRecipientE =  React.memo(
                                 else if(clientOperation&&typeClientOperation==='Возврат') list[idx].refund = clientOperation
                                 else if(clientOperation&&typeClientOperation==='Рассрочка'&&installmentMonth) {
                                     list[idx].installment = clientOperation._id
-                                    list[idx].installmentMonth = installmentMonth
+                                    list[idx].installmentMonth = installmentMonth.month
                                 }
 
                                 setList([...list])

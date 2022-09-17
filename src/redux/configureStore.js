@@ -22,8 +22,8 @@ const combinedReducer = combineReducers({
 const reducer = (state, action) => {
     if (action.type === HYDRATE) {
         const nextState = {
-            ...state, // use previous state
-            ...action.payload, // apply delta from hydration
+            ...state,
+            ...action.payload
         }
         return nextState
     } else {

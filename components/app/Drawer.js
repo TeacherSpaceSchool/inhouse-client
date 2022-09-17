@@ -11,7 +11,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { useRouter } from 'next/router';
 import Collapse from '@mui/material/Collapse';
-//import Badge from '@mui/material/Badge';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import HomeIcon from '@mui/icons-material/Home';
 import Router from 'next/router'
@@ -51,7 +50,7 @@ const MyDrawer = React.memo((props) => {
             'Данные'
             :
             ['/wayitems'].includes(router.pathname)||
-            router.pathname.includes('refund')||
+            router.pathname.includes('refund')&&!router.pathname.includes('refund/new')||
             router.pathname.includes('order')||
             router.pathname.includes('deliver')||
             router.pathname.includes('reservation')||
@@ -99,7 +98,7 @@ const MyDrawer = React.memo((props) => {
                 {
                     ['менеджер', 'менеджер/завсклад'].includes(profile.role)?
                         <>
-                        <ListItem style={{background: router.pathname==='/'||router.pathname==='/catalog'?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                        <ListItem style={{background: router.pathname==='/'||router.pathname==='/catalog'||router.pathname.includes('refund/new')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                             handleUncover('');
                             showDrawer(false);
                             if(!unsaved||JSON.stringify(unsaved.current)==='{}')
@@ -319,7 +318,7 @@ const MyDrawer = React.memo((props) => {
                         <ListItem style={{
                             background:
                                 ['/wayitems'].includes(router.pathname)||
-                                router.pathname.includes('refund')||
+                                router.pathname.includes('refund')&&!router.pathname.includes('refund/new')||
                                 router.pathname.includes('deliver')||
                                 router.pathname.includes('order')||
                                 router.pathname.includes('reservation')||
@@ -393,7 +392,7 @@ const MyDrawer = React.memo((props) => {
                         {
                             ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
                                 <>
-                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('refund')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
+                                <ListItem style={{marginLeft: 16, background: router.pathname.includes('refund')&&!router.pathname.includes('refund/new')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)
                                     if(!unsaved||JSON.stringify(unsaved.current)==='{}')
                                         Router.push('/refunds')
@@ -408,7 +407,7 @@ const MyDrawer = React.memo((props) => {
                                 null
                         }
                         {
-                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)?
+                            ['admin', 'управляющий', 'менеджер', 'менеджер/завсклад', 'завсклад', 'доставщик'].includes(profile.role)?
                                 <>
                                 <ListItem style={{marginLeft: 16, background: router.pathname.includes('deliver')?'rgba(24, 59, 55, .1)':'#ffffff'}} button onClick={()=>{
                                     showDrawer(false)

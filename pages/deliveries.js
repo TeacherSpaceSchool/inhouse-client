@@ -26,13 +26,10 @@ const status = ['на доставку', 'отгружен', 'доставлен
 
 const Deliveries = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, filter } = props.app;
-    //настройка
     let [today, setToday] = useState();
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -65,7 +62,6 @@ const Deliveries = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -88,7 +84,6 @@ const Deliveries = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -111,7 +106,6 @@ const Deliveries = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{status, client: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Доставка'>
             <Head>

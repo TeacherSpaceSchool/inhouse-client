@@ -59,8 +59,10 @@ const BuyBasket =  React.memo(
             if(amountEnd<0)
                 amountEnd = 0
             setAmountEnd(amountEnd)
-            if(type!=='reservation')
-                setPaid(prepaid?amountEnd-prepaid:amountEnd)
+            if(type!=='reservation') {
+                paid = amountEnd - checkFloat(prepaid)
+                setPaid(paid)
+            }
         }, [typePayment, discount, discountType]);
         useEffect(() => {
             monthInstallment = checkFloat(monthInstallment)
@@ -147,7 +149,7 @@ const BuyBasket =  React.memo(
                         </div>
                         <div className={classes.row}>
                             <div className={classes.nameField} style={{fontSize: '1.0625rem'}}>К оплате:&nbsp;</div>
-                            <div className={classes.value} style={{fontSize: '1.0625rem'}}>{`${checkFloat(amountEnd-prepaid)} сом`}</div>
+                            <div className={classes.value} style={{fontSize: '1.0625rem'}}>{`${(amountEnd-prepaid)<0?0:checkFloat(amountEnd-prepaid)} сом`}</div>
                         </div>
                         </>
                         :
@@ -184,8 +186,9 @@ const BuyBasket =  React.memo(
                                     value={paid}
                                     onChange={(event) => {
                                         paid = inputFloat(event.target.value)
-                                        if(paid>amountEnd)
-                                            paid = amountEnd
+                                        if(paid>(amountEnd-prepaid)) {
+                                            paid = amountEnd-prepaid
+                                        }
                                         setPaid(paid)
                                     }}
                                     onFocus={()=>{
@@ -195,8 +198,9 @@ const BuyBasket =  React.memo(
                                 />
                                 <div className={classes.counterbtn} onClick={() => {
                                     paid = checkFloat(checkFloat(paid) + 5)
-                                    if(paid>amountEnd)
-                                        paid = amountEnd
+                                    if(paid>(amountEnd-prepaid)) {
+                                        paid = amountEnd-prepaid
+                                    }
                                     setPaid(paid)
                                 }}>+
                                 </div>
@@ -277,23 +281,23 @@ const BuyBasket =  React.memo(
                 {
                     ['order', 'reservation', 'sale'].includes(type)?
                         <div className={isMobileApp?classes.column:classes.row}>
-                        <TextField
-                            id='date'
-                            error={!date&&type==='reservation'}
-                            type={type==='reservation'?'date':'datetime-local'}
-                            variant='standard'
-                            label={type==='reservation'?'Срок':'Доставка'}
-                            value={date}
-                            style={{marginRight: type==='reservation'?0:20}}
-                            onChange={(event) => setDate(event.target.value)}
-                            className={classes.input}
-                        />
-                        {
-                            ['order', 'sale'].includes(type)?
-                                <FormControlLabel control={<Checkbox checked={selfDelivery} onChange={(event) => setSelfDelivery(event.target.checked)}/>} label='Самовывоз' />
-                                :
-                                null
-                        }
+                            <TextField
+                                id='date'
+                                error={!date&&type==='reservation'}
+                                type={type==='reservation'?'date':'datetime-local'}
+                                variant='standard'
+                                label={type==='reservation'?'Срок':'Доставка'}
+                                value={date}
+                                style={{marginRight: type==='reservation'?0:20}}
+                                onChange={(event) => setDate(event.target.value)}
+                                className={classes.input}
+                            />
+                            {
+                                ['order', 'sale'].includes(type)?
+                                    <FormControlLabel control={<Checkbox checked={selfDelivery} onChange={(event) => setSelfDelivery(event.target.checked)}/>} label='Самовывоз' />
+                                    :
+                                    null
+                            }
                         </div>
                         :
                         null
@@ -430,7 +434,7 @@ const BuyBasket =  React.memo(
                                     monthInstallment = checkFloat(monthInstallment)
                                     paid = checkFloat(paid)
                                     amountEnd = checkFloat(amountEnd)
-                                    if ((paid + prepaid) >= amountEnd || (paidInstallment && monthInstallment)) {
+                                    if ((paid + prepaid) === amountEnd || (paidInstallment && monthInstallment)) {
                                         setConsultation({
                                             info: consultation.info,
                                             statusClient: consultation.statusClient,
@@ -454,11 +458,12 @@ const BuyBasket =  React.memo(
                                             paid: checkFloat(paid),
                                             prepaid,
                                             selfDelivery,
+                                            installment: !!(paidInstallment&&monthInstallment),
                                             delivery: date,
                                             reservations: reservations,
                                             ...type==='order'?{order: true}:{}
                                         })
-                                        if ((paid + prepaid) < amountEnd && res && res !== 'ERROR') {
+                                        if (paidInstallment && monthInstallment && res && res !== 'ERROR') {
                                             const grid = []
                                             let month = new Date()
                                             month.setHours(0, 0, 0, 0)
@@ -494,8 +499,11 @@ const BuyBasket =  React.memo(
                                                 showSnackBar('Ошибка', 'error')
                                         }
                                     }
-                                    else
+                                    else {
                                         showSnackBar('Укажите рассрочку')
+                                        showLoad(false)
+                                        return
+                                    }
                                 }
                                 if (res && res !== 'ERROR') {
                                     localStorage.basket = JSON.stringify({})

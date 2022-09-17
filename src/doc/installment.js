@@ -9,9 +9,22 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
               <td style="border: 1px solid black; text-align: center; width: 19%;">${!i?'Первонач. взнос':i}</td>
               <td style="border: 1px solid black; text-align: center; width: 20%;">${pdDDMMYYYY(installment.grid[i].month)}</td>
               <td style="border: 1px solid black; text-align: center; width: 59%;">
-                <strong>${installment.grid[i].amount} (${await numberToWord(installment.grid[i].amount, 'all')})</strong>
+                <strong>${installment.grid[i].amount} (${await numberToWord(installment.grid[i].amount, 'all')}) сом</strong>
               </td>
             </tr>`
+    }
+    let gridItems = '', discountPrecent = sale.discount*100/sale.amountStart, allCountItems = 0, discountItem, amountEndItem
+    for(let i=0; i<itemsSale.length; i++) {
+        allCountItems = checkFloat(allCountItems + itemsSale[i].count)
+        discountItem = checkFloat(itemsSale[i].amount/100*discountPrecent)
+        amountEndItem = checkFloat(itemsSale[i].amount-discountItem)
+        gridItems += `<tr style='height: 40px;'>
+                              <td style='border: 1px solid black; text-align: center; width: 52%;'>${itemsSale[i].name}</td>
+                              <td style='border: 1px solid black; text-align: center; width: 27%;'>${itemsSale[i].count} ${itemsSale[i].unit}</td>
+                              <td style='border: 1px solid black; text-align: center; width: 20%;'>${itemsSale[i].amount}</td>
+                              ${sale.discount?`<td style='border: 1px solid black; text-align: center; width: 20%;'>${discountItem}</td>`:''}
+                              <td style='border: 1px solid black; text-align: center; width: 20%;'>${amountEndItem}</td>
+                      </tr>`
     }
     const blob = await htmlDocx.asBlob(`
     <div>
@@ -28,13 +41,11 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
           </td>
         </tr>
       </table>
-      <p style="text-align:justify;font-size:10pt">${doc.name}, в лице директора ${doc.director}, действующего на основании Устава, именуемое в дальнейшем <strong>Продавец</strong>&nbsp; с одной стороны и гражданин(ка) Кыргызской Республики <strong>${client.name} ${pdDDMMYYYY(client.birthday)}</strong> года рождения с другой стороны, именуемый в дальнейшем&nbsp; <strong>Покупатель</strong> заключили настоящий Договор о нижеследующем: </p>
+      <p style="text-align:justify;font-size:10pt">${doc.name}, в лице директора ${doc.director}, действующего на основании добровольного патента, адрес магазина: ${doc.address}, именуемое в дальнейшем <strong>Продавец</strong>&nbsp; с одной стороны и гражданин(ка) Кыргызской Республики <strong>${client.name} ${pdDDMMYYYY(client.birthday)}</strong> года рождения с другой стороны, именуемый в дальнейшем&nbsp; <strong>Покупатель</strong> заключили настоящий Договор о нижеследующем: </p>
       <p style="text-align:center;font-size:10pt">
         <strong>1. ПРЕДМЕТ ДОГОВОРА</strong>
       </p>
-       ${
-        itemsSale&&itemsSale.length?
-            `
+       
             <span style="text-align:justify;font-size:10pt">1.1 По настоящему договору Продавец обязуется передать в собственность Покупателю, а Покупатель обязуется принять и оплатить мебель со следующими характеристиками:</span>
             <br>
             <br>
@@ -49,30 +60,23 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
                   <td style="border: 1px solid black; text-align: center; width: 20%;">
                     <strong>Цена (сом)</strong>
                   </td>
+                  ${sale.discount?`<td style="border: 1px solid black; text-align: center; width: 20%;"><strong>Скидка</strong></td>`:''}
+                  <td style="border: 1px solid black; text-align: center; width: 20%;">
+                    <strong>Итого</strong>
+                  </td>
                 </tr>
-                ${itemsSale.map((itemSale) => `<tr style='height: 40px;'>
-                  <td style='border: 1px solid black; text-align: center; width: 52%;'>${itemSale.name}</td>
-                  <td style='border: 1px solid black; text-align: center; width: 27%;'>${itemSale.count} ${itemSale.unit}</td>
-                  <td style='border: 1px solid black; text-align: center; width: 20%;'>${itemSale.amount}</td>
-                </tr>`)}
-                ${sale.discount?`<tr style='height: 40px;'>
-                  <td style='border: 1px solid black; text-align: center; width: 52%;'>Скидка</td>
-                  <td style='border: 1px solid black; text-align: center; width: 27%;'></td>
-                  <td style='border: 1px solid black; text-align: center; width: 20%;'>${checkFloat(sale.discount*100/sale.amountStart)}%</td>
-                </tr>`:''}
+                ${gridItems}
                 <tr style="height: 40px;">
                   <td style="border: 1px solid black; text-align: center; width: 52%;">
                     <strong>Итого:</strong>
                   </td>
-                  <td style="border: 1px solid black; text-align: center; width: 27%;"></td>
-                  <td style="border: 1px solid black; text-align: center; width: 20%;">${sale.amountEnd}</td>
+                  <td style='border: 1px solid black; text-align: center; width: 27%;'>${allCountItems}</td>
+                  <td style='border: 1px solid black; text-align: center; width: 20%;'>${sale.amountStart}</td>
+                  ${sale.discount?`<td style='border: 1px solid black; text-align: center; width: 20%;'>${sale.discount}</td>`:''}
+                  <td style='border: 1px solid black; text-align: center; width: 20%;'>${sale.amountEnd}</td>
                 </tr>
             </table>
             <br>
-            `
-            :
-            '<span style="text-align:justify;font-size:10pt">1.1 По настоящему договору Продавец обязуется передать товары в собственность Покупателю, а Покупатель обязуется принять товары и оплатить рассрочку.</span>\n'
-      }
       <span style="text-align:justify;font-size:10pt">Техническое состояние передаваемого Товара: новое (претензий и нареканий со стороны покупателя нет).</span>
       <br>
       <span style="text-align:justify;font-size:10pt">1.2. Товар передаётся Покупателю на условиях раздельной оплаты согласно графику указанного в пункте 3.3 за Товар в порядке, предусмотренном настоящим Договором.</span>
@@ -123,7 +127,7 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
           <td style="border: 1px solid black; text-align: center; width: 19%;"></td>
           <td style="border: 1px solid black; text-align: center; width: 20%;"></td>
           <td style="border: 1px solid black; text-align: center; width: 59%;">
-            <strong>${installment.amount} (${await numberToWord(installment.amount, 'all')})</strong>
+            <strong>${installment.amount} (${await numberToWord(installment.amount, 'all')}) сом</strong>
           </td>
         </tr>
       </table>

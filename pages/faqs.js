@@ -17,12 +17,9 @@ import CardFaq from '../components/CardFaq';
 
 const Faqs = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -32,7 +29,6 @@ const Faqs = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -45,7 +41,6 @@ const Faqs = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -56,7 +51,6 @@ const Faqs = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App checkPagination={checkPagination} searchShow={true} pageName='Инструкции'>
             <Head>

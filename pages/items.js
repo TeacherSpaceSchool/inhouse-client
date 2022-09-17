@@ -26,13 +26,10 @@ const uploadText = 'Формат xlsx:\n_id или текущее названи
 
 const Items = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, filter, isMobileApp } = props.app;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -53,7 +50,6 @@ const Items = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -71,7 +67,6 @@ const Items = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -88,7 +83,6 @@ const Items = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{factory: true, category: true, typeItem: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
             <Head>

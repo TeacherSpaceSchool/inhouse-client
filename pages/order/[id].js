@@ -3,7 +3,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../../layouts/App';
 import { connect } from 'react-redux'
-import { getSale, setSale, prepareAcceptOrder, getUnloadSales, getAttachment } from '../../src/gql/sale'
+import { getSale, setSale, prepareAcceptOrder, getUnloadSales, getAttachmentSale } from '../../src/gql/sale'
 import { getItems } from '../../src/gql/item'
 import pageListStyle from '../../src/styleMUI/list'
 import Card from '@mui/material/Card';
@@ -32,7 +32,7 @@ import AddIcon from '@mui/icons-material/Add';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
 import SetCharacteristics from '../../components/dialog/SetCharacteristics'
-import { getSaleDoc } from '../../src/doc/sale'
+import { getOrderDoc } from '../../src/doc/order'
 import { getVoucherDoc } from '../../src/doc/voucher'
 import { getInstallmentDoc } from '../../src/doc/installment'
 import { getClient } from '../../src/gql/client'
@@ -92,12 +92,13 @@ const Order = React.memo((props) => {
             today.setHours(0, 0, 0, 0)
             setToday(today)
         }
+        let discountPrecent = discount*100/amountStart
         amountStart = 0
         for (let i = 0; i < itemsSale.length; i++) {
             amountStart = checkFloat(amountStart + itemsSale[i].amount)
         }
-        /*discount = checkFloat(amountStart/100*30)
-        setDiscount(discount)*/
+        discount = checkFloat(amountStart/100*discountPrecent)
+        setDiscount(discount)
         setAmountStart(amountStart)
     },[itemsSale])
     useEffect(()=>{
@@ -423,7 +424,7 @@ const Order = React.memo((props) => {
                                 <div className={classes.value}>{`${edit?amountEnd:data.object.amountEnd} сом`}</div>
                             </div>
                             {
-                                edit&&data.object.installment?
+                                edit&&data.object.status==='обработка'&&data.object.installment?
                                     <TextField
                                         id='paid'
                                         variant='standard'
@@ -436,7 +437,7 @@ const Order = React.memo((props) => {
                                     :
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>Оплачено:&nbsp;</div>
-                                        <div className={classes.value}>{paid} {data.object.currency}</div>
+                                        <div className={classes.value}>{edit?paid:data.object.paid} {data.object.currency}</div>
                                     </div>
                             }
                             {
@@ -688,7 +689,7 @@ const Order = React.memo((props) => {
                                                         break
                                                     }
                                                 }
-                                                if(itemsSaleCheck) {
+                                                if(itemsSaleCheck&&paid>=0&&(!data.object.installment||paid<(amountEnd-checkFloat(data.object.prepaid)))) {
                                                     if (itemsSale.length) {
                                                         if (paid <= amountEnd) {
                                                             const action = async () => {
@@ -866,17 +867,6 @@ const Order = React.memo((props) => {
                                                                 [
                                                                     <Button color='primary' onClick={async()=>{
                                                                         await showLoad(true)
-                                                                        await getSaleDoc({
-                                                                            sale: data.object,
-                                                                            client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
-                                                                            doc: await getDoc()
-                                                                        })
-                                                                        let res = await getAttachment(data.object._id)
-                                                                        if(res)
-                                                                            window.open(res, '_blank');
-                                                                        else
-                                                                            showSnackBar('Ошибка', 'error')
                                                                         if(data.object.installment) {
                                                                             await getInstallmentDoc({
                                                                                 installment: (await getInstallments({_id: data.object.installment._id}))[0],
@@ -892,6 +882,18 @@ const Order = React.memo((props) => {
                                                                             })
 
                                                                         }
+                                                                        else
+                                                                            await getOrderDoc({
+                                                                                sale: data.object,
+                                                                                client: await getClient({_id: data.object.client._id}),
+                                                                                itemsSale: data.object.itemsSale,
+                                                                                doc: await getDoc()
+                                                                            })
+                                                                        let res = await getAttachmentSale(data.object._id)
+                                                                        if(res)
+                                                                            window.open(res, '_blank');
+                                                                        else
+                                                                            showSnackBar('Ошибка', 'error')
 
                                                                         await showLoad(false)
                                                                     }}>
@@ -999,17 +1001,6 @@ const Order = React.memo((props) => {
                                                         data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                             <Button color='primary' onClick={async()=>{
                                                                 await showLoad(true)
-                                                                await getSaleDoc({
-                                                                    sale: data.object,
-                                                                    client: await getClient({_id: data.object.client._id}),
-                                                                    itemsSale: data.object.itemsSale,
-                                                                    doc: await getDoc()
-                                                                })
-                                                                let res = await getAttachment(data.object._id)
-                                                                if(res)
-                                                                    window.open(res, '_blank');
-                                                                else
-                                                                    showSnackBar('Ошибка', 'error')
                                                                 if(data.object.installment) {
                                                                     await getInstallmentDoc({
                                                                         installment: (await getInstallments({_id: data.object.installment._id}))[0],
@@ -1023,8 +1014,19 @@ const Order = React.memo((props) => {
                                                                         client: await getClient({_id: data.object.client._id}),
                                                                         doc: await getDoc()
                                                                     })
-
                                                                 }
+                                                                else
+                                                                    await getOrderDoc({
+                                                                        sale: data.object,
+                                                                        client: await getClient({_id: data.object.client._id}),
+                                                                        itemsSale: data.object.itemsSale,
+                                                                        doc: await getDoc()
+                                                                    })
+                                                                let res = await getAttachmentSale(data.object._id)
+                                                                if(res)
+                                                                    window.open(res, '_blank');
+                                                                else
+                                                                    showSnackBar('Ошибка', 'error')
 
                                                                 await showLoad(false)
                                                             }}>

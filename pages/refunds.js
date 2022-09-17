@@ -27,12 +27,9 @@ const status = ['все', 'обработка', 'принят', 'отмена']
 
 const Refunds = React.memo((props) => {
     const {classes} = pageListStyle();
-    //props
     const { data } = props;
     const { search, filter, isMobileApp } = props.app;
-    //настройка
     const initialRender = useRef(true);
-    //получение данных
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -57,7 +54,6 @@ const Refunds = React.memo((props) => {
         forceCheck();
         paginationWork.current = true
     }
-    //поиск/фильтр
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
@@ -76,7 +72,6 @@ const Refunds = React.memo((props) => {
             }
         })()
     },[search])
-    //пагинация
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
@@ -95,7 +90,6 @@ const Refunds = React.memo((props) => {
                 paginationWork.current = false
         }
     }
-    //render
     return (
         <App filterShow={{status, user: true, userRole: 'менеджер', client: true, store: true, period: true}} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
             <Head>

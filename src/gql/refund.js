@@ -1,6 +1,23 @@
 import { gql } from '@apollo/client';
 import { getClientGql } from '../apollo';
 
+export const getAttachmentRefund = async(_id, clientGql)=>{
+    try{
+        clientGql = clientGql? clientGql : getClientGql()
+        let res = await clientGql
+            .query({
+                variables: {_id},
+                query: gql`
+                    query ($_id: ID!) {
+                        getAttachmentRefund(_id: $_id)
+                    }`,
+            })
+        return res.data.getAttachmentRefund
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getUnloadRefunds = async({search, manager, client, store, dateStart, dateEnd, status, _id}, clientGql)=>{
     let res
     try{
