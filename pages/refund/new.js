@@ -117,6 +117,7 @@ const Catalog = React.memo((props) => {
                                 getElements={async (search)=>{
                                     return [
                                         ...await getSales({
+                                            order: false,
                                             store: profile.store,
                                             items: true,
                                             search,

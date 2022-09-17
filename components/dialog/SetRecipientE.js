@@ -159,7 +159,7 @@ const SetRecipientE =  React.memo(
                                             }}
                                             defaultValue={clientOperation}
                                             getElements={async (search)=>{
-                                                return await getSales({status: 'оплата', search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
+                                                return await getSales({status: 'оплата', order: false, search, client: recipient._id, ...filter.store?{store: filter.store._id}:{}})
                                             }}
                                             minLength={0}
                                             label={typeClientOperation}

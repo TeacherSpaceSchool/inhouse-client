@@ -773,7 +773,7 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет по продажам', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadSales({
-                                                    order: false,
+                                                    order: undefined,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},
@@ -820,7 +820,7 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет по продажам доход', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadSales({
-                                                    order: false,
+                                                    order: undefined,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},
@@ -869,7 +869,6 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет продаж по фабрикам', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadFactorySales({
-                                                    order: false,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},
@@ -916,7 +915,6 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет по бонусам менеджеров', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadBonusManagerSales({
-                                                    order: false,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},
@@ -959,7 +957,6 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет по продажам клиентов', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadClientSales({
-                                                    order: false,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},
@@ -1002,7 +999,6 @@ const MyDrawer = React.memo((props) => {
                                         setMiniDialog('Отчет по бонусам дизайнеров', <DownloadStatistic
                                             unload={async (filter)=>{
                                                 return await getUnloadBonusCpaSales({
-                                                    order: false,
                                                     ...filter.store?{store: filter.store._id}:{},
                                                     ...filter.user?{manager: filter.user._id}:{},
                                                     ...filter.client?{client: filter.client._id}:{},

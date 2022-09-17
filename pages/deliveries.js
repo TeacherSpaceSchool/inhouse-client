@@ -19,6 +19,7 @@ import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
 
 const colors = {
+    'доставлен': 'green',
     'на доставку': '#00A875',
     'отгружен': 'blue',
 }
@@ -34,7 +35,7 @@ const Deliveries = React.memo((props) => {
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
         setList(cloneObject(await getSales({
-            order: false,
+            order: undefined,
             search,
             skip: 0,
             ...filter.store?{store: filter.store._id}:{},
@@ -47,7 +48,7 @@ const Deliveries = React.memo((props) => {
             ...filter.promotion?{promotion: filter.promotion._id}:{},
         })));
         setCount(await getSalesCount({
-            order: false,
+            order: undefined,
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -88,7 +89,7 @@ const Deliveries = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getSales({
-                order: false,
+                order: undefined,
                 skip: list.length,
                 search,
                 ...filter.store?{store: filter.store._id}:{},
@@ -213,8 +214,8 @@ Deliveries.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
     return {
         data: {
             list: cloneObject(await getSales({
+                order: undefined,
                 skip: 0,
-                order: false,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
@@ -227,7 +228,7 @@ Deliveries.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getSalesCount({
-                order: false,
+                order: undefined,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
