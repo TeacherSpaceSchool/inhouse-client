@@ -130,18 +130,3 @@ export const getUnloadBonusCpas = async({store}, client)=>{
         console.error(err)
     }
 }
-
-export const uploadBonusCpa = async(variables)=>{
-    try{
-        const client = getClientGql()
-        let res = await client.mutate({
-            variables,
-            mutation : gql`
-                    mutation ($document: Upload!) {
-                        uploadBonusCpa(document: $document) 
-                    }`})
-        return res.data.uploadBonusCpa
-    } catch(err){
-        console.error(err)
-    }
-}

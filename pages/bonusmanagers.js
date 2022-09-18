@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBonusManagers, getBonusManagersCount, setBonusManager, addBonusManager, getStoreForBonusManagers, deleteBonusManager, uploadBonusManager, getUnloadBonusManagers} from '../src/gql/bonusManager'
+import {getBonusManagers, getBonusManagersCount, setBonusManager, addBonusManager, getStoreForBonusManagers, deleteBonusManager, getUnloadBonusManagers} from '../src/gql/bonusManager'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -29,7 +29,6 @@ import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import { inputFloat, checkFloat } from '../src/lib'
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
-import Link from 'next/link';
 import Delete from '@mui/icons-material/Delete';
 import UnloadUpload from '../components/app/UnloadUpload';
 import Accordion from '@mui/material/Accordion';
@@ -37,14 +36,6 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
-const uploadText = 'Формат xlsx:' +
-    '\nназвание магазина;' +
-    '\nпродажа (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nрассрочка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nна заказ (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nна заказ рассрочка (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%);' +
-    '\nакция (через запятую с пробелом. Пример: скидка1%: бонус1%, скидка2%: бонус2%).'
 
 const BonusManagers = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -1009,7 +1000,7 @@ const BonusManagers = React.memo((props) => {
             </div>
             {
                 data.add||data.edit?
-                    <UnloadUpload upload={uploadBonusManager} uploadText={uploadText} unload={()=>getUnloadBonusManagers({...filter.store?{store: filter.store._id}:{}})}/>
+                    <UnloadUpload unload={()=>getUnloadBonusManagers({...filter.store?{store: filter.store._id}:{}})}/>
                     :
                     null
             }

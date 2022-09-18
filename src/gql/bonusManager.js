@@ -134,18 +134,3 @@ export const getUnloadBonusManagers = async({store}, client)=>{
         console.error(err)
     }
 }
-
-export const uploadBonusManager = async(variables)=>{
-    try{
-        const client = getClientGql()
-        let res = await client.mutate({
-            variables,
-            mutation : gql`
-                    mutation ($document: Upload!) {
-                        uploadBonusManager(document: $document) 
-                    }`})
-        return res.data.uploadBonusManager
-    } catch(err){
-        console.error(err)
-    }
-}

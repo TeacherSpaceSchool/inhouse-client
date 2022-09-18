@@ -72,7 +72,7 @@ export const inputMinusFloat = (str) => {
     return str
 }
 
-export const inputFloat = (str) => {
+export const inputFloat = (str, minus) => {
     if(!str.length)
         return ''
     let oldStr = str.substring(0, str.length-1)
@@ -87,6 +87,8 @@ export const inputFloat = (str) => {
         return oldStr
     if(str.length===2&&str[0]==='0'&&newChr!=='.')
         return str[1]
+    else if(str[0]==='-'&&!minus)
+        return str.slice(1)
     return str
 }
 
@@ -100,7 +102,7 @@ export const inputPhone = (str) => {
     return str
 }
 
-export const inputInt = (str) => {
+export const inputInt = (str, minus) => {
     if(!str.length)
         return ''
     let oldStr = str.substring(0, str.length-1)
@@ -109,6 +111,8 @@ export const inputInt = (str) => {
         return oldStr
     if(str.length===2&&str[0]==='0')
         return str[1]
+    else if(str[0]==='-'&&!minus)
+        return str.slice(1)
     return str
 }
 

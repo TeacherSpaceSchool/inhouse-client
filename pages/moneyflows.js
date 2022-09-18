@@ -886,7 +886,8 @@ MoneyFlows.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
             Router.push('/')
         }
     store.getState().app.sort = 'amount'
-    store.getState().app.filter.cashbox = store.getState().user.profile.cashbox
+    if(store.getState().user.profile.cashbox)
+        store.getState().app.filter.cashbox = store.getState().user.profile.cashbox
     return {
         data: {
             defaultMoneyArticle: {
