@@ -257,7 +257,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.cashbox?
+                    filterShow.cashbox&&['admin', 'кассир', 'управляющий'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.cashbox}
                             setElement={(cashbox)=>{
@@ -422,7 +422,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.promotion?
+                    filterShow.promotion&&['admin', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.promotion}
                             setElement={(promotion)=>{
@@ -538,7 +538,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.moneyArticle?
+                    filterShow.moneyArticle&&['admin', 'управляющий', 'кассир'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.moneyArticle}
                             setElement={(moneyArticle)=>{
@@ -558,7 +558,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.moneyRecipient?
+                    filterShow.moneyRecipient&&['admin', 'управляющий', 'кассир'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.moneyRecipient}
                             setElement={(moneyRecipient)=>{
@@ -578,7 +578,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.department?
+                    filterShow.department&&['admin', 'управляющий'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.department}
                             setElement={(department)=>{
@@ -598,7 +598,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.position?
+                    filterShow.position&&['admin', 'управляющий'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.position}
                             setElement={(position)=>{
@@ -618,7 +618,7 @@ const Filter =  React.memo(
                         null
                 }
                 {
-                    filterShow.cpa?
+                    filterShow.cpa&&['admin', 'менеджер', 'менеджер/завсклад', 'управляющий'].includes(profile.role)?
                         <AutocomplectOnline
                             element={filter.cpa}
                             setElement={(cpa)=>{
