@@ -45,6 +45,7 @@ const BuyBasket =  React.memo(
         let [selfDelivery, setSelfDelivery] = useState(false);
         let [promotion, setPromotion] = useState();
         let [remainder, setRemainder] = useState(0);
+        let [percentCpa, setPercentCpa] = useState('');
         let [monthInstallment, setMonthInstallment] = useState('');
         let [paidInstallment, setPaidInstallment] = useState('');
         let [address, setAddress] = useState(client.address);
@@ -352,6 +353,7 @@ const BuyBasket =  React.memo(
                         <AutocomplectOnline
                             element={cpa}
                             setElement={async (cpa)=>{
+                                setPercentCpa('')
                                 setCpa(cpa)
                             }}
                             getElements={async (search)=>{
@@ -360,6 +362,19 @@ const BuyBasket =  React.memo(
                             minLength={0}
                             label={'Дизайнер'}
                         />
+                        {
+                            cpa?
+                                <TextField
+                                    id='percentCpa'
+                                    variant='standard'
+                                    label='Бонус дизайнера'
+                                    value={percentCpa}
+                                    className={classes.input}
+                                    onChange={(event) => setPercentCpa(inputFloat(event.target.value))}
+                                />
+                                :
+                                null
+                        }
                         </>
                         :
                         null
@@ -461,7 +476,8 @@ const BuyBasket =  React.memo(
                                             installment: !!(paidInstallment&&monthInstallment),
                                             delivery: date,
                                             reservations: reservations,
-                                            ...type==='order'?{order: true}:{}
+                                            ...type==='order'?{order: true}:{},
+                                            ...percentCpa!==''?{percentCpa: checkFloat(percentCpa)}:{}
                                         })
                                         if (paidInstallment && monthInstallment && res && res !== 'ERROR') {
                                             const grid = []

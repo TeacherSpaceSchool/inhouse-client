@@ -45,7 +45,8 @@ const Sales = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
             ...filter.promotion?{promotion: filter.promotion._id}:{},
@@ -56,7 +57,8 @@ const Sales = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.cpa?{cpa: filter.cpa._id}:{},
             ...filter.delivery?{delivery: filter.delivery}:{},
             ...filter.promotion?{promotion: filter.promotion._id}:{},
@@ -99,7 +101,8 @@ const Sales = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
                 ...filter.promotion?{promotion: filter.promotion._id}:{},
@@ -166,7 +169,9 @@ const Sales = React.memo((props) => {
                                     {element.selfDelivery?'\nСамовывоз':''}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
+                                    <Link href='/client/[id]' as={`/client/${element.client._id}`}>
                                     {element.client.name}
+                                    </Link>
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 470px) / 2)'}, justifyContent: 'center'}}>
                                     {element.manager.name}
@@ -182,7 +187,8 @@ const Sales = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.cpa?{cpa: filter.cpa._id}:{},
                 ...filter.delivery?{delivery: filter.delivery}:{},
                 ...filter.promotion?{promotion: filter.promotion._id}:{},
@@ -218,7 +224,8 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
+                ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
+                ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
                 ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion._id}:{},
@@ -231,7 +238,8 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
+                ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
+                ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.cpa?{cpa: store.getState().app.filter.cpa._id}:{},
                 ...store.getState().app.filter.delivery?{delivery: store.getState().app.filter.delivery}:{},
                 ...store.getState().app.filter.promotion?{promotion: store.getState().app.filter.promotion._id}:{},

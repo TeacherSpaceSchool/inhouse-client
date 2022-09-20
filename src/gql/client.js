@@ -24,6 +24,7 @@ export const getClient = async({_id}, client)=>{
                             inn
                             level
                             birthday
+                            user {name role _id}
                         }
                     }`,
             })

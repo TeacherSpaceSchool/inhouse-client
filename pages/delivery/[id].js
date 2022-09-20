@@ -434,7 +434,7 @@ const Delivery = React.memo((props) => {
                                             :
                                             <>
                                             {
-                                                ['admin', 'менеджер', 'менеджер/завсклад'].includes(profile.role)&&['на доставку', 'отгружен'].includes(data.object.status)?
+                                                ['admin', 'менеджер', 'менеджер/завсклад', 'завсклад'].includes(profile.role)&&['на доставку', 'отгружен'].includes(data.object.status)?
                                                     <Button color='primary' onClick={()=>{
                                                         setEdit(true)
                                                     }}>

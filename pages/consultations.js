@@ -6,7 +6,7 @@ import {getConsultations, getConsultationsCount, getUnloadConsultations} from '.
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYHHMM, distanceHour } from '../src/lib'
+import { cloneObject, pdDDMMYYHHMM, distanceHour, checkFloat } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -24,6 +24,7 @@ const Consultations = React.memo((props) => {
     const { data } = props;
     const { filter } = props.app;
     const initialRender = useRef(true);
+    let [today, setToday] = useState();
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getList = async ()=>{
@@ -31,14 +32,16 @@ const Consultations = React.memo((props) => {
             ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             skip: 0
         })));
         setCount(await getConsultationsCount({
             ...filter.statusClient?{statusClient: filter.statusClient}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
         }));
         (document.getElementsByClassName('App-body'))[0].scroll({top: 0, left: 0, behavior: 'instant' });
         forceCheck();
@@ -46,8 +49,11 @@ const Consultations = React.memo((props) => {
     }
     useEffect(()=>{
         (async()=>{
-            if(initialRender.current)
+            if(initialRender.current) {
+                today = new Date()
+                setToday(today)
                 initialRender.current = false;
+            }
             else
                 await getList()
         })()
@@ -60,7 +66,8 @@ const Consultations = React.memo((props) => {
                 skip: list.length,
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             }))
             if(addedList.length>0)
                 setList([...list, ...addedList])
@@ -95,6 +102,9 @@ const Consultations = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
                             Конец
                         </div>
+                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
+                            Минут
+                        </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Операция
                         </div>
@@ -123,11 +133,16 @@ const Consultations = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 130, overflow: 'auto'}}>
                                 {element.end?pdDDMMYYHHMM(element.end):null}
                             </div>
+                            <div className={classes.tableCell} style={{width: 130, overflow: 'auto'}}>
+                                {checkFloat(((element.end?element.end:today)-element.createdAt)/1000/60)}
+                            </div>
                             <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                                 {element.operation}
                             </div>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>
-                                <div>{element.client?element.client.name:null}</div>
+                                <Link href='/client/[id]' as={`/client/${element.client._id}`}>
+                                    <div>{element.client?element.client.name:null}</div>
+                                </Link>
                                 <div>{element.statusClient?element.statusClient:null}</div>
                             </div>
                             <div className={classes.tableCell} style={{width: 250, overflow: 'auto', maxHeight: 100}}>
@@ -140,7 +155,8 @@ const Consultations = React.memo((props) => {
             <UnloadUpload unload={()=>getUnloadConsultations({
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             })}/>
             <div className='count'>
                 {`Всего: ${count}`}

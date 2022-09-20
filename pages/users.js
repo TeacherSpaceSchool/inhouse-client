@@ -98,11 +98,14 @@ const Users = React.memo((props) => {
             <Card className={classes.page}>
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
                             ФИО
                         </div>
-                        <div className={classes.tableCell} style={{width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
                             Роль
+                        </div>
+                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                            Магазин
                         </div>
                     </div>
                     {list.map((element) =>
@@ -113,11 +116,14 @@ const Users = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'user'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
-                                <div className={classes.tableCell} style={{width: 'calc(100% / 2)'}}>
+                                <div className={classes.tableCell} style={{width: 'calc(100% / 3)'}}>
                                     {element.name}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 'calc(100% / 2)'}}>
+                                <div className={classes.tableCell} style={{width: 'calc(100% / 3)'}}>
                                     {element.role}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 'calc(100% / 3)'}}>
+                                    {element.store?element.store.name:''}
                                 </div>
                             </div>
                         </Link>

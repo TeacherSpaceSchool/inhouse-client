@@ -29,13 +29,15 @@ const StoreBalanceItems = React.memo((props) => {
         setList(cloneObject(await getBalanceItemDays({
             skip: 0,
             ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{}
         })));
         setCount(await getBalanceItemDaysCount({
             ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{}
         }));
@@ -57,7 +59,8 @@ const StoreBalanceItems = React.memo((props) => {
             let addedList = cloneObject(await getBalanceItemDays({
                 skip: list.length,
                 ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.store?{store: filter.store._id}:{}
             }))
@@ -171,7 +174,8 @@ const StoreBalanceItems = React.memo((props) => {
             </div>
             <UnloadUpload unload={()=>getUnloadBalanceItemDays({
                 ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.store?{store: filter.store._id}:{}
             })}/>

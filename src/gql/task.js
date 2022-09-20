@@ -8,8 +8,8 @@ export const getUnloadTasks = async({status, search, employment, soon, late, tod
         res = await client.query({
             variables: {status, search, employment, soon, late, today},
             query: gql`
-                    query ($status: String, $search: String, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
-                        unloadTasks(status: $status, search: $search, employment: $employment, soon: $soon, late: $late, today: $today)
+                    query ($status: String, $search: String, $employment: ID, $sort: String, $soon: Boolean, $late: Boolean, $today: Boolean) {
+                        unloadTasks(status: $status, search: $search, employment: $employment, sort: $sort, soon: $soon, late: $late, today: $today)
                     }`,
         })
         return res.data.unloadTasks
@@ -43,15 +43,15 @@ export const getTask = async({_id}, client)=>{
     }
 }
 
-export const getTasks = async({status, search, skip, limit, employment, soon, late, today}, client)=>{
+export const getTasks = async({status, search, skip, limit, sort, employment, soon, late, today}, client)=>{
     let res
     try{
         client = client? client : getClientGql()
         res = await client.query({
-                variables: {status, search, skip, limit, employment, soon, late, today},
+                variables: {status, search, skip, limit, sort, employment, soon, late, today},
                 query: gql`
-                    query ($status: String, $search: String, $skip: Int, $limit: Int, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
-                        tasks(status: $status, search: $search, skip: $skip, limit: $limit, employment: $employment, soon: $soon, late: $late, today: $today) {
+                    query ($status: String, $search: String, $skip: Int, $sort: String, $limit: Int, $employment: ID, $soon: Boolean, $late: Boolean, $today: Boolean) {
+                        tasks(status: $status, search: $search, skip: $skip, sort: $sort, limit: $limit, employment: $employment, soon: $soon, late: $late, today: $today) {
                             _id
                             createdAt
                             who {_id name}

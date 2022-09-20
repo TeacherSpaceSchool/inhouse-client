@@ -28,11 +28,21 @@ const colors = {
     'проверен': 'green'
 }
 const status = ['все', 'отложен', 'обработка', 'в процессе', 'выполнен', 'проверен']
+const sorts = [
+    {
+        name: 'Создан',
+        field: 'createdAt'
+    },
+    {
+        name: 'Срок',
+        field: 'date'
+    }
+]
 
 const Tasks = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
-    const { search, isMobileApp, filter } = props.app;
+    const { search, isMobileApp, filter, sort } = props.app;
     const initialRender = useRef(true);
     let [today, setToday] = useState();
     let [showStat, setShowStat] = useState(true);
@@ -42,6 +52,7 @@ const Tasks = React.memo((props) => {
         setList(cloneObject(await getTasks({
             search,
             skip: 0,
+            sort,
             ...filter.status?{status: filter.status}:{},
             ...filter.user?{employment: filter.user._id}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
@@ -62,7 +73,7 @@ const Tasks = React.memo((props) => {
             if(!initialRender.current)
                 await getList()
         })()
-    },[filter])
+    },[filter, sort])
     useEffect(()=>{
         (async()=>{
             if(initialRender.current) {
@@ -84,6 +95,7 @@ const Tasks = React.memo((props) => {
             let addedList = cloneObject(await getTasks({
                 skip: list.length,
                 search,
+                sort,
                 ...filter.status?{status: filter.status}:{},
                 ...filter.user?{employment: filter.user._id}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
@@ -95,7 +107,7 @@ const Tasks = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
+        <App sorts={sorts} filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
             <Head>
                 <title>Задачи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -110,6 +122,9 @@ const Tasks = React.memo((props) => {
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                            Создан
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
                             Статус
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
@@ -121,7 +136,7 @@ const Tasks = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
                             Исполнитель
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 500px)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 600px)', justifyContent: 'start'}}>
                             Комментарий
                         </div>
                     </div>
@@ -133,6 +148,9 @@ const Tasks = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'task'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
+                                <div className={classes.tableCell} style={{width: 100, color: !['выполнен', 'проверен'].includes(element.status)&&new Date(element.date)<today?'red':'black'}}>
+                                    {pdDDMMYYYY(element.createdAt)}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 100, fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
                                 </div>
@@ -145,7 +163,7 @@ const Tasks = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 150}}>
                                     {element.whom.name}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 500px)', maxHeight: 100, overflow: 'auto'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 600px)', maxHeight: 100, overflow: 'auto'}}>
                                     {element.info}
                                 </div>
                             </div>
@@ -175,7 +193,7 @@ const Tasks = React.memo((props) => {
                         null
                 }
             </div>
-            <UnloadUpload position={2} unload={()=>getUnloadTasks({search, ...filter.status?{status: filter.status}:{}})}/>
+            <UnloadUpload position={2} unload={()=>getUnloadTasks({search, sort, ...filter.status?{status: filter.status}:{}})}/>
         </App>
     )
 })
@@ -192,11 +210,13 @@ Tasks.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
         else {
             Router.push('/')
         }
+    store.getState().app.sort = '-createdAt'
     store.getState().app.filterType = '/task'
     return {
         data: {
             list: cloneObject(await getTasks({
                 skip: 0,
+                sort: store.getState().app.sort,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
                 ...store.getState().app.filter.user?{employment: store.getState().app.filter.user._id}:{},

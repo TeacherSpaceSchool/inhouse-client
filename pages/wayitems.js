@@ -579,17 +579,22 @@ const WayItems = React.memo((props) => {
                                         </div>
                                     ):null
                                 }
-                                <center style={{width: '100%'}}><Button onClick={()=>{
-                                    setMiniDialog('Бронь', <SetBookings edit={data.edit} element={element} setElement={(bookings)=>{
-                                        list[idx].unsaved = true
-                                        unsaved.current[list[idx]._id] = true
-                                        list[idx].bookings = bookings
-                                        setList([...list])
-                                    }}/>)
-                                    showMiniDialog(true)
-                                }} size='small' color='primary'>
-                                    {element.bookings.length?'Редактировать бронь':'Добавить бронь'}
-                                </Button></center>
+                                {
+                                    data.edit?
+                                        <center style={{width: '100%'}}><Button onClick={()=>{
+                                            setMiniDialog('Бронь', <SetBookings edit={data.edit} element={element} setElement={(bookings)=>{
+                                                list[idx].unsaved = true
+                                                unsaved.current[list[idx]._id] = true
+                                                list[idx].bookings = bookings
+                                                setList([...list])
+                                            }}/>)
+                                            showMiniDialog(true)
+                                        }} size='small' color='primary'>
+                                            {element.bookings.length?'Редактировать бронь':'Добавить бронь'}
+                                        </Button></center>
+                                        :
+                                        null
+                                }
                             </div>
                         </div>
                     })}

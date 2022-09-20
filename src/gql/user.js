@@ -51,6 +51,7 @@ export const getUsers = async({skip, search, store, role, limit, department, pos
                             _id
                             role
                             name
+                            store {_id name}
                         }
                     }`,
             })

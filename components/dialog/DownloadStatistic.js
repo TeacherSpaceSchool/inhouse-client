@@ -43,7 +43,7 @@ const DownloadStatistic =  React.memo(
         const { unload, filterShow } = props;
         const { showMiniDialog } = props.mini_dialogActions;
         const { showSnackBar } = props.snackbarActions;
-        let [filter, setFilter] = useState(props.app.filter?cloneObject(props.app.filter):{});
+        let [filter, setFilter] = useState({});
         const width = isMobileApp? (window.innerWidth-113) : 500
         let handleStatus = (event) => {
             let status = event.target.value!=='все'?event.target.value:null

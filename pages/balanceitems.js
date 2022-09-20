@@ -4,6 +4,7 @@ import App from '../layouts/App';
 import { connect } from 'react-redux'
 import {getBalanceItems, getBalanceItemsCount, setBalanceItem, addBalanceItem, getItemsForBalanceItem, uploadBalanceItem, getUnloadBalanceItems} from '../src/gql/balanceItem'
 import {getWarehouses} from '../src/gql/warehouse'
+import {getItems} from '../src/gql/item'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -138,10 +139,16 @@ const BalanceItems = React.memo((props) => {
                                             <MenuItem onClick={()=>{
                                                 if(newElement.amount.length&&newElement.warehouse&&newElement.item) {
                                                     setMiniDialog('Вы уверены?', <Confirmation action={async ()=>{
-                                                        let res = await addBalanceItem({amount: checkFloat(newElement.amount), warehouse: newElement.warehouse._id, item: newElement.item._id})
-                                                        if(res&&res._id!=='ERROR') {
+                                                        let res = await setBalanceItem({
+                                                            amount: checkFloat(newElement.amount),
+                                                            warehouse: newElement.warehouse._id,
+                                                            item: newElement.item._id,
+                                                            type: '+'
+                                                        })
+                                                        if(res) {
                                                             showSnackBar('Успешно', 'success')
-                                                            setList([res, ...list])
+                                                            /*setList([res, ...list])*/
+                                                            Router.reload()
                                                             delete unsaved.current['new']
                                                             setNewElement({
                                                                 amount: ''
@@ -228,7 +235,7 @@ const BalanceItems = React.memo((props) => {
                                         }}
                                         getElements={async (search)=>{
                                             if(newElement.warehouse)
-                                                return await getItemsForBalanceItem({search, warehouse: newElement.warehouse._id})
+                                                return await getItems({search, warehouse: newElement.warehouse._id})
                                             else {
                                                 showSnackBar('Укажите склад')
                                                 return []
@@ -267,8 +274,12 @@ const BalanceItems = React.memo((props) => {
                                                     <MenuItem sx={{marginBottom: '5px'}} key='MenuItem1' onClick={async()=>{
                                                         if(element.amount&&element.warehouse&&element.item) {
                                                             setMiniDialog('Вы уверены?', <Confirmation action={async () => {
-                                                                let res = await setBalanceItem({amount: checkFloat(element.amount), warehouse: element.warehouse._id, item: element.item._id})
-                                                                if(res==='OK') {
+                                                                let res = await setBalanceItem({
+                                                                    amount: checkFloat(element.amount),
+                                                                    warehouse: element.warehouse._id,
+                                                                    item: element.item._id
+                                                                })
+                                                                if(res) {
                                                                     showSnackBar('Успешно', 'success')
                                                                     list[idx].unsaved = false
                                                                     delete unsaved.current[list[idx]._id]
@@ -307,23 +318,23 @@ const BalanceItems = React.memo((props) => {
                                     null
                             }
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
-                                <Link href='/item/[id]' as={`/item/${element.item._id}`}>
-                                    <a>
-                                        {
-                                           element.item.name
-                                        }
-                                    </a>
-                                </Link>
+                                {
+                                    element.store.name
+                                }
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
+                              <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
                                 {
                                     element.warehouse.name
                                 }
                             </div>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
-                                {
-                                    element.store.name
-                                }
+                                <Link href='/item/[id]' as={`/item/${element.item._id}`}>
+                                    <a>
+                                        {
+                                            element.item.name
+                                        }
+                                    </a>
+                                </Link>
                             </div>
                             <div className={classes.tableCell} style={{flexDirection: 'column', width: 150}}>
                                 {

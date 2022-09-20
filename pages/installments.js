@@ -143,7 +143,7 @@ const Installments = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 40, justifyContent: data.edit?'center':'start'}}>
                             №
                         </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                        <div className={classes.tableCell} style={{width: 105, justifyContent: data.edit?'center':'start'}}>
                             Статус
                         </div>
                         <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
@@ -314,7 +314,7 @@ const Installments = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 40, justifyContent: data.edit?'center':'start'}}>
                                 {element.number}
                             </div>
-                            <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start', fontWeight: 'bold', color: colors[element.status]}}>
+                            <div className={classes.tableCell} style={{width: 105, justifyContent: data.edit?'center':'start', fontWeight: 'bold', color: colors[element.status]}}>
                                 {element.status}
                             </div>
                             <div className={classes.tableCell} style={{flexDirection: 'column', width: 200, justifyContent: data.edit?'center':'start'}}>
@@ -384,7 +384,7 @@ const Installments = React.memo((props) => {
                                                         showMiniDialog(true)
                                                     }
                                                 }}
-                                                style={{fontWeight: 'bold', color: grid.amount!=0&&(!grid.paid||grid.paid==0)&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today?'red':'blue', height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>
+                                                style={{fontWeight: 'bold', color: grid.amount!=0&&(!grid.paid||grid.paid==0)&&['активна', 'безнадежна'].includes(element.status)&&new Date(grid.month)<today?'red':grid.paid>=grid.amount?'green':'orange', height: 30, borderBottom: 'solid 1px #00000040', justifyContent: 'start', display: 'flex', alignItems: 'center'}}>
                                                 {
                                                     pdDDMMYYYY(grid.month)
                                                 }

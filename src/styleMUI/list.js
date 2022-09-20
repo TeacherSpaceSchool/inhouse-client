@@ -291,6 +291,7 @@ export default makeStyles()(()=>{
             zIndex: 10000
         },
         bottomDivM: {
+            paddingBottom: 10,
             width: '100vw',
             borderTop: '1px #aeaeae solid',
             background: '#fff',

@@ -517,10 +517,10 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[0]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.sale[idx1][0] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].sale[idx1][0] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <Input
@@ -531,17 +531,17 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[1]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.sale[idx1][1] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].sale[idx1][1] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <IconButton onClick={()=>{
-                                                    element.unsaved = true
+                                                    list[idx].unsaved = true
                                                     unsaved.current[element._id] = true
-                                                    element.sale.splice(idx1, 1)
-                                                    setNewElement({...element})
+                                                    list[idx].sale.splice(idx1, 1)
+                                                    setList([...list])
                                                 }}>
                                                     <CloseIcon style={{color: 'red'}}/>
                                                 </IconButton>
@@ -551,10 +551,10 @@ const BonusCpas = React.memo((props) => {
                                             data.edit?
                                                 <center style={{width: '100%'}}>
                                                     <Button onClick={async()=>{
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.sale = [...element.sale, ['', '']]
-                                                        setNewElement({...element})
+                                                        list[idx].sale = [...list[idx].sale, ['', '']]
+                                                        setList([...list])
                                                     }} size='small'>
                                                         Добавить ставку
                                                     </Button>
@@ -583,10 +583,10 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[0]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.order[idx1][0] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].order[idx1][0] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <Input
@@ -597,17 +597,17 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[1]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.order[idx1][1] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].order[idx1][1] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <IconButton onClick={()=>{
-                                                    element.unsaved = true
+                                                    list[idx].unsaved = true
                                                     unsaved.current[element._id] = true
-                                                    element.order.splice(idx1, 1)
-                                                    setNewElement({...element})
+                                                    list[idx].order.splice(idx1, 1)
+                                                    setList([...list])
                                                 }}>
                                                     <CloseIcon style={{color: 'red'}}/>
                                                 </IconButton>
@@ -617,10 +617,10 @@ const BonusCpas = React.memo((props) => {
                                             data.edit?
                                                 <center style={{width: '100%'}}>
                                                     <Button onClick={async()=>{
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.order = [...element.order, ['', '']]
-                                                        setNewElement({...element})
+                                                        list[idx].order = [...list[idx].order, ['', '']]
+                                                        setList([...list])
                                                     }} size='small'>
                                                         Добавить ставку
                                                     </Button>
@@ -649,10 +649,10 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[0]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.installment[idx1][0] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].installment[idx1][0] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <Input
@@ -663,17 +663,17 @@ const BonusCpas = React.memo((props) => {
                                                     value={element1[1]}
                                                     inputProps={{readOnly: !data.edit}}
                                                     onChange={(event) => {
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.installment[idx1][1] = inputFloat(event.target.value)
-                                                        setNewElement({...element})
+                                                        list[idx].installment[idx1][1] = inputFloat(event.target.value)
+                                                        setList([...list])
                                                     }}
                                                 />
                                                 <IconButton onClick={()=>{
-                                                    element.unsaved = true
+                                                    list[idx].unsaved = true
                                                     unsaved.current[element._id] = true
-                                                    element.installment.splice(idx1, 1)
-                                                    setNewElement({...element})
+                                                    list[idx].installment.splice(idx1, 1)
+                                                    setList([...list])
                                                 }}>
                                                     <CloseIcon style={{color: 'red'}}/>
                                                 </IconButton>
@@ -683,10 +683,10 @@ const BonusCpas = React.memo((props) => {
                                             data.edit?
                                                 <center style={{width: '100%'}}>
                                                     <Button onClick={async()=>{
-                                                        element.unsaved = true
+                                                        list[idx].unsaved = true
                                                         unsaved.current[element._id] = true
-                                                        element.installment = [...element.installment, ['', '']]
-                                                        setNewElement({...element})
+                                                        list[idx].installment = [...list[idx].installment, ['', '']]
+                                                        setList([...list])
                                                     }} size='small'>
                                                         Добавить ставку
                                                     </Button>

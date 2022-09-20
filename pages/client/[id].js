@@ -121,6 +121,19 @@ const Client = React.memo((props) => {
                         data.object?
                             <>
                             {
+                                data.object.user?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>
+                                            Добавил:&nbsp;
+                                        </div>
+                                        <div className={classes.value}>
+                                            {data.object.user.role} {data.object.user.name}
+                                        </div>
+                                    </div>
+                                    :
+                                    null
+                            }
+                            {
                                 data.edit||data.add?
                                     <>
                                     <FormControl className={classes.input}>

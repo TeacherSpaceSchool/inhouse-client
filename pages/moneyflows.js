@@ -79,10 +79,12 @@ const MoneyFlows = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getMoneyFlowsCountWithFilter = async ()=>{
+        console.log({dateStart: filter.dateStart, dateEnd: filter.dateEnd})
         setCount(await getMoneyFlowsCount({
             search,
             ...filter.store?{store: filter.store._id}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.currency?{currency: filter.currency}:{},
             ...filter.operation?{operation: filter.operation}:{},
             ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
@@ -100,7 +102,8 @@ const MoneyFlows = React.memo((props) => {
     const getList = async ()=>{
         setList(cloneObject(await getMoneyFlows({skip: 0,
             search,
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.currency?{currency: filter.currency}:{},
             ...filter.operation?{operation: filter.operation}:{},
             ...filter.store?{store: filter.store._id}:{},
@@ -159,7 +162,8 @@ const MoneyFlows = React.memo((props) => {
             let addedList = cloneObject(await getMoneyFlows({skip: list.length,
                 search,
                 ...filter.store?{store: filter.store._id}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.currency?{currency: filter.currency}:{},
                 ...filter.operation?{operation: filter.operation}:{},
                 ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},
@@ -234,7 +238,7 @@ const MoneyFlows = React.memo((props) => {
                         data.add&&(
                             !search&&
                             !filter.moneyRecipient&&
-                            !filter.dateStart&&
+                            /*!filter.dateStart&&*/
                             !filter.user&&
                             !filter.client&&
                             !data.sale&&
@@ -784,61 +788,61 @@ const MoneyFlows = React.memo((props) => {
             </Card>
             {
                 count?
-                    <div className='count' style={{left: 10}} onClick={()=>{setShowStat(!showStat)}}>
-                        {`Всего: ${count[0][0]}`}<br/>
+                    <div className='count' style={{left: 10, fontWeight: 'unset', fontSize: 13}} onClick={()=>{setShowStat(!showStat)}}>
+                        Всего: <b>{count[0][0]}</b><br/>
                         {
                             showStat?
                                 <>
-                                {`Приход: сом: ${count[1][0]}${count[1][1]!=0?` | доллар: ${count[1][1]}`:''}${count[1][2]!=0?` | рубль: ${count[1][2]}`:''}${count[1][3]!=0?` | тенге: ${count[1][3]}`:''}${count[1][4]!=0?` | юань: ${count[1][4]}`:''}`}<br/>
-                                {`Расход: сом: ${count[2][0]}${count[2][1]!=0?` | доллар: ${count[2][1]}`:''}${count[2][2]!=0?` | рубль: ${count[2][2]}`:''}${count[2][3]!=0?` | тенге: ${count[2][3]}`:''}${count[2][4]!=0?` | юань: ${count[2][4]}`:''}`}<br/>
-                                {
-                                    count[3]?
-                                        <>{count[3][0]}: сом: {count[3][1]}{count[3][2]?` | доллар: ${count[3][2]}`:''}{count[3][3]?` | рубль: ${count[3][3]}`:''}{count[3][4]?` | тенге: ${count[3][4]}`:''}{count[3][5]?` | юань: ${count[3][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[4]?
-                                        <>{count[4][0]}: сом: {count[4][1]}{count[4][2]?` | доллар: ${count[4][2]}`:''}{count[4][3]?` | рубль: ${count[4][3]}`:''}{count[4][4]?` | тенге: ${count[4][4]}`:''}{count[4][5]?` | юань: ${count[4][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[5]?
-                                        <>{count[5][0]}: сом: {count[5][1]}{count[5][2]?` | доллар: ${count[5][2]}`:''}{count[5][3]?` | рубль: ${count[5][3]}`:''}{count[5][4]?` | тенге: ${count[5][4]}`:''}{count[5][5]?` | юань: ${count[5][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[6]?
-                                        <>{count[6][0]}: сом: {count[6][1]}{count[6][2]?` | доллар: ${count[6][2]}`:''}{count[6][3]?` | рубль: ${count[6][3]}`:''}{count[6][4]?` | тенге: ${count[6][4]}`:''}{count[6][5]?` | юань: ${count[6][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[7]?
-                                        <>{count[7][0]}: сом: {count[7][1]}{count[7][2]?` | доллар: ${count[7][2]}`:''}{count[7][3]?` | рубль: ${count[7][3]}`:''}{count[7][4]?` | тенге: ${count[7][4]}`:''}{count[7][5]?` | юань: ${count[7][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[8]?
-                                        <>{count[8][0]}: сом: {count[8][1]}{count[8][2]?` | доллар: ${count[8][2]}`:''}{count[8][3]?` | рубль: ${count[8][3]}`:''}{count[8][4]?` | тенге: ${count[8][4]}`:''}{count[8][5]?` | юань: ${count[8][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[9]?
-                                        <>{count[9][0]}: сом: {count[9][1]}{count[9][2]?` | доллар: ${count[9][2]}`:''}{count[9][3]?` | рубль: ${count[9][3]}`:''}{count[9][4]?` | тенге: ${count[9][4]}`:''}{count[9][5]?` | юань: ${count[9][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
-                                {
-                                    count[10]?
-                                        <>{count[10][0]}: сом: {count[10][1]}{count[10][2]?` | доллар: ${count[10][2]}`:''}{count[10][3]?` | рубль: ${count[10][3]}`:''}{count[10][4]?` | тенге: ${count[10][4]}`:''}{count[10][5]?` | юань: ${count[10][5]}`:''}<br/></>
-                                        :
-                                        null
-                                }
+                                Приход: сом: <b>{count[1][0]}</b>{count[1][1]!=0?<> | доллар: <b>{count[1][1]}</b></>:null}{count[1][2]!=0?<> | рубль: <b>{count[1][2]}</b></>:null}{count[1][3]!=0?<> | тенге: <b>{count[1][3]}</b></>:null}{count[1][4]!=0?<> | юань: <b>{count[1][4]}</b></>:null}<br/>
+                                Расход: сом: <b>{count[2][0]}</b>{count[2][1]!=0?<> | доллар: <b>{count[2][1]}</b></>:null}{count[2][2]!=0?<> | рубль: <b>{count[2][2]}</b></>:null}{count[2][3]!=0?<> | тенге: <b>{count[2][3]}</b></>:null}{count[2][4]!=0?<> | юань: <b>{count[2][4]}</b></>:null}<br/>
+                                                                 {
+                                                                     count[3]?
+                                                                         <>{count[3][0]}: сом: <b>{count[3][1]}</b>{count[3][2]?<> | доллар: <b>{count[3][2]}</b></>:null}{count[3][3]?<> | рубль: <b>{count[3][3]}</b></>:null}{count[3][4]?<> | тенге: <b>{count[3][4]}</b></>:null}{count[3][5]?<> | юань: <b>{count[3][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[4]?
+                                                                         <>{count[4][0]}: сом: <b>{count[4][1]}</b>{count[4][2]?<> | доллар: <b>{count[4][2]}</b></>:null}{count[4][3]?<> | рубль: <b>{count[4][3]}</b></>:null}{count[4][4]?<> | тенге: <b>{count[4][4]}</b></>:null}{count[4][5]?<> | юань: <b>{count[4][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[5]?
+                                                                         <>{count[5][0]}: сом: <b>{count[5][1]}</b>{count[5][2]?<> | доллар: <b>{count[5][2]}</b></>:null}{count[5][3]?<> | рубль: <b>{count[5][3]}</b></>:null}{count[5][4]?<> | тенге: <b>{count[5][4]}</b></>:null}{count[5][5]?<> | юань: <b>{count[5][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[6]?
+                                                                         <>{count[6][0]}: сом: <b>{count[6][1]}</b>{count[6][2]?<> | доллар: <b>{count[6][2]}</b></>:null}{count[6][3]?<> | рубль: <b>{count[6][3]}</b></>:null}{count[6][4]?<> | тенге: <b>{count[6][4]}</b></>:null}{count[6][5]?<> | юань: <b>{count[6][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[7]?
+                                                                         <>{count[7][0]}: сом: <b>{count[7][1]}</b>{count[7][2]?<> | доллар: <b>{count[7][2]}</b></>:null}{count[7][3]?<> | рубль: <b>{count[7][3]}</b></>:null}{count[7][4]?<> | тенге: <b>{count[7][4]}</b></>:null}{count[7][5]?<> | юань: <b>{count[7][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[8]?
+                                                                         <>{count[8][0]}: сом: <b>{count[8][1]}</b>{count[8][2]?<> | доллар: <b>{count[8][2]}</b></>:null}{count[8][3]?<> | рубль: <b>{count[8][3]}</b></>:null}{count[8][4]?<> | тенге: <b>{count[8][4]}</b></>:null}{count[8][5]?<> | юань: <b>{count[8][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[9]?
+                                                                         <>{count[9][0]}: сом: <b>{count[9][1]}</b>{count[9][2]?<> | доллар: <b>{count[9][2]}</b></>:null}{count[9][3]?<> | рубль: <b>{count[9][3]}</b></>:null}{count[9][4]?<> | тенге: <b>{count[9][4]}</b></>:null}{count[9][5]?<> | юань: <b>{count[9][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
+                                                                 {
+                                                                     count[10]?
+                                                                         <>{count[10][0]}: сом: <b>{count[10][1]}</b>{count[10][2]?<> | доллар: <b>{count[10][2]}</b></>:null}{count[10][3]?<> | рубль: <b>{count[10][3]}</b></>:null}{count[10][4]?<> | тенге: <b>{count[10][4]}</b></>:null}{count[10][5]?<> | юань: <b>{count[10][5]}</b></>:null}<br/></>
+                                                                         :
+                                                                         null
+                                                                 }
                                 </>
                                 :
                                 null
@@ -852,7 +856,8 @@ const MoneyFlows = React.memo((props) => {
                     <UnloadUpload upload={uploadMoneyFlow} uploadText={uploadText} unload={()=>getUnloadMoneyFlows({
                         search,
                         ...filter.store?{store: filter.store._id}:{},
-                        ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                        ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                        ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                         ...filter.currency?{currency: filter.currency}:{},
                         ...filter.operation?{operation: filter.operation}:{},
                         ...filter.moneyArticle?{moneyArticle: filter.moneyArticle._id}:{},

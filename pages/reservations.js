@@ -42,7 +42,8 @@ const Reservations = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
         })));
         setCount(await getReservationsCount({
@@ -50,7 +51,8 @@ const Reservations = React.memo((props) => {
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
-            ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+            ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+            ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
             search
         }));
@@ -90,7 +92,8 @@ const Reservations = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
             if(addedList.length>0)
@@ -154,7 +157,9 @@ const Reservations = React.memo((props) => {
                                     {pdDDMMYYYY(element.term)}
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'center'}}>
+                                    <Link href='/client/[id]' as={`/client/${element.client._id}`}>
                                     {element.client.name}
+                                    </Link>
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 430px) / 2)'}, justifyContent: 'center'}}>
                                     {element.manager.name}
@@ -169,7 +174,8 @@ const Reservations = React.memo((props) => {
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
-                ...filter.dateStart?{dateStart: filter.dateStart, dateEnd: filter.dateEnd}:{},
+                ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
+                ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
                 search
             })}/>
@@ -202,7 +208,8 @@ Reservations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
+                ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
+                ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.timeDif==='late'?{late: true}:store.getState().app.filter.timeDif==='soon'?{soon: true}:store.getState().app.filter.timeDif==='today'?{today: true}:{},
                 ...process.browser&&sessionStorage.scrollPositionLimit?{limit: parseInt(sessionStorage.scrollPositionLimit)}:{}
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
@@ -212,7 +219,8 @@ Reservations.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
-                ...store.getState().app.filter.dateStart?{dateStart: store.getState().app.filter.dateStart, dateEnd: store.getState().app.filter.dateEnd}:{},
+                ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
+                ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.timeDif==='late'?{late: true}:store.getState().app.filter.timeDif==='soon'?{soon: true}:store.getState().app.filter.timeDif==='today'?{today: true}:{},
             }, ctx.req?await getClientGqlSsr(ctx.req):undefined),
         }
