@@ -565,7 +565,6 @@ const DownloadStatistic =  React.memo(
                             window.open(res, '_blank');
                         else
                             showSnackBar('Ошибка', 'error')
-                        showMiniDialog(false)
                     }} className={classes.button}>
                         Выгрузить
                     </Button>
