@@ -41,7 +41,8 @@ const Warehouses = React.memo((props) => {
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
-        name: ''
+        name: '',
+        store: filter.store
     });
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -55,8 +56,13 @@ const Warehouses = React.memo((props) => {
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
-            if(!initialRender.current)
+            if(!initialRender.current) {
+                if(filter.store&&(!newElement.store||filter.store._id!==newElement.store._id)) {
+                    newElement.store = filter.store
+                    setNewElement({...newElement})
+                }
                 await getList()
+            }
         })()
     },[filter])
     useEffect(()=>{
@@ -165,21 +171,29 @@ const Warehouses = React.memo((props) => {
                                     />
                                 </div>
                                 <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)'}}>
-                                    <AutocomplectOnline
-                                        element={newElement.store}
-                                        error={!newElement.store&&newElement.unsaved}
-                                        setElement={(store)=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.store = store
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            return await getStores({search})
-                                        }}
-                                        placeholder={'Магазин'}
-                                        minLength={0}
-                                    />
+                                    {
+                                        !filter.store?
+                                            <AutocomplectOnline
+                                                element={newElement.store}
+                                                error={!newElement.store&&newElement.unsaved}
+                                                setElement={(store)=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    newElement.store = store
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    return await getStores({search})
+                                                }}
+                                                placeholder={'Магазин'}
+                                                minLength={0}
+                                            />
+                                            :
+                                            newElement.store?
+                                                newElement.store.name
+                                                :
+                                                null
+                                    }
                                 </div>
                             </div>
                             :

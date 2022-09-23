@@ -41,7 +41,7 @@ const initialApp = async (ctx, store)=>{
     if(!ctx.pathname.includes(store.getState().app.filterType)) {
         store.getState().app.filterType = undefined
         store.getState().app.filter = {
-            ...store.getState().app.filter.store ? {store: store.getState().app.filter.store._id} : {}
+            ...store.getState().app.filter.store ? {store: {...store.getState().app.filter.store}} : {}
         }
         store.getState().app.search = ''
     }

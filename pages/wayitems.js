@@ -59,7 +59,8 @@ const WayItems = React.memo((props) => {
     let [free, setFree] = useState(0);
     let [newElement, setNewElement] = useState({
         amount: '',
-        bookings: []
+        bookings: [],
+        store: filter.store
     });
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -101,8 +102,20 @@ const WayItems = React.memo((props) => {
                 today.setHours(0, 0, 0, 0)
                 setToday(today)
             }
-            else
+            else {
+                let changeNewElement
+                if(filter.store&&(!newElement.store||filter.store._id!==newElement.store._id)) {
+                    changeNewElement = true
+                    newElement.store = filter.store
+                }
+                if(filter.item&&(!newElement.item||filter.item._id!==newElement.item._id)) {
+                    changeNewElement = true
+                    newElement.item = filter.item
+                }
+                if(changeNewElement)
+                    setNewElement({...newElement})
                 await getList()
+            }
         })()
     },[filter])
     let paginationWork = useRef(true);
@@ -184,7 +197,7 @@ const WayItems = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add&&!filter.date&&!filter.item&&!filter.status&&!filter.timeDif?
+                        data.add&&!filter.date&&!filter.status&&!filter.timeDif?
                             <div className={classes.tableRow} style={{width: 'fit-content'}}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -247,20 +260,28 @@ const WayItems = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100}}/>
                                 <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                                    <AutocomplectOnline
-                                        element={newElement.item}
-                                        error={!newElement.item&&newElement.unsaved}
-                                        setElement={(item)=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            newElement.item = item
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            return await getItems({search})
-                                        }}
-                                        placeholder={'Модель'}
-                                    />
+                                    {
+                                        !filter.item?
+                                            <AutocomplectOnline
+                                                element={newElement.item}
+                                                error={!newElement.item&&newElement.unsaved}
+                                                setElement={(item)=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    newElement.item = item
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    return await getItems({search})
+                                                }}
+                                                placeholder={'Модель'}
+                                            />
+                                            :
+                                            newElement.item?
+                                                newElement.item.name
+                                                :
+                                                null
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                                     {newElement.item?newElement.item.factory.name:''}

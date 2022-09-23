@@ -79,7 +79,6 @@ const MoneyFlows = React.memo((props) => {
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
     const getMoneyFlowsCountWithFilter = async ()=>{
-        console.log({dateStart: filter.dateStart, dateEnd: filter.dateEnd})
         setCount(await getMoneyFlowsCount({
             search,
             ...filter.store?{store: filter.store._id}:{},
@@ -131,11 +130,29 @@ const MoneyFlows = React.memo((props) => {
     useEffect(()=>{
         (async()=>{
             if(!initialRender.current) {
-                if(filter.currency&&filter.currency!==newElement.currency) newElement.currency = filter.currency
-                if(!newElement.clientOperation&&filter.operation&&filter.operation!==newElement.operation) newElement.operation = filter.operation
-                if(filter.moneyArticle&&filter.moneyArticle!==newElement.moneyArticle) newElement.moneyArticle = filter.moneyArticle
-                if(filter.cashbox&&(!newElement.cashbox||filter.cashbox._id!==newElement.cashbox._id)) newElement.cashbox = filter.cashbox
-                setNewElement({...newElement})
+                let changeNewElement
+                if(filter.currency&&filter.currency!==newElement.currency) {
+                    changeNewElement = true
+                    newElement.currency = filter.currency
+                }
+                if(filter.store&&newElement.cashbox&&filter.store._id!==newElement.cashbox.store._id) {
+                    changeNewElement = true
+                    newElement.cashbox = null
+                }
+                if(!newElement.clientOperation&&filter.operation&&filter.operation!==newElement.operation) {
+                    changeNewElement = true
+                    newElement.operation = filter.operation
+                }
+                if(filter.moneyArticle&&filter.moneyArticle!==newElement.moneyArticle) {
+                    changeNewElement = true
+                    newElement.moneyArticle = filter.moneyArticle
+                }
+                if(filter.cashbox&&(!newElement.cashbox||filter.cashbox._id!==newElement.cashbox._id)) {
+                    changeNewElement = true
+                    newElement.cashbox = filter.cashbox
+                }
+                if(changeNewElement)
+                    setNewElement({...newElement})
 
                 await getList()
             }
@@ -415,7 +432,10 @@ const MoneyFlows = React.memo((props) => {
                                                 placeholder={'Статья'}
                                             />
                                             :
-                                            newElement.moneyArticle.name
+                                            newElement.moneyArticle?
+                                                newElement.moneyArticle.name
+                                                :
+                                                null
                                     }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 115}}>

@@ -120,7 +120,6 @@ const Catalog = React.memo((props) => {
         if(initialRender.current)
             initialRender.current = false;
         else {
-            console.log(1);
             (async () => {
                 if (data.type === 'sale') {
                     if (client) {

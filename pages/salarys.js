@@ -182,7 +182,7 @@ const Salarys = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add&&!search&&!filter.user&&!filter.department&&!filter.position?
+                        data.add&&!search/*&&!filter.user*/?
                             <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{

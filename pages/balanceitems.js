@@ -53,7 +53,8 @@ const BalanceItems = React.memo((props) => {
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
-        amount: ''
+        amount: '',
+        store: filter.store
     });
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -72,8 +73,28 @@ const BalanceItems = React.memo((props) => {
     let searchTimeOut = useRef(null);
     useEffect(()=>{
         (async()=>{
-            if(!initialRender.current)
+            if(!initialRender.current) {
+                let changeNewElement
+                if(filter.store&&(!newElement.store||filter.store._id!==newElement.store._id)) {
+                    changeNewElement = true
+                    newElement.store = filter.store
+                    if(newElement.warehouse&&newElement.warehouse.store._id!==filter.store._id)
+                        newElement.warehouse = null
+                }
+                if(filter.warehouse&&(!newElement.warehouse||filter.warehouse._id!==newElement.warehouse._id)) {
+                    changeNewElement = true
+                    newElement.warehouse = filter.warehouse
+                    if(!newElement.store||newElement.warehouse.store._id!==newElement.store._id)
+                        newElement.store = newElement.warehouse.store
+                }
+                if(filter.item&&(!newElement.item||filter.item._id!==newElement.item._id)) {
+                    changeNewElement = true
+                    newElement.item = filter.item
+                }
+                if(changeNewElement)
+                    setNewElement({...newElement})
                 await getList()
+            }
         })()
     },[filter, sort])
     useEffect(()=>{
@@ -131,7 +152,7 @@ const BalanceItems = React.memo((props) => {
                         </div>
                     </div>
                     {
-                        data.add&&!search&&!filter.item&&!filter.warehouse?
+                        data.add&&!search?
                             <div className={classes.tableRow}>
                                 <div className={classes.tableCell} style={{width: 40, padding: 0}}>
                                     <IconButton onClick={(event)=>{
@@ -177,54 +198,72 @@ const BalanceItems = React.memo((props) => {
                                     </IconButton>
                                 </div>
                                 <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
-                                    <AutocomplectOnline
-                                        error={!newElement.store}
-                                        element={newElement.store}
-                                        setElement={store=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            if(!store) {
-                                                newElement.item = null
-                                                newElement.warehouse = null
-                                            }
-                                            newElement.store = store
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            return await getStores({search})
-                                        }}
-                                        minLength={0}
-                                    />
+                                    {
+                                        !filter.store&&!filter.warehouse?
+                                            <AutocomplectOnline
+                                                error={!newElement.store}
+                                                element={newElement.store}
+                                                setElement={store=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    if(!store) {
+                                                        newElement.item = null
+                                                        newElement.warehouse = null
+                                                    }
+                                                    newElement.store = store
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    return await getStores({search})
+                                                }}
+                                                minLength={0}
+                                            />
+                                            :
+                                            newElement.store?
+                                                newElement.store.name
+                                                :
+                                                null
+                                    }
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)'}}>
-                                    <AutocomplectOnline
-                                        element={newElement.warehouse}
-                                        error={!newElement.warehouse&&newElement.unsaved}
-                                        setElement={(warehouse)=>{
-                                            newElement.unsaved = true
-                                            unsaved.current['new'] = true
-                                            if(!warehouse)
-                                                newElement.item = null
-                                            newElement.warehouse = warehouse
-                                            setNewElement({...newElement})
-                                        }}
-                                        getElements={async (search)=>{
-                                            if(newElement.store)
-                                                return await getWarehouses({
-                                                    search,
-                                                    store: newElement.store._id,
-                                                })
-                                            else {
-                                                showSnackBar('Укажите магазин')
-                                                return []
-                                            }
-                                        }}
-                                        placeholder={'Склад'}
-                                        minLength={0}
-                                    />
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                    {
+                                        !filter.warehouse?
+                                            <AutocomplectOnline
+                                                element={newElement.warehouse}
+                                                error={!newElement.warehouse&&newElement.unsaved}
+                                                setElement={(warehouse)=>{
+                                                    newElement.unsaved = true
+                                                    unsaved.current['new'] = true
+                                                    if(!warehouse)
+                                                        newElement.item = null
+                                                    newElement.warehouse = warehouse
+                                                    setNewElement({...newElement})
+                                                }}
+                                                getElements={async (search)=>{
+                                                    if(newElement.store)
+                                                        return await getWarehouses({
+                                                            search,
+                                                            store: newElement.store._id,
+                                                        })
+                                                    else {
+                                                        showSnackBar('Укажите магазин')
+                                                        return []
+                                                    }
+                                                }}
+                                                placeholder={'Склад'}
+                                                minLength={0}
+                                            />
+                                            :
+                                            newElement.warehouse?
+                                                newElement.warehouse.name
+                                                :
+                                                null
+                                    }
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)'}}>
-                                    <AutocomplectOnline
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                    {
+                                        !filter.item?
+                                        <AutocomplectOnline
                                         element={newElement.item}
                                         error={!newElement.item&&newElement.unsaved}
                                         setElement={(item)=>{
@@ -243,6 +282,12 @@ const BalanceItems = React.memo((props) => {
                                         }}
                                         placeholder={'Модель'}
                                     />
+                                            :
+                                            newElement.item?
+                                                newElement.item.name
+                                                :
+                                                null
+                                    }
                                 </div>
                                 <div className={classes.tableCell} style={{width: 150}}>
                                     <Input
