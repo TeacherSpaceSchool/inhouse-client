@@ -134,6 +134,10 @@ const MoneyFlows = React.memo((props) => {
                 if(filter.currency&&filter.currency!==newElement.currency) {
                     changeNewElement = true
                     newElement.currency = filter.currency
+                    if(newElement.currency==='сом'&&newElement.exchangeRate!==1) {
+                        newElement.exchangeRate = 1
+                    }
+
                 }
                 if(filter.store&&newElement.cashbox&&filter.store._id!==newElement.cashbox.store._id) {
                     changeNewElement = true

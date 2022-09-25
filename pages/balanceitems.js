@@ -36,7 +36,7 @@ import UnloadUpload from '../components/app/UnloadUpload';
 import Fab from '@mui/material/Fab';
 import {getStores} from '../src/gql/store'
 
-const uploadText = 'Формат xlsx:\nназвание модели;\nназвание склада;\nназвание магазина;\nостаток.'
+const uploadText = 'Формат xlsx:\nназвание магазина;\nназвание склада;\nназвание модели;\nостаток.'
 const sorts = [
     {
         name: 'Остаток',

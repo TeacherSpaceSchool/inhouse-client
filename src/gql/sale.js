@@ -114,6 +114,7 @@ export const getSale = async({_id}, client)=>{
                         sale(_id: $_id) {
                             _id
                             createdAt
+                            paymentAmount
                             number
                             selfDelivery
                             manager {_id name}
@@ -165,6 +166,7 @@ export const getSales = async({search, skip, items, order, limit, promotion, man
                         sales(search: $search, order: $order, skip: $skip, items: $items, limit: $limit, promotion: $promotion, manager: $manager, client: $client, cpa: $cpa, dateStart: $dateStart, dateEnd: $dateEnd, delivery: $delivery, status: $status, store: $store) {
                             _id
                             createdAt
+                            paymentAmount
                             number
                             manager {_id name}
                             client {_id name phones}

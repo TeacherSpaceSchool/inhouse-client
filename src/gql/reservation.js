@@ -29,6 +29,7 @@ export const getReservation = async({_id}, client)=>{
                         reservation(_id: $_id) {
                             _id
                             createdAt
+                            paymentAmount
                             number
                             manager {_id name}
                             client {_id name}
@@ -80,6 +81,7 @@ export const getReservations = async({search, skip, limit, manager, client, stor
                         reservations(search: $search, skip: $skip, items: $items, limit: $limit, soon: $soon, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status, late: $late, today: $today) {
                             _id
                             createdAt
+                            paymentAmount
                             number
                             term
                             manager {_id name}

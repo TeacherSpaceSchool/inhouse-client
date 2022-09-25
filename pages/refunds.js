@@ -6,7 +6,7 @@ import {getRefunds, getRefundsCount, getUnloadRefunds} from '../src/gql/refund'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import { cloneObject, pdDDMMYYHHMM } from '../src/lib'
+import { cloneObject, pdDDMMYYHHMM, checkFloat } from '../src/lib'
 import Router from 'next/router'
 import { forceCheck } from 'react-lazyload';
 import { getClientGqlSsr } from '../src/apollo'
@@ -105,7 +105,7 @@ const Refunds = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/refunds`} />
                 <link rel='canonical' href={`${urlMain}/refunds`}/>
             </Head>
-            <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
+            <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
                     <div className={classes.tableHead} >
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
@@ -117,10 +117,19 @@ const Refunds = React.memo((props) => {
                         <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                             Дата
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'center'}}>
+                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Клиент
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'center'}}>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                            К оплате
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                            Оплачено
+                        </div>
+                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                            Долг
+                        </div>
+                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Менеджер
                         </div>
                     </div>
@@ -132,8 +141,9 @@ const Refunds = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'refund'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center', fontWeight: 'bold', color: colors[element.status]}}>
+                                <div className={classes.tableCell} style={{flexDirection: 'column', width: 100, justifyContent: 'center', fontWeight: 'bold', color: colors[element.status]}}>
                                     {element.status}
+                                    {element.paymentConfirmation?<div style={{color: 'green'}}>оплачен</div>:null}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {element.number}
@@ -141,12 +151,21 @@ const Refunds = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
                                     {pdDDMMYYHHMM(element.createdAt)}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     <Link href='/client/[id]' as={`/client/${element.client._id}`}>
-                                    {element.client.name}
+                                        {element.client.name}
                                     </Link>
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{width: 200}:{width: 'calc((100% - 330px) / 2)'}, justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {element.amount}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {checkFloat(element.paymentAmount)}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {checkFloat(element.amount - checkFloat(element.paymentAmount))}
+                                </div>
+                                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     {element.manager.name}
                                 </div>
                             </div>

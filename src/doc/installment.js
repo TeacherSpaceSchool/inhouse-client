@@ -17,7 +17,7 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
     for(let i=0; i<itemsSale.length; i++) {
         allCountItems = checkFloat(allCountItems + itemsSale[i].count)
         discountItem = checkFloat(itemsSale[i].amount/100*discountPrecent)
-        amountEndItem = checkFloat(itemsSale[i].amount-discountItem)
+        amountEndItem = checkFloat(itemsSale[i].amount - discountItem)
         gridItems += `<tr style='height: 40px;'>
                               <td style='border: 1px solid black; text-align: center; width: 52%;'>${itemsSale[i].name}</td>
                               <td style='border: 1px solid black; text-align: center; width: 27%;'>${itemsSale[i].count} ${itemsSale[i].unit}</td>

@@ -46,6 +46,7 @@ export const getRefund = async({_id}, client)=>{
                         refund(_id: $_id) {
                             _id
                             createdAt
+                            paymentAmount
                             paymentConfirmation
                             number
                             manager {_id name}
@@ -78,6 +79,7 @@ export const getRefunds = async({search, skip, limit, manager, client, store, da
                         refunds(search: $search, skip: $skip, limit: $limit, manager: $manager, client: $client, store: $store, dateStart: $dateStart, dateEnd: $dateEnd, status: $status) {
                             _id
                             createdAt
+                            paymentAmount
                             number
                             manager {_id name}
                             client {_id name}

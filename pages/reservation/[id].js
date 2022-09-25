@@ -239,7 +239,7 @@ const Reservation = React.memo((props) => {
                                     <TextField
                                         id='paid'
                                         variant='standard'
-                                        label='Оплачено'
+                                        label='К оплате'
                                         className={classes.input}
                                         margin='normal'
                                         value={paid}
@@ -247,9 +247,22 @@ const Reservation = React.memo((props) => {
                                     />
                                     :
                                     <div className={classes.row}>
-                                        <div className={classes.nameField}>Оплачено:&nbsp;</div>
+                                        <div className={classes.nameField}>К оплате:&nbsp;</div>
                                         <div className={classes.value}>{data.object.paid} {data.object.currency}</div>
                                     </div>
+                            }
+                            <div className={classes.row}>
+                                <div className={classes.nameField}>Оплачено:&nbsp;</div>
+                                <div className={classes.value}>{checkFloat(data.object.paymentAmount)} {data.object.currency}</div>
+                            </div>
+                            {
+                                data.object.paid&&checkFloat(data.object.paid - checkFloat(data.object.paymentAmount))?
+                                    <div className={classes.row}>
+                                        <div className={classes.nameField}>Долг:&nbsp;</div>
+                                        <div className={classes.value}>{checkFloat(data.object.paid - checkFloat(data.object.paymentAmount))} {data.object.currency}</div>
+                                    </div>
+                                    :
+                                    null
                             }
                             {
                                 edit?
