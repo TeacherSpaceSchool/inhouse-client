@@ -29,7 +29,7 @@ import Confirmation from '../../components/dialog/Confirmation'
 import UsdToKgs from '../../components/dialog/UsdToKgs'
 import { urlMain } from '../../src/const'
 import { getClientGqlSsr } from '../../src/apollo'
-import { cloneObject, inputFloat, checkFloat } from '../../src/lib'
+import { cloneObject, inputFloat, checkFloat, checkInt, inputInt } from '../../src/lib'
 import History from '../../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import CloseIcon from '@mui/icons-material/Close';
@@ -87,7 +87,7 @@ const Item = React.memo((props) => {
                 priceAfterDiscountKGS = priceKGS - priceKGS/100*discount
             else
                 priceAfterDiscountKGS = priceKGS - discount
-            setPriceAfterDiscountKGS(priceAfterDiscountKGS>0?checkFloat(priceAfterDiscountKGS):0)
+            setPriceAfterDiscountKGS(priceAfterDiscountKGS>0?checkInt(priceAfterDiscountKGS):0)
         })()
     }, [priceKGS, discount])
     useEffect(()=>{
@@ -291,7 +291,7 @@ const Item = React.memo((props) => {
                                                 placeholder='Скидка'
                                                 value={discount}
                                                 onChange={(event)=>{
-                                                    discount = inputFloat(event.target.value)
+                                                    discount = typeDiscount==='%'?inputFloat(event.target.value):inputInt(event.target.value)
                                                     if(discount>100&&typeDiscount==='%')
                                                         discount = 100
                                                     else if(discount>priceKGS&&typeDiscount==='сом')
@@ -302,7 +302,7 @@ const Item = React.memo((props) => {
                                                     <InputAdornment position='end'>
                                                         <IconButton onClick={()=>{
                                                             if(typeDiscount==='%')
-                                                                discount = checkFloat(discount*priceKGS/100)
+                                                                discount = checkInt(discount*priceKGS/100)
                                                             else
                                                                 discount = checkFloat(discount*100/priceKGS)
                                                             setDiscount(discount)

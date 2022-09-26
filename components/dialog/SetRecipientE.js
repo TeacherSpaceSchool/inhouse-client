@@ -24,8 +24,7 @@ import * as snackbarActions from '../../src/redux/actions/snackbar'
 import { getBalanceClients } from '../../src/gql/balanceClient'
 
 const types = ['Клиент', 'Сотрудник', 'Касса', 'Получатель денег']
-const typesClientOperationPrihod = ['Продажа', 'На заказ', 'Бронь', 'Рассрочка']
-const typesClientOperationRashod = ['Возврат']
+const typesClientOperation = ['Продажа', 'На заказ', 'Бронь', 'Возврат', 'Рассрочка']
 
 const SetRecipientE =  React.memo(
     (props) =>{
@@ -145,7 +144,7 @@ const SetRecipientE =  React.memo(
                                         setInstallmentMonth(null)
                                         setInstallmentMonthes(null)
                                     }}>
-                                        {(list[idx].operation==='расход'?typesClientOperationRashod:typesClientOperationPrihod).map((element)=>
+                                        {typesClientOperation.map((element)=>
                                             <MenuItem key={element} value={element}>{element}</MenuItem>
                                         )}
                                     </Select>

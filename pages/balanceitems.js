@@ -134,23 +134,23 @@ const BalanceItems = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/balanceitems`} />
                 <link rel='canonical' href={`${urlMain}/balanceitems`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                    Склад
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                    Модель
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Остаток
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
-                            Склад
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
-                            Модель
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Остаток
-                        </div>
-                    </div>
                     {
                         data.add&&!search?
                             <div className={classes.tableRow}>

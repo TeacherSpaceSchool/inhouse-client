@@ -220,41 +220,41 @@ const MoneyFlows = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/moneyflows`} />
                 <link rel='canonical' href={`${urlMain}/moneyflows`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
+                    Дата/Номер
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Касса/Банк
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Получатель
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: data.edit?'center':'start'}}>
+                    Статья
+                </div>
+                <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
+                    Операция
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Сумма
+                </div>
+                <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
+                    Валюта
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Курс
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Итого
+                </div>
+                <div className={classes.tableCell} style={{width: 400, justifyContent: data.edit?'center':'start'}}>
+                    Комментарий
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
-                            Дата/Номер
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Касса/Банк
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Получатель
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: data.edit?'center':'start'}}>
-                            Статья
-                        </div>
-                        <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
-                            Операция
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Сумма
-                        </div>
-                        <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
-                            Валюта
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Курс
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Итого
-                        </div>
-                        <div className={classes.tableCell} style={{width: 400, justifyContent: data.edit?'center':'start'}}>
-                            Комментарий
-                        </div>
-                    </div>
                     {
                         data.add&&(
                             !search&&
@@ -444,7 +444,7 @@ const MoneyFlows = React.memo((props) => {
                                 </div>
                                 <div className={classes.tableCell} style={{width: 115}}>
                                     {
-                                        newElement.clientOperation||filter.operation?
+                                        filter.operation?
                                             newElement.operation
                                             :
                                             <Select className={classes.input} error={!newElement.operation&&newElement.unsaved} variant='standard' value={newElement.operation} onChange={(event) => {

@@ -101,21 +101,21 @@ const BonusManagers = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/bonusmanagers`} />
                 <link rel='canonical' href={`${urlMain}/bonusmanagers`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{
+                    ...isMobileApp?{minWidth: 250}:{},
+                    width: data.edit?'calc(100% - 190px)':'calc(100% - 150px)',
+                    justifyContent: data.edit?'center':'start'
+                }}>
+                    Ставка(Скидка%/Бонус%)
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{
-                            ...isMobileApp?{minWidth: 250}:{},
-                            width: data.edit?'calc(100% - 190px)':'calc(100% - 150px)',
-                            justifyContent: data.edit?'center':'start'
-                        }}>
-                            Ставка(Скидка%/Бонус%)
-                        </div>
-                    </div>
                     {
                         data.add?
                             <div className={classes.tableRow}>

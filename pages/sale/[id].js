@@ -38,6 +38,12 @@ import dynamic from 'next/dynamic';
 import DivideSaleOrder from '../../components/dialog/DivideSaleOrder';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import { getOrderDoc } from '../../src/doc/order'
+import { getVoucherDoc } from '../../src/doc/voucher'
+import { getInstallmentDoc } from '../../src/doc/installment'
+import { getClient } from '../../src/gql/client'
+import { getDoc } from '../../src/gql/doc'
+import { getInstallments } from '../../src/gql/installment'
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
 
 const colors = {
@@ -894,14 +900,36 @@ const Sale = React.memo((props) => {
                                                             data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                                 [
                                                                     <Button color='primary' onClick={async()=>{
-                                                                    await showLoad(true)
-                                                                    let res = await getAttachmentSale(data.object._id)
-                                                                    if(res)
-                                                                        window.open(res, '_blank');
-                                                                    else
-                                                                        showSnackBar('Ошибка', 'error')
-                                                                    await showLoad(false)
-                                                                }}>
+                                                                        await showLoad(true)
+                                                                        if(data.object.installment) {
+                                                                            await getInstallmentDoc({
+                                                                                installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                                sale: data.object,
+                                                                                client: await getClient({_id: data.object.client._id}),
+                                                                                itemsSale: data.object.itemsSale,
+                                                                                doc: await getDoc()
+                                                                            })
+                                                                            await getVoucherDoc({
+                                                                                installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                                client: await getClient({_id: data.object.client._id}),
+                                                                                doc: await getDoc()
+                                                                            })
+
+                                                                        }
+                                                                        else
+                                                                            await getOrderDoc({
+                                                                                sale: data.object,
+                                                                                client: await getClient({_id: data.object.client._id}),
+                                                                                itemsSale: data.object.itemsSale,
+                                                                                doc: await getDoc()
+                                                                            })
+                                                                        let res = await getAttachmentSale(data.object._id)
+                                                                        if(res)
+                                                                            window.open(res, '_blank');
+                                                                        else
+                                                                            showSnackBar('Ошибка', 'error')
+                                                                        await showLoad(false)
+                                                                    }}>
                                                                         Документы
                                                                     </Button>,
                                                                     <br/>
@@ -988,6 +1016,28 @@ const Sale = React.memo((props) => {
                                                             data.object&&!['отмена', 'возврат'].includes(data.object.status)&&data.object._id?
                                                                 <Button color='primary' onClick={async()=>{
                                                                     await showLoad(true)
+                                                                    if(data.object.installment) {
+                                                                        await getInstallmentDoc({
+                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                            sale: data.object,
+                                                                            client: await getClient({_id: data.object.client._id}),
+                                                                            itemsSale: data.object.itemsSale,
+                                                                            doc: await getDoc()
+                                                                        })
+                                                                        await getVoucherDoc({
+                                                                            installment: (await getInstallments({_id: data.object.installment._id}))[0],
+                                                                            client: await getClient({_id: data.object.client._id}),
+                                                                            doc: await getDoc()
+                                                                        })
+
+                                                                    }
+                                                                    else
+                                                                        await getOrderDoc({
+                                                                            sale: data.object,
+                                                                            client: await getClient({_id: data.object.client._id}),
+                                                                            itemsSale: data.object.itemsSale,
+                                                                            doc: await getDoc()
+                                                                        })
                                                                     let res = await getAttachmentSale(data.object._id)
                                                                     if(res)
                                                                         window.open(res, '_blank');

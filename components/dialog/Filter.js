@@ -114,6 +114,26 @@ const Filter =  React.memo(
                         null
                 }
                 {
+                    filterShow.installment?
+                        <FormControl>
+                            <RadioGroup
+                                row
+                                value={filter.installment}
+                                onChange={event => {
+                                    setFilter({
+                                        ...filter,
+                                        installment: event.target.value
+                                    })
+                                }}
+                            >
+                                <FormControlLabel value={undefined} control={<Radio/>} label='Все'/>
+                                <FormControlLabel value={true} control={<Radio/>} label='Рассрочка'/>
+                            </RadioGroup>
+                        </FormControl>
+                        :
+                        null
+                }
+                {
                     filterShow.date?
                         <TextField
                             id='date'

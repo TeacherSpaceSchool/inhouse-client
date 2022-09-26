@@ -42,6 +42,7 @@ const Orders = React.memo((props) => {
             search,
             skip: 0,
             order: true,
+            ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -54,6 +55,7 @@ const Orders = React.memo((props) => {
         })));
         setCount(await getSalesCount({
             order: true,
+            ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -98,6 +100,7 @@ const Orders = React.memo((props) => {
                 order: true,
                 skip: list.length,
                 search,
+                ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
@@ -115,7 +118,7 @@ const Orders = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
+        <App filterShow={{status, user: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
             <Head>
                 <title>На заказ</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -126,37 +129,40 @@ const Orders = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/orders`} />
                 <link rel='canonical' href={`${urlMain}/orders`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Номер
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Дата
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Доставка
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    К оплате
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Оплачено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Остаток
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Тип
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Менеджер
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Номер
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                              Дата
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Доставка
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            К оплате
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Оплачено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Остаток
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Менеджер
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/order/[id]' as={`/order/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
@@ -193,6 +199,9 @@ const Orders = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {checkFloat(element.paid - checkFloat(element.paymentAmount))}
                                 </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {element.installment?'Рассрочка':'Наличка'}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     {element.manager.name}
                                 </div>
@@ -203,6 +212,7 @@ const Orders = React.memo((props) => {
             </Card>
             <UnloadUpload unload={()=>getUnloadSales({
                 order: true,
+                ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
@@ -239,6 +249,7 @@ Orders.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 skip: 0,
                 order: true,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
@@ -253,6 +264,7 @@ Orders.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             count: await getSalesCount({
                 order: true,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},

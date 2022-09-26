@@ -136,34 +136,34 @@ const Installments = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/installments`} />
                 <link rel='canonical' href={`${urlMain}/installments`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'max-content'}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: 40, justifyContent: data.edit?'center':'start'}}>
+                    №
+                </div>
+                <div className={classes.tableCell} style={{width: 105, justifyContent: data.edit?'center':'start'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} onClick={()=>setShowComment(!showComment)} style={{width: showComment?400:30, overflow: 'hidden', justifyContent: data.edit&&showComment?'center':'start'}}>
+                    {
+                        showComment?'Комментарий':'...'
+                    }
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Долг
+                </div>
+                <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
+                    Сумма оплат
+                </div>
+                <div className={classes.tableCell} style={{width: 'fit-content', minWidth: 100, justifyContent: 'start'}}>
+                    График оплат
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={{width: '100%'}}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: 40, justifyContent: data.edit?'center':'start'}}>
-                            №
-                        </div>
-                        <div className={classes.tableCell} style={{width: 105, justifyContent: data.edit?'center':'start'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} onClick={()=>setShowComment(!showComment)} style={{width: showComment?400:30, overflow: 'hidden', justifyContent: data.edit&&showComment?'center':'start'}}>
-                            {
-                                showComment?'Комментарий':'...'
-                            }
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Долг
-                        </div>
-                        <div className={classes.tableCell} style={{width: 115, justifyContent: data.edit?'center':'start'}}>
-                            Сумма оплат
-                        </div>
-                        <div className={classes.tableCell} style={{width: 'fit-content', minWidth: 100, justifyContent: 'start'}}>
-                            График оплат
-                        </div>
-                    </div>
                     {list.map((element, idx) =>
                         <div className={classes.tableRow}>
                             {

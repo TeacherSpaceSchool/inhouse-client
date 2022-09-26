@@ -95,22 +95,22 @@ const Items = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/items`} />
                 <link rel='canonical' href={`${urlMain}/items`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 4)', justifyContent: 'start'}}>
+                    Название
+                </div>
+                <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 4)', justifyContent: 'start'}}>
+                    Цена(сом)
+                </div>
+                <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
+                    Категория
+                </div>
+                <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
+                    Фабрика
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: isMobileApp?200:'calc(100% / 4)', justifyContent: 'start'}}>
-                            Название
-                        </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?100:'calc(100% / 4)', justifyContent: 'start'}}>
-                            Цена(сом)
-                        </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
-                            Категория
-                        </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?150:'calc(100% / 4)', justifyContent: 'start'}}>
-                            Фабрика
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/item/[id]' as={`/item/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{

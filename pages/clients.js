@@ -75,20 +75,20 @@ const Clients = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/clients`} />
                 <link rel='canonical' href={`${urlMain}/clients`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    ФИО
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    Уровень
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    Менеджер
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            ФИО
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            Уровень
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            Менеджер
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/client/[id]' as={`/client/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} key={element._id} onClick={()=>{

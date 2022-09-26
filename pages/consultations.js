@@ -87,34 +87,34 @@ const Consultations = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/consultations`} />
                 <link rel='canonical' href={`${urlMain}/consultations`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
+                    Менеджер
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
+                    Начало
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
+                    Конец
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
+                    Минут
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Операция
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'start'}}>
+                    Комментарий
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={{width: 'fit-content', minWidth: '100%'}}>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
-                            Менеджер
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
-                            Начало
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
-                            Конец
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'start'}}>
-                            Минут
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
-                            Операция
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'start'}}>
-                            Комментарий
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <div className={classes.tableRow}>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto'}}>
@@ -140,16 +140,17 @@ const Consultations = React.memo((props) => {
                                 {element.operation}
                             </div>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>
-                                {element.client?
-                                    <Link href='/client/[id]' as={`/client/${element.client._id}`}>
-                                        <div>{element.client.name}</div>
-                                    </Link>
-                                    :
-                                    null
+                                {
+                                    element.client?
+                                        <Link href='/client/[id]' as={`/client/${element.client._id}`}>
+                                            <div>{element.client.name}</div>
+                                        </Link>
+                                        :
+                                        null
                                 }
                                 {
                                     element.statusClient?
-                                        <div>element.statusClient</div>
+                                        <div>{element.statusClient}</div>
                                         :
                                         null
                                 }

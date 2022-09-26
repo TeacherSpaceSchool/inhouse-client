@@ -114,37 +114,37 @@ const Reservations = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/reservations`} />
                 <link rel='canonical' href={`${urlMain}/reservations`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Номер
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Дата
+                </div>
+                <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
+                    Срок
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    К оплате
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Оплачено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Остаток
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Менеджер
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Номер
-                        </div>
-                          <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Дата
-                        </div>
-                        <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
-                            Срок
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            К оплате
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Оплачено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Остаток
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Менеджер
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/reservation/[id]' as={`/reservation/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{

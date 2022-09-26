@@ -164,38 +164,38 @@ const WayItems = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/wayitems`} />
                 <link rel='canonical' href={`${urlMain}/wayitems`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Модель
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Фабрика
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
+                    Отправлен
+                </div>
+                <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
+                    Прибытие
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Кол-во
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Свободно
+                </div>
+                <div className={classes.tableCell} style={{width: 300, justifyContent: data.edit?'center':'start'}}>
+                    Бронь
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} style={{width: 'fit-content'}}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Модель
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Фабрика
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
-                            Отправлен
-                        </div>
-                        <div className={classes.tableCell} style={{width: 135, justifyContent: data.edit?'center':'start'}}>
-                            Прибытие
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Кол-во
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Свободно
-                        </div>
-                        <div className={classes.tableCell} style={{width: 300, justifyContent: data.edit?'center':'start'}}>
-                            Бронь
-                        </div>
-                    </div>
                     {
                         data.add&&!filter.date&&!filter.status&&!filter.timeDif?
                             <div className={classes.tableRow} style={{width: 'fit-content'}}>

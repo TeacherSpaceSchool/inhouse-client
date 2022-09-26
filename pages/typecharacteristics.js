@@ -87,14 +87,14 @@ const TypeCharacteristics = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/typecharacteristics`} />
                 <link rel='canonical' href={`${urlMain}/typecharacteristics`}/>
             </Head>
+            <div className={classes.tableHead}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: data.edit?'calc(100% - 40px)':'100%', justifyContent: 'center'}}>
+                    Название
+                </div>
+            </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: data.edit?'calc(100% - 40px)':'100%', justifyContent: 'center'}}>
-                            Название
-                        </div>
-                    </div>
                     {
                         data.add?
                             <div className={classes.tableRow}>

@@ -1,5 +1,5 @@
 import htmlDocx from 'html-docx-js/dist/html-docx';
-import { pdDDMMYYYY } from '../../src/lib'
+import { pdDDMMYYYY, checkFloat } from '../../src/lib'
 import numberToWord from '../../src/numberToWord'
 
 export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
@@ -7,7 +7,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     for(let i=0; i<itemsSale.length; i++) {
         items += `${itemsSale[i].name} - ${itemsSale[i].count} ${itemsSale[i].unit}; `
     }
-    const precentPaid = parseInt(sale.paid*100/sale.amountEnd)
+    const precentPaid = parseInt(sale.paid*100/(sale.amountEnd-checkFloat(sale.prepaid)))
     const blob = await htmlDocx.asBlob(`
     <p style="text-align:center;font-size:12pt">
       <strong>ДОГОВОР КУПЛИ-ПРОДАЖИ №${sale.number}</strong>
@@ -35,7 +35,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     </p>
     <span style="text-align:justify;font-size:10pt">2.1 Поставляемый по настоящему Договору товар, оплачивается по ценам, согласно спецификации (приложения № 1) являющейся неотъемлемой частью данного договора.</span>
     <br>
-    <span style="text-align:justify;font-size:10pt">2.2 Общая стоимость поставляемого по настоящему Договору товара составляет ${sale.amountEnd} (${await numberToWord(sale.amountEnd, 'all')}) сом.</span>
+    <span style="text-align:justify;font-size:10pt">2.2 Общая стоимость поставляемого по настоящему Договору товара составляет ${(sale.amountEnd-checkFloat(sale.prepaid))} (${await numberToWord((sale.amountEnd-checkFloat(sale.prepaid)), 'all')}) сом.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">2.3 Данная стоимость не включает в себя доставку, сборку и установку товара у Покупателя.</span>
     <br>

@@ -134,53 +134,53 @@ const Salarys = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/salarys`} />
                 <link rel='canonical' href={`${urlMain}/salarys`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Сотрудник
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Оклад
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Ставка
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Фак дни
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Раб дни
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Долг на начало
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Начислено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Премия
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Бонус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Штрафы
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Авансы
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    К оплате
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Оплачено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Долг на конец
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Сотрудник
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Оклад
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Ставка
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Фак дни
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Раб дни
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Долг на начало
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Начислено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Премия
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Бонус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Штрафы
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Авансы
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            К оплате
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Оплачено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
-                            Долг на конец
-                        </div>
-                    </div>
                     {
                         data.add&&!search/*&&!filter.user*/?
                             <div className={classes.tableRow}>

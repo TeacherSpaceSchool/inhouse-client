@@ -210,7 +210,9 @@ const SetRecipient =  React.memo(
                                                 newElement.clientOperation = clientOperation
                                                 newElement.operation = 'приход'
                                                 if(clientOperation) {
-                                                    newElement.amount = clientOperation.paid
+                                                    newElement.amount = checkFloat(clientOperation.paid - checkFloat(clientOperation.paymentAmount))
+                                                    if(newElement.amount<1)
+                                                        newElement.amount = ''
                                                     newElement.installment = clientOperation.installment
                                                 } else {
                                                     newElement.amount = ''
@@ -238,8 +240,12 @@ const SetRecipient =  React.memo(
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
                                                 newElement.operation = 'приход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
+                                                if(clientOperation) {
+                                                    newElement.amount = checkFloat(clientOperation.paid - checkFloat(clientOperation.paymentAmount))
+                                                    if(newElement.amount<1)
+                                                        newElement.amount = ''
+                                                    newElement.installment = clientOperation.installment
+                                                }
                                                 else
                                                     newElement.amount = ''
                                                 setClientOperation(clientOperation)
@@ -264,8 +270,12 @@ const SetRecipient =  React.memo(
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
                                                 newElement.operation = 'приход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.paid
+                                                if(clientOperation) {
+                                                    newElement.amount = checkFloat(clientOperation.paid - checkFloat(clientOperation.paymentAmount))
+                                                    if(newElement.amount<1)
+                                                        newElement.amount = ''
+                                                    newElement.installment = clientOperation.installment
+                                                }
                                                 else
                                                     newElement.amount = ''
                                                 setClientOperation(clientOperation)
@@ -290,8 +300,12 @@ const SetRecipient =  React.memo(
                                                 unsaved.current['new'] = true
                                                 newElement.clientOperation = clientOperation
                                                 newElement.operation = 'расход'
-                                                if(clientOperation)
-                                                    newElement.amount = clientOperation.amount
+                                                if(clientOperation) {
+                                                    newElement.amount = checkFloat(clientOperation.amount - checkFloat(clientOperation.paymentAmount))
+                                                    if(newElement.amount<1)
+                                                        newElement.amount = ''
+                                                    newElement.installment = clientOperation.installment
+                                                }
                                                 else
                                                     newElement.amount = ''
                                                 setClientOperation(clientOperation)

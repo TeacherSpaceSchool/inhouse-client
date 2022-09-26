@@ -95,19 +95,19 @@ const Users = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/users`} />
                 <link rel='canonical' href={`${urlMain}/users`}/>
             </Head>
+            <div className={classes.tableHead}>
+                <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    ФИО
+                </div>
+                <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    Роль
+                </div>
+                <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                    Магазин
+                </div>
+            </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            ФИО
-                        </div>
-                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            Роль
-                        </div>
-                        <div className={classes.tableCell} style={{width: 'calc(100% / 3)', justifyContent: 'start'}}>
-                            Магазин
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/user/[id]' as={`/user/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{

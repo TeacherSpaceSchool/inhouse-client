@@ -122,28 +122,28 @@ const Deliveries = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/sales`} />
                 <link rel='canonical' href={`${urlMain}/sales`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Доставка
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Доставщики
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Адрес
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Телефоны
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Доставка
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Доставщики
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Адрес
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Телефоны
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/delivery/[id]' as={`/delivery/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{

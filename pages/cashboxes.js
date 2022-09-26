@@ -103,20 +103,20 @@ const Cashboxes = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/cashboxes`} />
                 <link rel='canonical' href={`${urlMain}/cashboxes`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{minWidth: 200, width: `calc((100% - ${data.edit?240:200}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                    Название
+                </div>
+                <div className={classes.tableCell} style={{minWidth: 200, width: `calc((100% - ${data.edit?240:200}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
+                    Баланс
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{minWidth: 200, width: `calc((100% - ${data.edit?240:200}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
-                            Название
-                        </div>
-                        <div className={classes.tableCell} style={{minWidth: 200, width: `calc((100% - ${data.edit?240:200}px) / 2)`, justifyContent: data.edit?'center':'start'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
-                            Баланс
-                        </div>
-                    </div>
                     {
                         data.add?
                             <div className={classes.tableRow}>

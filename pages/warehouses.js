@@ -102,17 +102,17 @@ const Warehouses = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/warehouses`} />
                 <link rel='canonical' href={`${urlMain}/warehouses`}/>
             </Head>
+            <div className={classes.tableHead}>
+                {data.edit?<div style={{width: 40, padding: 0}}/>:null}
+                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
+                    Название
+                </div>
+                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
+                    Магазин
+                </div>
+            </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
-                            Название
-                        </div>
-                        <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
-                            Магазин
-                        </div>
-                    </div>
                     {
                         data.add&&!search?
                             <div className={classes.tableRow}>

@@ -41,6 +41,7 @@ const Sales = React.memo((props) => {
             order: false,
             search,
             skip: 0,
+            ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -53,6 +54,7 @@ const Sales = React.memo((props) => {
         })));
         setCount(await getSalesCount({
             order: false,
+            ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -97,6 +99,7 @@ const Sales = React.memo((props) => {
                 order: false,
                 skip: list.length, 
                 search,
+                ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
@@ -114,7 +117,7 @@ const Sales = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, promotion: true, user: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
+        <App filterShow={{status, promotion: true, user: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
                 <title>Продажи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -125,37 +128,40 @@ const Sales = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/sales`} />
                 <link rel='canonical' href={`${urlMain}/sales`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Номер
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Дата
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Доставка
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    К оплате
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Оплачено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Остаток
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Тип
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Менеджер
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Номер
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Дата
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Доставка
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            К оплате
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Оплачено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Остаток
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Менеджер
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/sale/[id]' as={`/sale/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
@@ -192,6 +198,9 @@ const Sales = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {checkFloat(element.paid - checkFloat(element.paymentAmount))}
                                 </div>
+                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                    {element.installment?'Рассрочка':'Наличка'}
+                                </div>
                                 <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     {element.manager.name}
                                 </div>
@@ -202,6 +211,7 @@ const Sales = React.memo((props) => {
             </Card>
             <UnloadUpload unload={()=>getUnloadSales({
                 order: false,
+                ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
@@ -239,6 +249,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 order: false,
                 skip: 0,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
@@ -253,6 +264,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             count: await getSalesCount({
                 order: false,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
+                ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},

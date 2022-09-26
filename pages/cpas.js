@@ -70,13 +70,13 @@ const Cpas = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/cpas`} />
                 <link rel='canonical' href={`${urlMain}/cpas`}/>
             </Head>
+            <div className={classes.tableHead}>
+                <div className={classes.tableCell} style={{width: '100%', justifyContent: 'center'}}>
+                    ФИО
+                </div>
+            </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: '100%', justifyContent: 'center'}}>
-                            ФИО
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/cpa/[id]' as={`/cpa/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{

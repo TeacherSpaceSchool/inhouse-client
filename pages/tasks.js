@@ -118,28 +118,28 @@ const Tasks = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/tasks`} />
                 <link rel='canonical' href={`${urlMain}/tasks`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Создан
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Срок
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
+                    От кого
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'start'}}>
+                    Исполнитель
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 700px)', justifyContent: 'start'}}>
+                    Комментарий
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
-                            Создан
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
-                            Срок
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
-                            От кого
-                        </div>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'start'}}>
-                            Исполнитель
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 600px)', justifyContent: 'start'}}>
-                            Комментарий
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/task/[id]' as={`/task/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
@@ -157,13 +157,13 @@ const Tasks = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, color: !['выполнен', 'проверен'].includes(element.status)&&new Date(element.date)<today?'red':'black'}}>
                                     {pdDDMMYYYY(element.date)}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 150}}>
+                                <div className={classes.tableCell} style={{width: 200}}>
                                     {element.who.name}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 150}}>
+                                <div className={classes.tableCell} style={{width: 200}}>
                                     {element.whom.name}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 600px)', maxHeight: 100, overflow: 'auto'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% - 700px)', maxHeight: 100, overflow: 'auto'}}>
                                     {element.info}
                                 </div>
                             </div>

@@ -11,6 +11,11 @@ export default makeStyles()(()=>{
             flexDirection: 'row',
         },
         tableHead: {
+            position: 'sticky',
+            top: '-1px',
+            margin: '10px 10px -10px 10px',
+            zIndex: 1000,
+            background: 'white',
             cursor: 'pointer',
             display: 'flex',
             justifyContent: 'start',

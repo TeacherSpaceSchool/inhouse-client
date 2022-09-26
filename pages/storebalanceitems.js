@@ -81,25 +81,25 @@ const StoreBalanceItems = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/storebalanceitems`} />
                 <link rel='canonical' href={`${urlMain}/storebalanceitems`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                    Магазин
+                </div>
+                <div className={classes.tableCell} style={{width: isMobileApp?200:300, justifyContent: 'center'}}>
+                    Модель
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
+                    Категория
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
+                    Фабрика
+                </div>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
+                    Баланс
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
-                            Магазин
-                        </div>
-                        <div className={classes.tableCell} style={{width: isMobileApp?200:300, justifyContent: 'center'}}>
-                            Модель
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
-                            Категория
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
-                            Фабрика
-                        </div>
-                        <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
-                            Баланс
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <div className={classes.tableRow}>
                             <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>

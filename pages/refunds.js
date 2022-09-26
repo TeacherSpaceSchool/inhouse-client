@@ -105,34 +105,34 @@ const Refunds = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/refunds`} />
                 <link rel='canonical' href={`${urlMain}/refunds`}/>
             </Head>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Статус
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Номер
+                </div>
+                <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
+                    Дата
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    К возврату
+                </div>
+                <div className={classes.tableCell} style={{width: 120, justifyContent: 'center'}}>
+                    Возвращено
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                    Остаток
+                </div>
+                <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
+                    Менеджер
+                </div>
+            </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead} >
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Статус
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Номер
-                        </div>
-                        <div className={classes.tableCell} style={{width: 130, justifyContent: 'center'}}>
-                            Дата
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            К оплате
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Оплачено
-                        </div>
-                        <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Остаток
-                        </div>
-                        <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
-                            Менеджер
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <Link href='/refund/[id]' as={`/refund/${element._id}`} key={element._id}>
                             <div className={classes.tableRow}  onClick={()=>{
@@ -159,7 +159,7 @@ const Refunds = React.memo((props) => {
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {element.amount}
                                 </div>
-                                <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 120, justifyContent: 'center'}}>
                                     {checkFloat(element.paymentAmount)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>

@@ -69,16 +69,16 @@ const BalanceClients = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/balanceclients`} />
                 <link rel='canonical' href={`${urlMain}/balanceclients`}/>
             </Head>
+            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                    Клиент
+                </div>
+                <div className={classes.tableCell} style={{...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}, justifyContent: 'start'}}>
+                    Баланс
+                </div>
+            </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    <div className={classes.tableHead}>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
-                            Клиент
-                        </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}, justifyContent: 'start'}}>
-                            Баланс
-                        </div>
-                    </div>
                     {list.map((element) =>
                         <div className={classes.tableRow} key={element._id}>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>

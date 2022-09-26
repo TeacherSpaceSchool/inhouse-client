@@ -178,19 +178,16 @@ const Refund = React.memo((props) => {
                             </div>
                             {
                                 data.object.discount?
+                                    <>
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>До уценки:&nbsp;</div>
                                         <div className={classes.value}>{checkFloat(data.object.amount+data.object.discount)} сом</div>
                                     </div>
-                                    :
-                                    null
-                            }
-                            {
-                                data.object.discount?
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>Уценка:&nbsp;</div>
                                         <div className={classes.value}>{data.object.discount} сом</div>
                                     </div>
+                                    </>
                                     :
                                     null
                             }
@@ -199,7 +196,7 @@ const Refund = React.memo((props) => {
                                 <div className={classes.value}>{`${data.object.amount} сом`}</div>
                             </div>
                             <div className={classes.row}>
-                                <div className={classes.nameField}>Оплачено:&nbsp;</div>
+                                <div className={classes.nameField}>Возвращено:&nbsp;</div>
                                 <div className={classes.value}>{checkFloat(data.object.paymentAmount)} {data.object.currency}</div>
                             </div>
                             {

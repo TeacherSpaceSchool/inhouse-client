@@ -26,7 +26,7 @@ export const getJWT = (cookie)=>{
 export const checkInt = (int) => {
     if(int&&int.length>1&&int[0]==='0')
         int = int.substring(1)
-    return isNaN(parseInt(int))?0:parseInt(int)
+    return isNaN(Math.round(int))?0:Math.round(int)
 }
 
 export const months = [
