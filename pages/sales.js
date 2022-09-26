@@ -150,7 +150,7 @@ const Sales = React.memo((props) => {
                             Оплачено
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Долг
+                            Остаток
                         </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Менеджер
@@ -184,10 +184,10 @@ const Sales = React.memo((props) => {
                                     </Link>
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                                    {element.paid}
+                                    {checkFloat(element.paid+element.prepaid)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                                    {checkFloat(element.paymentAmount)}
+                                    {checkFloat(checkFloat(element.paymentAmount)+element.prepaid)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {checkFloat(element.paid - checkFloat(element.paymentAmount))}

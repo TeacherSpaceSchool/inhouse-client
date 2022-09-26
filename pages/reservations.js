@@ -139,7 +139,7 @@ const Reservations = React.memo((props) => {
                             Оплачено
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Долг
+                            Остаток
                         </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Менеджер
@@ -172,13 +172,13 @@ const Reservations = React.memo((props) => {
                                     </Link>
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                                    {element.amount}
+                                    {element.paid}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
                                     {checkFloat(element.paymentAmount)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                                    {checkFloat(element.amount - checkFloat(element.paymentAmount))}
+                                    {checkFloat(element.paid - checkFloat(element.paymentAmount))}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                                     {element.manager.name}

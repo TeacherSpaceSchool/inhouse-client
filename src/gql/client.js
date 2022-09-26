@@ -52,6 +52,7 @@ export const getClients = async({search, skip, level, limit}, client)=>{
                             address
                             address1
                             level
+                            user {name role _id}
                         }
                     }`,
             })

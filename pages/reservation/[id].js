@@ -258,7 +258,7 @@ const Reservation = React.memo((props) => {
                             {
                                 data.object.paid&&checkFloat(data.object.paid - checkFloat(data.object.paymentAmount))?
                                     <div className={classes.row}>
-                                        <div className={classes.nameField}>Долг:&nbsp;</div>
+                                        <div className={classes.nameField}>Остаток:&nbsp;</div>
                                         <div className={classes.value}>{checkFloat(data.object.paid - checkFloat(data.object.paymentAmount))} {data.object.currency}</div>
                                     </div>
                                     :

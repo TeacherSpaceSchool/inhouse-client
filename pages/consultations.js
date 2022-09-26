@@ -140,10 +140,19 @@ const Consultations = React.memo((props) => {
                                 {element.operation}
                             </div>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>
-                                <Link href='/client/[id]' as={`/client/${element.client._id}`}>
-                                    <div>{element.client?element.client.name:null}</div>
-                                </Link>
-                                <div>{element.statusClient?element.statusClient:null}</div>
+                                {element.client?
+                                    <Link href='/client/[id]' as={`/client/${element.client._id}`}>
+                                        <div>{element.client.name}</div>
+                                    </Link>
+                                    :
+                                    null
+                                }
+                                {
+                                    element.statusClient?
+                                        <div>element.statusClient</div>
+                                        :
+                                        null
+                                }
                             </div>
                             <div className={classes.tableCell} style={{width: 250, overflow: 'auto', maxHeight: 100}}>
                                 {element.info}

@@ -79,11 +79,14 @@ const Clients = React.memo((props) => {
                 <div className={classes.table}>
                     <div className={classes.tableHead}>
                         {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
                             ФИО
                         </div>
-                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
                             Уровень
+                        </div>
+                        <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', justifyContent: 'start'}}>
+                            Менеджер
                         </div>
                     </div>
                     {list.map((element) =>
@@ -94,11 +97,14 @@ const Clients = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'client'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', maxHeight: 100, overflow: 'auto'}}>
                                     {element.name}
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:150}:{}, width: 'calc(100% / 3)', maxHeight: 100, overflow: 'auto'}}>
                                     {element.level}
+                                </div>
+                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth:300}:{}, width: 'calc(100% / 3)', maxHeight: 100, overflow: 'auto'}}>
+                                    {element.user?element.user.name:null}
                                 </div>
                             </div>
                         </Link>

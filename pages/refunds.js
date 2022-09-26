@@ -127,7 +127,7 @@ const Refunds = React.memo((props) => {
                             Оплачено
                         </div>
                         <div className={classes.tableCell} style={{width: 100, justifyContent: 'center'}}>
-                            Долг
+                            Остаток
                         </div>
                         <div className={classes.tableCell} style={{width: 250, justifyContent: 'center'}}>
                             Менеджер
