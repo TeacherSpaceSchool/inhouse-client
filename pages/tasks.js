@@ -148,7 +148,7 @@ const Tasks = React.memo((props) => {
                                 sessionStorage.scrollPositionName = 'task'
                                 sessionStorage.scrollPositionLimit = list.length
                             }}>
-                                <div className={classes.tableCell} style={{width: 100, color: !['выполнен', 'проверен'].includes(element.status)&&new Date(element.date)<today?'red':'black'}}>
+                                <div className={classes.tableCell} style={{width: 100}}>
                                     {pdDDMMYYYY(element.createdAt)}
                                 </div>
                                 <div className={classes.tableCell} style={{width: 100, fontWeight: 'bold', color: colors[element.status]}}>

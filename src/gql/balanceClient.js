@@ -31,6 +31,10 @@ export const getBalanceClients = async({search, skip, debtor, client}, clientGql
                             createdAt
                             client {_id name}
                             balance
+                            sale
+                            order
+                            reservation
+                            refund
                           }
                     }`,
             })

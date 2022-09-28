@@ -70,25 +70,37 @@ const BalanceClients = React.memo((props) => {
                 <link rel='canonical' href={`${urlMain}/balanceclients`}/>
             </Head>
             <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
-                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', justifyContent: 'start'}}>
+                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 400px) / 2)', justifyContent: 'start'}}>
                     Клиент
                 </div>
-                <div className={classes.tableCell} style={{...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}, justifyContent: 'start'}}>
+                <div className={classes.tableCell} style={{...isMobileApp?{width: 150}:{width: 'calc((100% - 400px) / 2)'}, justifyContent: 'start'}}>
                     Баланс
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Продажа
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    На заказ
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Бронь
+                </div>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                    Возврат
                 </div>
             </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
                     {list.map((element) =>
                         <div className={classes.tableRow} key={element._id}>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 400px) / 2)', maxHeight: 100, overflow: 'auto'}}>
                                 <Link href='/client/[id]' as={`/client/${element.client._id}`}>
                                     <a>
                                         {element.client.name}
                                     </a>
                                 </Link>
                             </div>
-                            <div className={classes.tableCell} style={{flexDirection: 'column', ...isMobileApp?{width: 150}:{width: 'calc(100% / 2)'}}}>
+                            <div className={classes.tableCell} style={{flexDirection: 'column', ...isMobileApp?{width: 150}:{width: 'calc((100% - 400px) / 2)'}}}>
                                 <div className={classes.row}>
                                     <div className={classes.value}>
                                         сом:&nbsp;
@@ -97,6 +109,18 @@ const BalanceClients = React.memo((props) => {
                                         {element.balance}
                                     </div>
                                 </div>
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                {element.sale}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                {element.order}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                {element.reservation}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 100, justifyContent: 'start'}}>
+                                {element.refund}
                             </div>
                         </div>
                     )}
