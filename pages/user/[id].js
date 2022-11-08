@@ -46,9 +46,9 @@ const User = React.memo((props) => {
     const { isMobileApp } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const unsaved = useRef();
-    let [add, setAdd] = useState(true);
-    let [edit, setEdit] = useState(true);
-    let [deleted, setdeleted] = useState(true);
+    let [add, setAdd] = useState(data.object?data.object.add:true);
+    let [edit, setEdit] = useState(data.object?data.object.edit:true);
+    let [deleted, setdeleted] = useState(data.object?data.object.deleted:true);
     let [hide, setHide] = useState(true);
     let [login, setLogin] = useState(data.object?data.object.login:'');
     let [loginError, setLoginError] = useState(false);
