@@ -77,7 +77,7 @@ const BonusCpas = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getBonusCpas({...filter.store?{store: filter.store._id}:{}, skip: list.length}))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -400,7 +400,7 @@ const BonusCpas = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) =>
+                    {list&&list.map((element, idx) =>
                         <div className={classes.tableRow}>
                             {
                                 data.edit?

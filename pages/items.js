@@ -77,7 +77,7 @@ const Items = React.memo((props) => {
                 ...filter.category?{category: filter.category._id}:{},
                 ...filter.typeItem?{type: filter.typeItem.name}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -111,7 +111,7 @@ const Items = React.memo((props) => {
             </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/item/[id]' as={`/item/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

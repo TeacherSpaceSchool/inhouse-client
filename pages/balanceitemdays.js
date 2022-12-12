@@ -64,7 +64,7 @@ const StoreBalanceItems = React.memo((props) => {
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.store?{store: filter.store._id}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -107,7 +107,7 @@ const StoreBalanceItems = React.memo((props) => {
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <div className={classes.tableRow}>
                             <div className={classes.tableCell} style={{width: 110, justifyContent: 'center'}}>
                                 {pdDDMMYYYY(element.date)}

@@ -52,7 +52,7 @@ const Cpas = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getCpas({skip: list.length, search}))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -77,7 +77,7 @@ const Cpas = React.memo((props) => {
             </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/cpa/[id]' as={`/cpa/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

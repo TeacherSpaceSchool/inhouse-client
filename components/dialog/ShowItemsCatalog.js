@@ -16,7 +16,7 @@ const ShowitemsCatalog =  React.memo(
             <div className={classes.main} style={{width}}>
                 <div className={isMobileApp?classes.fullDialogBody:classes.miniDialogBody}>
                     {
-                        list.map((element)=> <div key={element.item}>
+                        list&&list.map((element)=> <div key={element.item}>
                             <div className={classes.row}>
                                 <div className={classes.value} style={{marginBottom: 5}}>
                                     {element.name}: {element.count} {element.unit}

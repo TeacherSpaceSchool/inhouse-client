@@ -51,7 +51,7 @@ const BalanceClients = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getBalanceClients({skip: list.length, ...data.client?{client: data.client}:{}, search, debtor: filter.debtor}))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -91,7 +91,7 @@ const BalanceClients = React.memo((props) => {
             </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <div className={classes.tableRow} key={element._id}>
                             <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 400px) / 2)', maxHeight: 100, overflow: 'auto'}}>
                                 <Link href='/client/[id]' as={`/client/${element.client._id}`}>

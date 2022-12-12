@@ -66,7 +66,7 @@ const Promotions = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getPromotions({skip: list.length, search}))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -155,7 +155,7 @@ const Promotions = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) =>
+                    {list&&list.map((element, idx) =>
                         <div className={classes.tableRow} key={element._id}>
                         {
                                 data.edit?

@@ -45,7 +45,7 @@ const Faqs = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = cloneObject(await getFaqs({skip: list.length, search}))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -66,9 +66,9 @@ const Faqs = React.memo((props) => {
             <div className={classes.page}>
                 {data.add?
                     <CardFaq list={list} setList={setList}/>:null}
-                {list?list.map((element, idx)=>
+                {list&&list.map((element, idx)=>
                         <CardFaq edit={data.edit} deleted={data.deleted} list={list} idx={idx} setList={setList} key={element._id} element={element}/>
-                ):null}
+                )}
             </div>
             <div className='count'>
                 {`Всего: ${count}`}

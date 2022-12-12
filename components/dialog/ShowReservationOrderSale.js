@@ -16,7 +16,7 @@ const ShowReservationOrderSale =  React.memo(
             <div className={classes.main} style={{width}}>
                 <div className={isMobileApp?classes.fullDialogBody:classes.miniDialogBody}>
                     {
-                        list.map(element=> <div key={element._id}>
+                        list&&list.map(element=> <div key={element._id}>
                             <a href={`/${type}/${element._id}`} target='_blank'>
                                 <div className={classes.row}>
                                     <div className={classes.nameField} style={{marginBottom: 0}}>

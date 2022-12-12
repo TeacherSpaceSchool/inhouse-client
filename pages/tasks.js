@@ -100,7 +100,7 @@ const Tasks = React.memo((props) => {
                 ...filter.user?{employment: filter.user._id}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -140,7 +140,7 @@ const Tasks = React.memo((props) => {
             </div>
             <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/task/[id]' as={`/task/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

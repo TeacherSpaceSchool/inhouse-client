@@ -41,6 +41,46 @@ export const getItems = async({skip, limit, type, store, search, category, facto
     }
 }
 
+export const getZeroItems = async({client, type, search, category, factory}, gqlClient)=>{
+    let res
+    try{
+        gqlClient = gqlClient? gqlClient : getClientGql()
+        res = await gqlClient
+            .query({
+                variables: {client, type, search, category, factory},
+                query: gql`
+                    query ($client: ID!, $type: String, $search: String, $category: ID, $factory: ID) {
+                        zeroItems(client: $client, type: $type, search: $search category: $category, factory: $factory) {
+                            _id
+                            createdAt
+                            category {_id name}
+                            ID
+                            name
+                            free
+                            art
+                            images
+                            typeDiscount
+                            priceUSD
+                            primeCostUSD
+                            priceKGS
+                            primeCostKGS
+                            discount
+                            priceAfterDiscountKGS
+                            info
+                            type
+                            unit
+                            size
+                            characteristics
+                            factory {_id name}
+                        }
+                    }`,
+            })
+        return res.data.zeroItems
+    } catch(err){
+        console.error(err)
+    }
+}
+
 export const getTypeItems = async({search}, client)=>{
     try{
         client = client? client : getClientGql()

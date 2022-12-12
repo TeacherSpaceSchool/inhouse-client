@@ -69,7 +69,7 @@ const Consultations = React.memo((props) => {
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -115,7 +115,7 @@ const Consultations = React.memo((props) => {
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <div className={classes.tableRow}>
                             <div className={classes.tableCell} style={{width: 200, overflow: 'auto'}}>
                                 <Link href='/user/[id]' as={`/user/${element.manager._id}`}>

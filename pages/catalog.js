@@ -17,7 +17,7 @@ import { forceCheck } from 'react-lazyload';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
 import initialApp from '../src/initialApp'
-import { getItems } from '../src/gql/item'
+import { getItems, getZeroItems } from '../src/gql/item'
 import { cloneObject } from '../src/lib'
 import { wrapper } from '../src/redux/configureStore'
 import SetCharacteristics from '../components/dialog/SetCharacteristics'
@@ -31,11 +31,12 @@ import ShowItemsCatalog from '../components/dialog/ShowItemsCatalog';
 import { getReservations } from '../src/gql/reservation';
 import { getInstallments } from '../src/gql/installment';
 import {getConsultations, setConsultation} from '../src/gql/consultation'
+import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
     const basketStyle = basketStyleFile();
-    const { setShowLightbox, setImagesLightbox, setIndexLightbox } = props.appActions;
+    const { setShowLightbox, setImagesLightbox, setIndexLightbox, showLoad } = props.appActions;
     const { data } = props;
     const { search, filter, isMobileApp, consultation } = props.app;
     const { profile } = props.user;
@@ -44,6 +45,7 @@ const Catalog = React.memo((props) => {
     const initialRender = useRef(true);
     let [client, setClient] = useState(consultation.client);
     let [reservations, setReservations] = useState(data.reservations);
+    let [zeroItems, setZeroItems] = useState(data.zeroItems);
     let [itemsReservations, setItemsReservations] = useState(data.itemsReservations);
     let [installmentsDebt, setInstallmentsDebt] = useState(data.installmentsDebt);
     const localStorageBasket = useRef(true);
@@ -101,27 +103,13 @@ const Catalog = React.memo((props) => {
         })()
     },[search])
     let paginationWork = useRef(true);
-    const checkPagination = async()=>{
-        if(paginationWork.current){
-            let addedList = cloneObject(await getItems({
-                catalog: data.type!=='order',
-                skip: list.length,
-                search,
-                ...filter.factory?{factory: filter.factory._id}:{},
-                ...filter.category?{category: filter.category._id}:{}
-            }))
-            if(addedList.length>0)
-                setList([...list, ...addedList])
-            else
-                paginationWork.current = false
-        }
-    }
     useEffect(()=>{
         if(initialRender.current)
             initialRender.current = false;
         else {
             (async () => {
                 if (data.type === 'sale') {
+                    setBasket({})
                     if (client) {
                         let installments = [
                             ...await getInstallments({
@@ -148,6 +136,15 @@ const Catalog = React.memo((props) => {
                             items: true
                         })
                         setReservations(reservations)
+
+                        zeroItems = await cloneObject(await getZeroItems({
+                            client: client._id,
+                            search,
+                            ...filter.factory?{factory: filter.factory._id}:{},
+                            ...filter.category?{category: filter.category._id}:{}
+                        }))
+                        setZeroItems(zeroItems)
+
                         itemsReservations = {}
                         for (let i = 0; i < reservations.length; i++) {
                             for (let i1 = 0; i1 < reservations[i].itemsReservation.length; i1++) {
@@ -159,6 +156,7 @@ const Catalog = React.memo((props) => {
                         setItemsReservations(itemsReservations)
                     }
                     else {
+                        setZeroItems([])
                         setReservations([])
                         setItemsReservations({})
                         setInstallmentsDebt(0)
@@ -172,8 +170,25 @@ const Catalog = React.memo((props) => {
             })()
         }
     },[client])
+    const containerRef = useBottomScrollListener(async()=>{
+        if(paginationWork.current){
+            await showLoad(true)
+            let addedList = cloneObject(await getItems({
+                catalog: data.type!=='order',
+                skip: list.length,
+                search,
+                ...filter.factory?{factory: filter.factory._id}:{},
+                ...filter.category?{category: filter.category._id}:{}
+            }))
+            if(addedList&&addedList.length>0)
+                setList([...list, ...addedList])
+            else
+                paginationWork.current = false
+            await showLoad(false)
+        }
+    });
     return (
-        <App filterShow={{factory: true, category: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Каталог'>
+        <App filterShow={{factory: true, category: true}} qrScannerShow={true} searchShow={true} pageName='Каталог'>
             <Head>
                 <title>Каталог</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -220,9 +235,147 @@ const Catalog = React.memo((props) => {
                             null
                     }
                     <Divider/>
-                    <div className={basketStyle.classes.list}>
+                    <div ref={containerRef} className={basketStyle.classes.list}>
                         {
-                            list.map((element, idx) => {
+                            zeroItems&&zeroItems.map((element, idx) => {
+                                return <div key={element._id}>
+                                    <div className={classes.rowTop}>
+                                        <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
+                                            setShowLightbox(true)
+                                            setImagesLightbox(element.images)
+                                            setIndexLightbox(0)
+                                        }}/>
+                                        <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
+                                            <div className={basketStyle.classes.name}>
+                                                {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
+                                                {element.name}
+                                            </div>
+                                            <div className={classes.row} style={{marginBottom: 10}}>
+                                                {
+                                                    element.discount?
+                                                        <>
+                                                        <strike className={basketStyle.classes.priceBeforeDiscount}>
+                                                            {basket[element._id]&&basket[element._id].priceKGSCount?basket[element._id].priceKGSCount:element.priceKGS}
+                                                        </strike>
+                                                        &nbsp;
+                                                        </>
+                                                        :
+                                                        null
+                                                }
+                                                <div className={basketStyle.classes.price}>
+                                                    {`${basket[element._id]&&basket[element._id].priceAfterDiscountKGSCount?basket[element._id].priceAfterDiscountKGSCount:element.priceAfterDiscountKGS} сом`}
+                                                </div>
+                                            </div>
+                                            <div className={basketStyle.classes.counter}>
+                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                    if(basket[element._id]) {
+                                                        basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
+                                                        if(basket[element._id].count<0)
+                                                            basket[element._id].count = 0
+                                                        if (basket[element._id].count === 0)
+                                                            delete basket[element._id]
+                                                        setBasket({...basket})
+                                                    }
+                                                }}>–
+                                                </div>
+                                                <input type={isMobileApp?'number':'text'} className={basketStyle.classes.counternmbr}
+                                                       value={basket[element._id]?basket[element._id].count:''} onChange={(event) => {
+                                                    if(!basket[element._id])
+                                                        basket[element._id] = {
+                                                            ...element,
+                                                            priceKGSCount: 0,
+                                                            priceAfterDiscountKGSCount: 0,
+                                                            count: 0,
+                                                        }
+                                                    basket[element._id].count = inputFloat(event.target.value)
+                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
+                                                        basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
+                                                    setBasket({...basket})
+                                                }}/>
+                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                    if(!basket[element._id])
+                                                        basket[element._id] = {
+                                                            ...element,
+                                                            priceKGSCount: 0,
+                                                            priceAfterDiscountKGSCount: 0,
+                                                            count: 0,
+                                                        }
+                                                    let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
+                                                    if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
+                                                        basket[element._id].count = newCount
+                                                        setBasket({...basket})
+                                                    }
+                                                }}>+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
+                                        {
+                                            data.type!=='order'?
+                                                <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
+                                                    {
+                                                        itemsReservations[element._id]?
+                                                            <>
+                                                            <span style={{color: 'orange'}}>
+                                                                Бронь: {itemsReservations[element._id]} {element.unit}
+                                                            </span>
+                                                            <br/>
+                                                            </>
+                                                            :
+                                                            null
+                                                    }
+                                                    Остаток: {element.free} {element.unit}
+                                                </div>
+                                                :
+                                                null
+                                        }
+                                        <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
+                                            zeroItems[idx].showCharacteristics = !zeroItems[idx].showCharacteristics
+                                            setZeroItems([...zeroItems])
+                                        }}>
+                                            {element.showCharacteristics?'🔼':'🔽'}Характеристики: {basket[element._id]?basket[element._id].characteristics.length:element.characteristics.length}
+                                        </div>
+                                    </div>
+                                    {
+                                        element.showCharacteristics?
+                                            <>
+                                            {
+                                                (basket[element._id]?basket[element._id].characteristics:element.characteristics).map((characteristic) => <div className={classes.row}>
+                                                    <div className={basketStyle.classes.characteristic}>
+                                                        {characteristic[0]}:&nbsp;{characteristic[1]}
+                                                    </div>
+                                                </div>)
+                                            }
+                                            <div className={basketStyle.classes.addCharacteristic} onClick={()=>{
+                                                if(basket[element._id]) {
+                                                    if(isMobileApp) {
+                                                        setFullDialog('Характеристики', <SetCharacteristics
+                                                            _id={element._id} setBasket={setBasket} basket={basket}
+                                                            characteristics={basket[element._id].characteristics}/>)
+                                                        showFullDialog(true)
+                                                    }
+                                                    else {
+                                                        setMiniDialog('Характеристики', <SetCharacteristics
+                                                            _id={element._id} setBasket={setBasket} basket={basket}
+                                                            characteristics={basket[element._id].characteristics}/>)
+                                                        showMiniDialog(true)
+                                                    }
+                                                }
+                                            }}>
+                                                Добавить характеристику
+                                            </div>
+                                            </>
+                                            :
+                                            null
+                                    }
+                                    <Divider/>
+                                    <br/>
+                                </div>
+                            })
+                        }
+                        {
+                            list&&list.map((element, idx) => {
                                 return <div key={element._id}>
                                     <div className={classes.rowTop}>
                                         <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
@@ -446,7 +599,7 @@ Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             ctx.res.end()
         } else
             Router.push('/')
-    let reservations = [], itemsReservations = {}, installmentsDebt = 0
+    let reservations = [], itemsReservations = {}, installmentsDebt = 0, zeroItems = []
     if(store.getState().app.consultation.client) {
         let installments = [
             ...await getInstallments({
@@ -478,11 +631,15 @@ Catalog.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 itemsReservations[reservations[i].itemsReservation[i1].item] = checkFloat(itemsReservations[reservations[i].itemsReservation[i1].item] + reservations[i].itemsReservation[i1].count)
             }
         }
+        zeroItems = cloneObject(await getZeroItems({
+            client: store.getState().app.consultation.client._id,
+        },  ctx.req?await getClientGqlSsr(ctx.req):undefined))
     }
     return {
         data: {
             installmentsDebt,
             reservations,
+            zeroItems,
             itemsReservations,
             type: ctx.query.type,
             list: cloneObject(await getItems({

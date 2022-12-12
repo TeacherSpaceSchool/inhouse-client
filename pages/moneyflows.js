@@ -198,7 +198,7 @@ const MoneyFlows = React.memo((props) => {
                 ...data.refund?{refund: data.refund}:{},
                 ...data.installment?{installment: data.installment}:{},
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -537,7 +537,7 @@ const MoneyFlows = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) =>
+                    {list&&list.map((element, idx) =>
                         <div className={classes.tableRow} key={element._id}>
                             {
                                 data.edit?

@@ -136,7 +136,7 @@ const WayItems = React.memo((props) => {
                     if(addedList[i].dispatchDate)
                         addedList[i].dispatchDate = pdDatePicker(addedList[i].dispatchDate)
                 }
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -385,7 +385,7 @@ const WayItems = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) => {
+                    {list&&list.map((element, idx) => {
                         let used = 0
                         for(let i=0; i<element.bookings.length; i++)
                             used += element.bookings[i].amount

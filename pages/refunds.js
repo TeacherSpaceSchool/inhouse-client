@@ -87,7 +87,7 @@ const Refunds = React.memo((props) => {
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -133,7 +133,7 @@ const Refunds = React.memo((props) => {
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/refund/[id]' as={`/refund/${element._id}`} key={element._id}>
                             <div className={classes.tableRow}  onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

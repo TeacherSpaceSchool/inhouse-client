@@ -114,7 +114,7 @@ const Installments = React.memo((props) => {
                 ...filter.store?{store: filter.store._id}:{},
                 ...data._id?{_id: data._id}:{},
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -164,7 +164,7 @@ const Installments = React.memo((props) => {
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    {list.map((element, idx) =>
+                    {list&&list.map((element, idx) =>
                         <div className={classes.tableRow}>
                             {
                                 data.edit?

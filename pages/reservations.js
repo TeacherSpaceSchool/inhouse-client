@@ -96,7 +96,7 @@ const Reservations = React.memo((props) => {
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -145,7 +145,7 @@ const Reservations = React.memo((props) => {
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/reservation/[id]' as={`/reservation/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

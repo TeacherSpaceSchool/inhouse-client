@@ -77,7 +77,7 @@ const Users = React.memo((props) => {
                 ...filter.department?{department: filter.department.name}:{},
                 ...filter.position?{position: filter.position.name}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -108,7 +108,7 @@ const Users = React.memo((props) => {
             </div>
             <Card className={classes.page}>
                 <div className={classes.table}>
-                    {list.map((element) =>
+                    {list&&list.map((element) =>
                         <Link href='/user/[id]' as={`/user/${element._id}`} key={element._id}>
                             <div className={classes.tableRow} onClick={()=>{
                                 let appBody = (document.getElementsByClassName('App-body'))[0]

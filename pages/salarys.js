@@ -112,7 +112,7 @@ const Salarys = React.memo((props) => {
                 ...filter.position?{position: filter.position.name}:{},
                 ...filter.store?{store: filter.store._id}:{}
             }))
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -441,7 +441,7 @@ const Salarys = React.memo((props) => {
                             :
                             null
                     }
-                    {list.map((element, idx) =>
+                    {list&&list.map((element, idx) =>
                         <div className={classes.tableRow}>
                             {
                                 data.edit?

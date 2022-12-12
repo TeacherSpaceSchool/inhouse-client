@@ -29,7 +29,7 @@ const Error = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = await getErrors(list.length)
-            if(addedList.length>0)
+            if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
                 paginationWork.current = false
@@ -48,11 +48,11 @@ const Error = React.memo((props) => {
                 <link rel='canonical' href={`${urlMain}/errors`}/>
             </Head>
             <div className={classes.page}>
-                {list?list.map((element)=>
+                {list&&list.map((element)=>
                     <LazyLoad scrollContainer={'.App-body'} key={element._id} height={120} offset={[120, 0]} debounce={0} once={true}  placeholder={<CardErrorPlaceholder/>}>
                         <CardError element={element}/>
                     </LazyLoad>
-                ):null}
+                )}
             </div>
             {
                 profile.role==='admin'?
