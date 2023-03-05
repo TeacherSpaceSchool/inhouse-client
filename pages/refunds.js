@@ -77,7 +77,7 @@ const Refunds = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getRefunds({
+            let addedList = await getRefunds({
                 skip: list.length, 
                 search,
                 ...filter.store?{store: filter.store._id}:{},
@@ -86,7 +86,7 @@ const Refunds = React.memo((props) => {
                 ...filter.status?{status: filter.status}:{},
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

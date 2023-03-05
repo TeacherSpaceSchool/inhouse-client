@@ -70,13 +70,13 @@ const Items = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getItems({
+            let addedList = await getItems({
                 skip: list.length,
                 search,
                 ...filter.factory?{factory: filter.factory._id}:{},
                 ...filter.category?{category: filter.category._id}:{},
                 ...filter.typeItem?{type: filter.typeItem.name}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

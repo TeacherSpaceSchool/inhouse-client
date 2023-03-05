@@ -51,7 +51,7 @@ const Cpas = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getCpas({skip: list.length, search}))
+            let addedList = await getCpas({skip: list.length, search})
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

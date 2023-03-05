@@ -180,7 +180,7 @@ const MoneyFlows = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getMoneyFlows({skip: list.length,
+            let addedList = await getMoneyFlows({skip: list.length,
                 search,
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
@@ -197,7 +197,7 @@ const MoneyFlows = React.memo((props) => {
                 ...data.order?{order: data.order}:{},
                 ...data.refund?{refund: data.refund}:{},
                 ...data.installment?{installment: data.installment}:{},
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

@@ -104,7 +104,7 @@ const Installments = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getInstallments({
+            let addedList = await getInstallments({
                 search,
                 skip: list.length,
                 ...filter.client?{client: filter.client._id}:{},
@@ -113,7 +113,7 @@ const Installments = React.memo((props) => {
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...data._id?{_id: data._id}:{},
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

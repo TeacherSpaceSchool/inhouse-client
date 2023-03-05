@@ -56,7 +56,7 @@ const Clients = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getClients({skip: list.length, ...filter.level?{level: filter.level}:{}, search}))
+            let addedList = await getClients({skip: list.length, ...filter.level?{level: filter.level}:{}, search})
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

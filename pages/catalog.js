@@ -102,7 +102,6 @@ const Catalog = React.memo((props) => {
             }
         })()
     },[search])
-    let paginationWork = useRef(true);
     useEffect(()=>{
         if(initialRender.current)
             initialRender.current = false;
@@ -170,16 +169,17 @@ const Catalog = React.memo((props) => {
             })()
         }
     },[client])
+    let paginationWork = useRef(true);
     const containerRef = useBottomScrollListener(async()=>{
         if(paginationWork.current){
             await showLoad(true)
-            let addedList = cloneObject(await getItems({
+            let addedList = await getItems({
                 catalog: data.type!=='order',
                 skip: list.length,
                 search,
                 ...filter.factory?{factory: filter.factory._id}:{},
                 ...filter.category?{category: filter.category._id}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

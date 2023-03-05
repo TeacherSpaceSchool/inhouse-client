@@ -4,7 +4,7 @@ import App from '../layouts/App';
 import { connect } from 'react-redux'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
-import {pdHHMM, distanceHour, cloneObject} from '../src/lib'
+import {pdHHMM, distanceHour} from '../src/lib'
 import initialApp from '../src/initialApp'
 import { bindActionCreators } from 'redux'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'

@@ -85,7 +85,7 @@ const Reservations = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getReservations({
+            let addedList = await getReservations({
                 skip: list.length, 
                 search,
                 ...filter.store?{store: filter.store._id}:{},
@@ -95,7 +95,7 @@ const Reservations = React.memo((props) => {
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

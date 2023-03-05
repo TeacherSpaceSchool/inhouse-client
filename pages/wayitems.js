@@ -121,14 +121,14 @@ const WayItems = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getWayItems({skip: list.length,
+            let addedList = await getWayItems({skip: list.length,
                 ...filter.my==='my'?{my: true}:{},
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.date?{date: filter.date}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.status?{status: filter.status}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
-            }))
+            })
             if(data.edit)
                 for(let i=0; i<addedList.length; i++) {
                     if(addedList[i].arrivalDate)

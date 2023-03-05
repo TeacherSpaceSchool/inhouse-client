@@ -103,7 +103,7 @@ const Salarys = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getSalarys({
+            let addedList = await getSalarys({
                 skip: list.length,
                 search,
                 date,
@@ -111,7 +111,7 @@ const Salarys = React.memo((props) => {
                 ...filter.department?{department: filter.department.name}:{},
                 ...filter.position?{position: filter.position.name}:{},
                 ...filter.store?{store: filter.store._id}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

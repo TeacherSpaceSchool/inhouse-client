@@ -56,14 +56,14 @@ const StoreBalanceItems = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getBalanceItemDays({
+            let addedList = await getBalanceItemDays({
                 skip: list.length,
                 ...filter.warehouse?{warehouse: filter.warehouse._id}:{},
                 ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
                 ...filter.dateEnd&&filter.dateEnd.length?{dateEnd: filter.dateEnd}:{},
                 ...filter.item?{item: filter.item._id}:{},
                 ...filter.store?{store: filter.store._id}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

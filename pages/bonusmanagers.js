@@ -78,7 +78,7 @@ const BonusManagers = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: list.length}))
+            let addedList = await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: list.length})
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else

@@ -92,14 +92,14 @@ const Tasks = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = cloneObject(await getTasks({
+            let addedList = await getTasks({
                 skip: list.length,
                 search,
                 sort,
                 ...filter.status?{status: filter.status}:{},
                 ...filter.user?{employment: filter.user._id}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
-            }))
+            })
             if(addedList&&addedList.length>0)
                 setList([...list, ...addedList])
             else
