@@ -172,9 +172,9 @@ const Catalog = React.memo((props) => {
     const containerRef = useRef();
     useEffect(() => {
         if(containerRef.current) {
-            containerRef.current.addEventListener('scroll', async () => {
+            const scrollHandle = async () => {
                 const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
-                if (paginationWork.current && scrolledTop <= 0) {
+                if (paginationWork.current && scrolledTop <= 100) {
                     paginationWork.current = false
                     await showLoad(true)
                     let addedList = await getItems({
@@ -193,8 +193,9 @@ const Catalog = React.memo((props) => {
                     await showLoad(false)
                     paginationWork.current = true
                 }
-            });
-            //return () => containerRef.current.removeEventListener('scroll');
+            };
+            containerRef.current.addEventListener('scroll', scrollHandle);
+            return () => containerRef.current.removeEventListener('scroll', scrollHandle);
         }
     }, [])
     return (

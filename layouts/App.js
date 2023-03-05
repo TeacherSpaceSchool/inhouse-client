@@ -129,17 +129,18 @@ const App = React.memo(props => {
     containerRef = useRef();
     useEffect(() => {
         if(checkPagination&&containerRef.current) {
-            containerRef.current.addEventListener('scroll', async () => {
+            const scrollHandle = async () => {
                 const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
-                if (tic.current&&scrolledTop<=0) {
+                if (tic.current&&scrolledTop<=100) {
                     tic.current = false
                     await setReloadPage(true)
                     await checkPagination()
                     await setReloadPage(false)
                     tic.current = true
                 }
-            });
-            //return () => containerRef.current.removeEventListener('scroll');
+            }
+            containerRef.current.addEventListener('scroll', scrollHandle);
+            return () => containerRef.current.removeEventListener('scroll', scrollHandle);
         }
     }, [])
 
