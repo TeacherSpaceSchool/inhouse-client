@@ -194,7 +194,7 @@ const Catalog = React.memo((props) => {
                     paginationWork.current = true
                 }
             });
-            return () => containerRef.current.removeEventListener('scroll');
+            //return () => containerRef.current.removeEventListener('scroll');
         }
     }, [])
     return (

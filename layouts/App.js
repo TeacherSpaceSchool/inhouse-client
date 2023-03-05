@@ -139,7 +139,7 @@ const App = React.memo(props => {
                     tic.current = true
                 }
             });
-            return () => containerRef.current.removeEventListener('scroll');
+            //return () => containerRef.current.removeEventListener('scroll');
         }
     }, [])
 
