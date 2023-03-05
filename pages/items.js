@@ -70,6 +70,7 @@ const Items = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
+            paginationWork.current = false
             let addedList = await getItems({
                 skip: list.length,
                 search,
@@ -77,10 +78,10 @@ const Items = React.memo((props) => {
                 ...filter.category?{category: filter.category._id}:{},
                 ...filter.typeItem?{type: filter.typeItem.name}:{}
             })
-            if(addedList&&addedList.length>0)
+            if(addedList&&addedList.length>0) {
                 setList([...list, ...addedList])
-            else
-                paginationWork.current = false
+            }
+            paginationWork.current = true
         }
     }
     return (
