@@ -63,8 +63,7 @@ const StoreBalanceItems = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = await getStoreBalanceItems({skip: list.length, sort, ...filter.item?{item: filter.item._id}:{}, ...filter.store?{store: filter.store._id}:{}})
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

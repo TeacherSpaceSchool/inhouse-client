@@ -31,7 +31,6 @@ import ShowItemsCatalog from '../components/dialog/ShowItemsCatalog';
 import { getReservations } from '../src/gql/reservation';
 import { getInstallments } from '../src/gql/installment';
 import {getConsultations, setConsultation} from '../src/gql/consultation'
-import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 
 const Catalog = React.memo((props) => {
     const {classes} = pageListStyle();
@@ -170,23 +169,34 @@ const Catalog = React.memo((props) => {
         }
     },[client])
     let paginationWork = useRef(true);
-    const containerRef = useBottomScrollListener(async()=>{
-        if(paginationWork.current){
-            await showLoad(true)
-            let addedList = await getItems({
-                catalog: data.type!=='order',
-                skip: list.length,
-                search,
-                ...filter.factory?{factory: filter.factory._id}:{},
-                ...filter.category?{category: filter.category._id}:{}
-            })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
-            else
-                paginationWork.current = false
-            await showLoad(false)
+    const containerRef = useRef();
+    useEffect(() => {
+        if(containerRef.current) {
+            containerRef.current.addEventListener('scroll', async () => {
+                const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
+                if (paginationWork.current && scrolledTop <= 0) {
+                    paginationWork.current = false
+                    await showLoad(true)
+                    let addedList = await getItems({
+                        catalog: data.type !== 'order',
+                        skip: list.length,
+                        search,
+                        ...filter.factory ? {factory: filter.factory._id} : {},
+                        ...filter.category ? {category: filter.category._id} : {}
+                    })
+                    if (addedList && addedList.length > 0) {
+                        list = [...list, ...addedList];
+                        setList(list);
+                    }
+                    else
+                        paginationWork.current = false
+                    await showLoad(false)
+                    paginationWork.current = true
+                }
+            });
+            return () => containerRef.current.removeEventListener('scroll');
         }
-    });
+    }, [])
     return (
         <App filterShow={{factory: true, category: true}} qrScannerShow={true} searchShow={true} pageName='Каталог'>
             <Head>

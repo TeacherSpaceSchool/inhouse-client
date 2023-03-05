@@ -100,8 +100,7 @@ const Tasks = React.memo((props) => {
                 ...filter.user?{employment: filter.user._id}:{},
                 ...filter.timeDif==='late'?{late: true}:filter.timeDif==='soon'?{soon: true}:filter.timeDif==='today'?{today: true}:{}
             })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

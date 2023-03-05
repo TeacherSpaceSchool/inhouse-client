@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import AppBar from '../components/app/AppBar'
 import Dialog from '../components/app/Dialog'
 import FullDialog from '../components/app/FullDialog'
@@ -13,7 +13,6 @@ import Router from 'next/router'
 import { useRouter } from 'next/router';
 import { subscriptionData } from '../src/gql/data';
 import { useSubscription } from '@apollo/client';
-import { useBottomScrollListener } from 'react-bottom-scroll-listener';
 import * as snackbarActions from '../src/redux/actions/snackbar'
 import Lightbox from 'react-awesome-lightbox';
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
@@ -126,14 +125,23 @@ const App = React.memo(props => {
             Router.events.off('routeChangeComplete', routeChangeComplete)
         }
     },[])
-
-    containerRef = useBottomScrollListener(async()=>{
-        if(checkPagination) {
-            await setReloadPage(true)
-            await checkPagination()
-            await setReloadPage(false)
+    const tic = useRef(true)
+    containerRef = useRef();
+    useEffect(() => {
+        if(checkPagination&&containerRef.current) {
+            containerRef.current.addEventListener('scroll', async () => {
+                const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
+                if (tic.current&&scrolledTop<=0) {
+                    tic.current = false
+                    await setReloadPage(true)
+                    await checkPagination()
+                    await setReloadPage(false)
+                    tic.current = true
+                }
+            });
+            return () => containerRef.current.removeEventListener('scroll');
         }
-    });
+    }, [])
 
     let subscriptionDataRes = useSubscription(subscriptionData);
     useEffect(()=>{

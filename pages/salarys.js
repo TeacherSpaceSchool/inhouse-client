@@ -112,8 +112,7 @@ const Salarys = React.memo((props) => {
                 ...filter.position?{position: filter.position.name}:{},
                 ...filter.store?{store: filter.store._id}:{}
             })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

@@ -198,8 +198,7 @@ const MoneyFlows = React.memo((props) => {
                 ...data.refund?{refund: data.refund}:{},
                 ...data.installment?{installment: data.installment}:{},
             })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

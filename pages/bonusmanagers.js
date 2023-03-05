@@ -79,8 +79,7 @@ const BonusManagers = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = await getBonusManagers({...filter.store?{store: filter.store._id}:{}, skip: list.length})
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

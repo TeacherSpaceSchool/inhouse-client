@@ -111,8 +111,7 @@ const Orders = React.memo((props) => {
                 ...filter.delivery?{delivery: filter.delivery}:{},
                 ...filter.promotion?{promotion: filter.promotion._id}:{},
             })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

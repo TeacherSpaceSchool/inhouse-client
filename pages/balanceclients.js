@@ -51,8 +51,7 @@ const BalanceClients = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = await getBalanceClients({skip: list.length, ...data.client?{client: data.client}:{}, search, debtor: filter.debtor})
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

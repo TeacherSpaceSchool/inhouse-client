@@ -114,8 +114,7 @@ const Installments = React.memo((props) => {
                 ...filter.store?{store: filter.store._id}:{},
                 ...data._id?{_id: data._id}:{},
             })
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }

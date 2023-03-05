@@ -136,8 +136,7 @@ const WayItems = React.memo((props) => {
                     if(addedList[i].dispatchDate)
                         addedList[i].dispatchDate = pdDatePicker(addedList[i].dispatchDate)
                 }
-            if(addedList&&addedList.length>0)
-                setList([...list, ...addedList])
+            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }
