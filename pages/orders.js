@@ -120,7 +120,7 @@ const Orders = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, /*item: true,*/ installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
+        <App filterShow={{status, user: true, item: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
             <Head>
                 <title>На заказ</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

@@ -96,7 +96,7 @@ const Refunds = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, /*item: true,*/ userRole: 'менеджер', client: true, store: true, period: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
+        <App filterShow={{status, user: true, item: true, userRole: 'менеджер', client: true, store: true, period: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
             <Head>
                 <title>Возврат</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

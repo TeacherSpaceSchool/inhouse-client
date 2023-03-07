@@ -113,7 +113,7 @@ const Deliveries = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, client: true, /*item: true,*/ delivery: true, store: true}} list={list} checkPagination={checkPagination} pageName='Доставка'>
+        <App filterShow={{status, client: true, item: true, delivery: true, store: true}} list={list} checkPagination={checkPagination} pageName='Доставка'>
             <Head>
                 <title>Доставка</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

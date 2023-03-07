@@ -105,7 +105,7 @@ const Reservations = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, /*item: true,*/ userRole: 'менеджер', client: true, store: true, period: true, timeDif: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Бронь'>
+        <App filterShow={{status, user: true, item: true, userRole: 'менеджер', client: true, store: true, period: true, timeDif: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Бронь'>
             <Head>
                 <title>Бронь</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
