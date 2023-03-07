@@ -51,7 +51,7 @@ const Faqs = React.memo((props) => {
         }
     }
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Инструкции'>
+        <App list={list} checkPagination={checkPagination} searchShow={true} pageName='Инструкции'>
             <Head>
                 <title>Инструкции</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

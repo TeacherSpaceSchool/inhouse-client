@@ -2,7 +2,10 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getStoreBalanceItems, getStoreBalanceItemsCount, getUnloadStoreBalanceItems} from '../src/gql/storeBalanceItem'
+import {
+    getStoreBalanceItems, getStoreBalanceItemsCount, getUnloadStoreBalanceItems,
+    repairBalanceItems
+} from '../src/gql/storeBalanceItem'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
 import pageListStyle from '../src/styleMUI/list'
 import { urlMain } from '../src/const'
@@ -15,8 +18,11 @@ import * as snackbarActions from '../src/redux/actions/snackbar'
 import { bindActionCreators } from 'redux'
 import { wrapper } from '../src/redux/configureStore'
 import Card from '@mui/material/Card';
+import Fab from '@mui/material/Fab';
 import Link from 'next/link';
 import UnloadUpload from '../components/app/UnloadUpload';
+import BuildIcon from '@mui/icons-material/Build';
+import Confirmation from '../components/dialog/Confirmation';
 
 const sorts = [
     {
@@ -41,6 +47,8 @@ const StoreBalanceItems = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
     const { isMobileApp, filter, sort } = props.app;
+    const { showSnackBar } = props.snackbarActions;
+    const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const initialRender = useRef(true);
     let [list, setList] = useState(data.list);
     let [count, setCount] = useState(data.count);
@@ -62,14 +70,23 @@ const StoreBalanceItems = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = await getStoreBalanceItems({skip: list.length, sort, ...filter.item?{item: filter.item._id}:{}, ...filter.store?{store: filter.store._id}:{}})
+            console.log({
+                skip: list.length, sort,
+                ...filter.item?{item: filter.item._id}:{},
+                ...filter.store?{store: filter.store._id}:{}
+            })
+            let addedList = await getStoreBalanceItems({
+                skip: list.length, sort,
+                ...filter.item?{item: filter.item._id}:{},
+                ...filter.store?{store: filter.store._id}:{}
+            })
             if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
             else
                 paginationWork.current = false
         }
     }
     return (
-        <App checkPagination={checkPagination} filterShow={{item: true, store: true}} sorts={sorts} pageName='Баланс моделей'>
+        <App list={list} checkPagination={checkPagination} filterShow={{item: true, store: true}} sorts={sorts} pageName='Баланс моделей'>
             <Head>
                 <title>Баланс моделей</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -158,7 +175,22 @@ const StoreBalanceItems = React.memo((props) => {
             <div className='count'>
                 {`Всего: ${count}`}
             </div>
-            <UnloadUpload unload={()=>getUnloadStoreBalanceItems({...filter.item?{item: filter.item._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
+            <Fab color='primary' aria-label='Исправить' className={classes.fab} onClick={()=>{
+                const action = async () => {
+                    let res = await repairBalanceItems()
+                    if (res === 'ERROR'||!res)
+                        showSnackBar('Ошибка', 'error')
+                    else {
+                        showSnackBar('Успешно', 'success')
+                        Router.reload()
+                    }
+                }
+                setMiniDialog('Вы уверены?', <Confirmation action={action}/>)
+                showMiniDialog(true)
+            }}>
+                <BuildIcon/>
+            </Fab>
+            <UnloadUpload position={2} unload={()=>getUnloadStoreBalanceItems({...filter.item?{item: filter.item._id}:{}, ...filter.store?{store: filter.store._id}:{}})}/>
         </App>
     )
 })

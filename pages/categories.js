@@ -75,7 +75,7 @@ const Category = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Категории' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} checkPagination={checkPagination} list={list} searchShow={true} pageName='Категории' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Категории</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

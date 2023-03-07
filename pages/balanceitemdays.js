@@ -70,7 +70,7 @@ const StoreBalanceItems = React.memo((props) => {
         }
     }
     return (
-        <App checkPagination={checkPagination} filterShow={{item: true, store: true, warehouse: true, period: true}} pageName='Движение на складах'>
+        <App checkPagination={checkPagination} list={list} filterShow={{item: true, store: true, warehouse: true, period: true}} pageName='Движение на складах'>
             <Head>
                 <title>Движение на складах</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

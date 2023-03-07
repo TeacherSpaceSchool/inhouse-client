@@ -36,6 +36,7 @@ const Refunds = React.memo((props) => {
         setList(cloneObject(await getRefunds({
             search, 
             skip: 0,
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -45,6 +46,7 @@ const Refunds = React.memo((props) => {
         })));
         setCount(await getRefundsCount({
             ...filter.store?{store: filter.store._id}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
@@ -81,6 +83,7 @@ const Refunds = React.memo((props) => {
                 skip: list.length, 
                 search,
                 ...filter.store?{store: filter.store._id}:{},
+                ...filter.item?{item: filter.item._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{},
@@ -93,7 +96,7 @@ const Refunds = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, userRole: 'менеджер', client: true, store: true, period: true}} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
+        <App filterShow={{status, user: true, /*item: true,*/ userRole: 'менеджер', client: true, store: true, period: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Возврат'>
             <Head>
                 <title>Возврат</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -208,6 +211,7 @@ Refunds.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
                 ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
                 ...store.getState().app.filter.manager?{manager: store.getState().app.filter.manager._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
@@ -219,6 +223,7 @@ Refunds.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
                 ...store.getState().app.filter.dateEnd&&store.getState().app.filter.dateEnd.length?{dateEnd: store.getState().app.filter.dateEnd}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.filter.manager?{manager: store.getState().app.filter.manager._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},

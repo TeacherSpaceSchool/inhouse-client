@@ -122,7 +122,7 @@ const Salarys = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App full unsaved={unsaved} filterShow={{user: true, store: true, department: true, position: true}} checkPagination={checkPagination} pageName='Зарплаты' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App list={list} full unsaved={unsaved} filterShow={{user: true, store: true, department: true, position: true}} checkPagination={checkPagination} pageName='Зарплаты' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Зарплаты</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

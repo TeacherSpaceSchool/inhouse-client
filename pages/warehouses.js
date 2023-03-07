@@ -90,7 +90,7 @@ const Warehouses = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} searchShow={true} pageName='Склады' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App list={list} unsaved={unsaved} filterShow={{store: true}} checkPagination={checkPagination} searchShow={true} pageName='Склады' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Склады</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

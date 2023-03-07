@@ -63,7 +63,7 @@ const Clients = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{level: true}} checkPagination={checkPagination} searchShow={true} pageName='Клиенты'>
+        <App filterShow={{level: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Клиенты'>
             <Head>
                 <title>Клиенты</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

@@ -60,3 +60,17 @@ export const getStoreBalanceItemsCount = async({item, store}, client)=>{
         console.error(err)
     }
 }
+
+export const repairBalanceItems = async()=>{
+    try{
+        const client = getClientGql()
+        let res = await client.mutate({
+            mutation : gql`
+                    mutation {
+                        repairBalanceItems 
+                    }`})
+        return res.data.repairBalanceItems
+    } catch(err){
+        console.error(err)
+    }
+}

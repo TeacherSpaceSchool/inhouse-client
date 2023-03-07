@@ -91,7 +91,7 @@ const Cashboxes = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App filterShow={{store: true}} unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Кассы/Банки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App list={list} filterShow={{store: true}} unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Кассы/Банки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Кассы/Банки</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

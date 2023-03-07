@@ -43,6 +43,7 @@ const Orders = React.memo((props) => {
             skip: 0,
             order: true,
             ...filter.installment?{installment: true}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -57,6 +58,7 @@ const Orders = React.memo((props) => {
             order: true,
             ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
@@ -100,6 +102,7 @@ const Orders = React.memo((props) => {
                 order: true,
                 skip: list.length,
                 search,
+                ...filter.item?{item: filter.item._id}:{},
                 ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
@@ -117,7 +120,7 @@ const Orders = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, user: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
+        <App filterShow={{status, user: true, /*item: true,*/ installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='На заказ'>
             <Head>
                 <title>На заказ</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -247,6 +250,7 @@ Orders.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             list: cloneObject(await getSales({
                 skip: 0,
                 order: true,
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
@@ -262,6 +266,7 @@ Orders.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getSalesCount({
                 order: true,
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},

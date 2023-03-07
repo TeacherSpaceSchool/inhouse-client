@@ -83,7 +83,7 @@ const Users = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{store: true, role: true, department: true, position: true}} checkPagination={checkPagination} searchShow={true} pageName='Пользователи'>
+        <App filterShow={{store: true, role: true, department: true, position: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Пользователи'>
             <Head>
                 <title>Пользователи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

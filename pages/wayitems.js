@@ -152,7 +152,7 @@ const WayItems = React.memo((props) => {
         setFree(checkFloat(newElement.amount - used))
     },[newElement])
     return (
-        <App unsaved={unsaved} filterShow={{my: profile.role==='менеджер', item: true, store: true, status, timeDif: true, date: true}} checkPagination={checkPagination} pageName='В пути' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} filterShow={{my: profile.role==='менеджер', item: true, store: true, status, timeDif: true, date: true}} list={list} checkPagination={checkPagination} pageName='В пути' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>В пути</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

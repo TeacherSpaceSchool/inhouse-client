@@ -124,7 +124,7 @@ const Installments = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App searchShow={true} full unsaved={unsaved} filterShow={{client: true, store: true, status, date: true, timeDif: true }} checkPagination={checkPagination} pageName='Рассрочки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App searchShow={true} full unsaved={unsaved} filterShow={{client: true, store: true, status, date: true, timeDif: true }} list={list} checkPagination={checkPagination} pageName='Рассрочки' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Рассрочки</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

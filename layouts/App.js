@@ -28,7 +28,7 @@ const App = React.memo(props => {
     const { setProfile, logout } = props.userActions;
     const { setIsMobileApp, setShowAppBar, setShowLightbox } = props.appActions;
     const { profile, authenticated } = props.user;
-    const { load, search, showAppBar, filter, showLightbox, imagesLightbox, indexLightbox } = props.app;
+    const { load, search, showAppBar, filter, sort, showLightbox, imagesLightbox, indexLightbox } = props.app;
     const [unread, setUnread] = useState({});
     const { showMiniDialog, showFullDialog } = props.mini_dialogActions;
     const [reloadPage, setReloadPage] = useState(false);
@@ -130,19 +130,21 @@ const App = React.memo(props => {
     useEffect(() => {
         if(checkPagination&&containerRef.current) {
             const scrollHandle = async () => {
-                const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
-                if (tic.current&&scrolledTop<=100) {
-                    tic.current = false
-                    await setReloadPage(true)
-                    await checkPagination()
-                    await setReloadPage(false)
-                    tic.current = true
+                if(containerRef.current.clientHeight<containerRef.current.scrollHeight) {
+                    const scrolledTop = containerRef.current.scrollHeight - (containerRef.current.offsetHeight + containerRef.current.scrollTop)
+                    if (tic.current && scrolledTop <= 100) {
+                        tic.current = false
+                        await setReloadPage(true)
+                        await checkPagination()
+                        await setReloadPage(false)
+                        tic.current = true
+                    }
                 }
             }
             containerRef.current.addEventListener('scroll', scrollHandle);
             return () => containerRef.current.removeEventListener('scroll', scrollHandle);
         }
-    }, [])
+    }, [filter, search, sort, list])
 
     let subscriptionDataRes = useSubscription(subscriptionData);
     useEffect(()=>{

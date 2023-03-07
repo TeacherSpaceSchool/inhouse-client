@@ -58,7 +58,7 @@ const Cpas = React.memo((props) => {
         }
     }
     return (
-        <App checkPagination={checkPagination} searchShow={true} pageName='Дизайнеры'>
+        <App list={list} checkPagination={checkPagination} searchShow={true} pageName='Дизайнеры'>
             <Head>
                 <title>Дизайнеры</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

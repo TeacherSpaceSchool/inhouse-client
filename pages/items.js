@@ -83,7 +83,7 @@ const Items = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{factory: true, category: true, typeItem: true}} qrScannerShow={true} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
+        <App filterShow={{factory: true, category: true, typeItem: true}} qrScannerShow={true} list={list} checkPagination={checkPagination} searchShow={true} pageName='Модели'>
             <Head>
                 <title>Модели</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

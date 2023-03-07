@@ -208,7 +208,7 @@ const MoneyFlows = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App searchShow={true} full unsaved={unsaved} filterShow={{period: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App searchShow={true} full unsaved={unsaved} filterShow={{period: true, store: true, currency: true, operation: true, moneyArticle: true, moneyRecipient: true, user: true, client: true, cashbox: true}} list={list} checkPagination={checkPagination} pageName='Движения денег' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Движения денег</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

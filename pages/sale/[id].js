@@ -196,6 +196,14 @@ const Sale = React.memo((props) => {
                                         null
                                 }
                             </div>
+                            <div className={classes.row}>
+                                <div className={classes.nameField}>
+                                    Создан:
+                                </div>
+                                <div className={classes.value}>
+                                    {pdDDMMYYHHMM(data.object.createdAt)}
+                                </div>
+                            </div>
                             {
                                 data.object.promotion?
                                     <div className={classes.row}>

@@ -106,7 +106,7 @@ const Tasks = React.memo((props) => {
         }
     }
     return (
-        <App sorts={sorts} filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
+        <App list={list} sorts={sorts} filterShow={{status, user: true, timeDif: true}} checkPagination={checkPagination} searchShow={true} pageName='Задачи'>
             <Head>
                 <title>Задачи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

@@ -40,6 +40,7 @@ const Deliveries = React.memo((props) => {
             skip: 0,
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{status: 'доставка'},
             ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
@@ -52,6 +53,7 @@ const Deliveries = React.memo((props) => {
             order: undefined,
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{status: 'доставка'},
             ...filter.dateStart&&filter.dateStart.length?{dateStart: filter.dateStart}:{},
@@ -95,6 +97,7 @@ const Deliveries = React.memo((props) => {
                 skip: list.length,
                 search,
                 ...filter.store?{store: filter.store._id}:{},
+                ...filter.item?{item: filter.item._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
                 ...filter.client?{client: filter.client._id}:{},
                 ...filter.status?{status: filter.status}:{status: 'доставка'},
@@ -110,7 +113,7 @@ const Deliveries = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, client: true, delivery: true, store: true}} checkPagination={checkPagination} pageName='Доставка'>
+        <App filterShow={{status, client: true, /*item: true,*/ delivery: true, store: true}} list={list} checkPagination={checkPagination} pageName='Доставка'>
             <Head>
                 <title>Доставка</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -218,6 +221,7 @@ Deliveries.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 skip: 0,
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{status: 'доставка'},
@@ -233,6 +237,7 @@ Deliveries.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => 
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{status: 'доставка'},
                 ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},

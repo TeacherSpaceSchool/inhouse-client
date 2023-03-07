@@ -65,7 +65,10 @@ const MoneyArticle = React.memo((props) => {
     const checkPagination = async()=>{
         if(paginationWork.current){
             let addedList = await getMoneyArticles({skip: list.length, search})
-            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
+            if(addedList&&addedList.length>0){
+                list = [...list, ...addedList];
+                setList(list);
+            }
             else
                 paginationWork.current = false
         }
@@ -75,7 +78,7 @@ const MoneyArticle = React.memo((props) => {
     let handleMenuQuick = event => setAnchorElQuick(event.currentTarget);
     let handleCloseQuick = () => setAnchorElQuick(null);
     return (
-        <App unsaved={unsaved} checkPagination={checkPagination} searchShow={true} pageName='Статьи' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
+        <App unsaved={unsaved} checkPagination={checkPagination} list={list} searchShow={true} pageName='Статьи' menuItems={menuItems} anchorElQuick={anchorElQuick} setAnchorElQuick={setAnchorElQuick}>
             <Head>
                 <title>Статьи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

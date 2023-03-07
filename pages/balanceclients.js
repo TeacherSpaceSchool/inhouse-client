@@ -50,14 +50,22 @@ const BalanceClients = React.memo((props) => {
     let paginationWork = useRef(true);
     const checkPagination = async()=>{
         if(paginationWork.current){
-            let addedList = await getBalanceClients({skip: list.length, ...data.client?{client: data.client}:{}, search, debtor: filter.debtor})
-            if(addedList&&addedList.length>0){list = [...list, ...addedList]; setList(list);}
+            let addedList = await getBalanceClients({
+                skip: list.length,
+                ...data.client?{client: data.client}:{},
+                search,
+                debtor: filter.debtor
+            })
+            if(addedList&&addedList.length>0){
+                list = [...list, ...addedList];
+                setList(list);
+            }
             else
                 paginationWork.current = false
         }
     }
     return (
-        <App filterShow={{debtor: true}} checkPagination={checkPagination} searchShow={true} pageName='Баланс клиентов'>
+        <App filterShow={{debtor: true}} checkPagination={checkPagination} list={list} searchShow={true} pageName='Баланс клиентов'>
             <Head>
                 <title>Баланс клиентов</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

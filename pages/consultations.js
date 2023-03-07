@@ -75,7 +75,7 @@ const Consultations = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, period: true}} checkPagination={checkPagination} pageName='Консультации'>
+        <App filterShow={{statusClient: true, user: true, userRole: 'менеджер', store: true, period: true}} list={list} checkPagination={checkPagination} pageName='Консультации'>
             <Head>
                 <title>Консультации</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />

@@ -43,6 +43,7 @@ const Sales = React.memo((props) => {
             skip: 0,
             ...filter.installment?{installment: true}:{},
             ...filter.store?{store: filter.store._id}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
             ...filter.status?{status: filter.status}:{},
@@ -55,6 +56,7 @@ const Sales = React.memo((props) => {
         setCount(await getSalesCount({
             order: false,
             ...filter.installment?{installment: true}:{},
+            ...filter.item?{item: filter.item._id}:{},
             ...filter.store?{store: filter.store._id}:{},
             ...filter.user?{manager: filter.user._id}:{},
             ...filter.client?{client: filter.client._id}:{},
@@ -99,6 +101,7 @@ const Sales = React.memo((props) => {
                 order: false,
                 skip: list.length, 
                 search,
+                ...filter.item?{item: filter.item._id}:{},
                 ...filter.installment?{installment: true}:{},
                 ...filter.store?{store: filter.store._id}:{},
                 ...filter.user?{manager: filter.user._id}:{},
@@ -116,7 +119,7 @@ const Sales = React.memo((props) => {
         }
     }
     return (
-        <App filterShow={{status, promotion: true, user: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
+        <App filterShow={{status, promotion: true, /*item: true,*/ user: true, installment: true, client: true, userRole: 'менеджер', cpa: true, period: true, delivery: true, store: true}} list={list} checkPagination={checkPagination} searchShow={true} pageName='Продажи'>
             <Head>
                 <title>Продажи</title>
                 <meta name='description' content='Inhouse.kg | МЕБЕЛЬ и КОВРЫ БИШКЕК' />
@@ -251,6 +254,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
                 ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
                 ...store.getState().app.filter.user?{manager: store.getState().app.filter.user._id}:{},
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.filter.client?{client: store.getState().app.filter.client._id}:{},
                 ...store.getState().app.filter.status?{status: store.getState().app.filter.status}:{},
                 ...store.getState().app.filter.dateStart&&store.getState().app.filter.dateStart.length?{dateStart: store.getState().app.filter.dateStart}:{},
@@ -262,6 +266,7 @@ Sales.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) => {
             },  ctx.req?await getClientGqlSsr(ctx.req):undefined)),
             count: await getSalesCount({
                 order: false,
+                ...store.getState().app.filter.item?{item: store.getState().app.filter.item._id}:{},
                 ...store.getState().app.search?{search: store.getState().app.search}:{},
                 ...store.getState().app.filter.installment?{installment: true}:{},
                 ...store.getState().app.filter.store?{store: store.getState().app.filter.store._id}:{},
