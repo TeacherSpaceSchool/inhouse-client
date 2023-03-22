@@ -22,20 +22,20 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
         </td>
       </tr>
     </table>
-    <p style="text-align:justify;font-size:10pt">${doc.name}, в лице директора ${doc.director}, действующего на основании Устава, именуемое в дальнейшем <strong>Продавец</strong>&nbsp; с одной стороны и гражданин(ка) Кыргызской Республики <strong>${client.name} ${pdDDMMYYYY(client.birthday)}</strong> года рождения с другой стороны, именуемый в дальнейшем&nbsp; <strong>Покупатель</strong> заключили настоящий Договор о нижеследующем: </p>
+    <p style="text-align:justify;font-size:10pt">${doc.name}, в лице директора ${doc.director}, действующего на основании Устава, именуемое в дальнейшем <strong>Продавец</strong>&nbsp; с одной стороны и <strong>${client.name} ${pdDDMMYYYY(client.birthday)}</strong> года рождения с другой стороны, именуемый в дальнейшем&nbsp; <strong>Покупатель</strong> заключили настоящий Договор о нижеследующем: </p>
     <p style="text-align:center;font-size:10pt">
       <strong>1. ПРЕДМЕТ ДОГОВОРА</strong>
     </p>
-    <span style="text-align:justify;font-size:10pt">1.1 Продавец обязуется поставить товар, а именно: ${items}в течение <strong>90 дней со дня получения оплаты.</strong>
+    <span style="text-align:justify;font-size:10pt">1.1 Продавец обязуется поставить товар в течение <strong>90 дней со дня получения оплаты.</strong>
     </span>
     <br>
     <span style="text-align:justify;font-size:10pt">1.2 Продавец по согласованию с Покупателем имеет право досрочно доставить товар.</span>
     <p style="text-align:center;font-size:10pt">
       <strong>2. ЦЕНА И СУММА ДОГОВОРА</strong>
     </p>
-    <span style="text-align:justify;font-size:10pt">2.1 Поставляемый по настоящему Договору товар, оплачивается по ценам, согласно спецификации (приложения № 1) являющейся неотъемлемой частью данного договора.</span>
+    <span style="text-align:justify;font-size:10pt">2.1 Поставляемый по настоящему Договору товар, оплачивается по ценам, <strong>согласно спецификации (приложения № 1) являющейся неотъемлемой частью данного договора.</strong></span>
     <br>
-    <span style="text-align:justify;font-size:10pt">2.2 Общая стоимость поставляемого по настоящему Договору товара составляет ${(sale.amountEnd-checkFloat(sale.prepaid))} (${await numberToWord((sale.amountEnd-checkFloat(sale.prepaid)), 'all')}) сом.</span>
+    <span style="text-align:justify;font-size:10pt">2.2 Общая стоимость поставляемого по настоящему Договору товара составляет <strong>${(sale.amountEnd-checkFloat(sale.prepaid))} (${await numberToWord((sale.amountEnd-checkFloat(sale.prepaid)), 'all')})</strong> сом.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">2.3 Данная стоимость не включает в себя доставку, сборку и установку товара у Покупателя.</span>
     <br>
@@ -55,7 +55,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     <br>
     <span style="text-align:justify;font-size:10pt">2) Подготовить поверхность помещения для произведения сборки мебели;</span>
     <br>
-    <span style="text-align:justify;font-size:10pt">3) Уведомить Продавца в случае изменения условий Приложения №1 (комплектации, отделки, цвета обивки товара, и т.д.) в течение 3 (трех) дней, со дня составления договора купли-продажи, с обязательным внесением изменений в Приложение.</span>
+    <span style="text-align:justify;font-size:10pt">3) Уведомить Продавца в случае изменения условий Приложения №1 (комплектации, отделки, цвета обивки товара, и т.д.), с обязательным внесением изменений в Приложении.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">4) Проинформировать Продавца в течение 5 (пяти) дней с момента получения заказа, в случае если прибывший товар оказывается явно бракованным или не соответствует спецификации Приложения №1.</span>
     <br>
@@ -85,6 +85,8 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     <span style="text-align:justify;font-size:10pt">5.1. Продавец гарантирует качество товара сроком на один год, при условии соблюдения Покупателем норм хранения и правильной эксплуатации мебели.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">5.2. Продавец передает товар лично Покупателю или лицу, действующему в его интересах и предъявившему Договор и Доверенность от Покупателя.</span>
+    <br>
+   <span style="text-align:justify;font-size:10pt">5.3. В случаях просрочки доставки заказа, Продавцом предоставляется Покупателю дополнительная скидка от стоимости товара в размере 0,1% за каждый день просрочки доставки, но не более 5% от суммы договора.</span>
     <br>
     <p style="text-align:center;font-size:10pt">
       <strong>6. ОТВЕТСТВЕННОСТЬ СТОРОН</strong>

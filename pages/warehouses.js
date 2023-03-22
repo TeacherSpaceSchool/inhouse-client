@@ -28,6 +28,7 @@ import History from '../components/dialog/History';
 import HistoryIcon from '@mui/icons-material/History';
 import AutocomplectOnline from '../components/app/AutocomplectOnline'
 import Card from '@mui/material/Card';
+import Checkbox from '@mui/material/Checkbox';
 
 import UnloadUpload from '../components/app/UnloadUpload';
 const uploadText = 'Формат xlsx:\n_id или текущее название склада (если требуется обновить);\nназвание;\nназвание магазина.'
@@ -42,6 +43,7 @@ const Warehouses = React.memo((props) => {
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
         name: '',
+        hide: false,
         store: filter.store
     });
     let [list, setList] = useState(data.list);
@@ -103,10 +105,13 @@ const Warehouses = React.memo((props) => {
             </Head>
             <div className={classes.tableHead}>
                 {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
+                <div className={classes.tableCell} style={{width: 100, justifyContent: data.edit?'center':'start'}}>
+                    Скрывать
+                </div>
+                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 140px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
                     Название
                 </div>
-                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
+                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 140px) / 2)':'calc(100% / 2)', justifyContent: data.edit?'center':'start'}}>
                     Магазин
                 </div>
             </div>
@@ -152,7 +157,19 @@ const Warehouses = React.memo((props) => {
                                         </Badge>
                                     </IconButton>
                                 </div>
-                                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)'}}>
+                                <div className={classes.tableCell} style={{width: 100}}>
+                                    <Checkbox
+                                        checked={newElement.hide}
+                                        onChange={()=>{
+                                            newElement.unsaved = true
+                                            unsaved.current['new'] = true
+                                            newElement.hide = !newElement.hide
+                                            setNewElement({...newElement})
+                                        }}
+                                        color='primary'
+                                    />
+                                </div>
+                                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 140px) / 2)':'calc(100% / 2)'}}>
                                     <Input
                                         placeholder='Название'
                                         error={!newElement.name.length&&newElement.unsaved}
@@ -169,7 +186,7 @@ const Warehouses = React.memo((props) => {
                                         }}
                                     />
                                 </div>
-                                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)'}}>
+                                <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 140px) / 2)':'calc(100% / 2)'}}>
                                     {
                                         !filter.store?
                                             <AutocomplectOnline
@@ -275,6 +292,12 @@ const Warehouses = React.memo((props) => {
                                     :
                                     null
                             }
+                            <div className={classes.tableCell} style={{width: 100}}>
+                                <Checkbox
+                                    checked={element.hide}
+                                    color='primary'
+                                />
+                            </div>
                             <div className={classes.tableCell} style={{width: data.edit?'calc((100% - 40px) / 2)':'calc(100% / 2)', maxHeight: 100, overflow: 'auto'}}>
                                 {
                                     data.edit?

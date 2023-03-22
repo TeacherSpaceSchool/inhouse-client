@@ -6,7 +6,7 @@ import * as appActions from '../../src/redux/actions/app'
 import * as snackbarActions from '../../src/redux/actions/snackbar'
 import Button from '@mui/material/Button';
 import dialogContentStyle from '../../src/styleMUI/dialogContent'
-import { checkFloat, inputFloat, inputInt } from '../../src/lib';
+import {checkFloat, checkInt, inputFloat, inputInt} from '../../src/lib';
 import { getCpas } from '../../src/gql/cpa';
 import { getPromotions } from '../../src/gql/promotion';
 import { addReservation } from '../../src/gql/reservation';
@@ -125,9 +125,9 @@ const BuyBasket =  React.memo(
                             </div>
                             <div className={classes.typeShow} onClick={()=>{
                                 if(discountType==='%')
-                                    discount = checkFloat(discount*amountStart/100)
+                                    discount = checkInt(discount*amountStart/100)
                                 else
-                                    discount = checkFloat(discount*100/amountStart)
+                                    discount = checkInt(discount*100/amountStart)
                                 setDiscount(discount)
                                 setDiscountType(discountType==='%'?'сом':'%')
                             }}>

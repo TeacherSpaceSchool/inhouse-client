@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
-import App from '../layouts/App';
+import App, {containerRef} from '../layouts/App';
 import { connect } from 'react-redux'
 import pageListStyle from '../src/styleMUI/list'
 import basketStyleFile from '../src/styleMUI/basket'
@@ -195,7 +195,10 @@ const Catalog = React.memo((props) => {
                 }
             };
             containerRef.current.addEventListener('scroll', scrollHandle);
-            return () => containerRef.current.removeEventListener('scroll', scrollHandle);
+            return () => {
+                if(containerRef.current)
+                    containerRef.current.removeEventListener('scroll', scrollHandle);
+            }
         }
     }, [])
     return (
@@ -249,278 +252,280 @@ const Catalog = React.memo((props) => {
                     <div ref={containerRef} className={basketStyle.classes.list}>
                         {
                             zeroItems&&zeroItems.map((element, idx) => {
-                                return <div key={element._id}>
-                                    <div className={classes.rowTop}>
-                                        <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
-                                            setShowLightbox(true)
-                                            setImagesLightbox(element.images)
-                                            setIndexLightbox(0)
-                                        }}/>
-                                        <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
-                                            <div className={basketStyle.classes.name}>
-                                                {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
-                                                {element.name}
-                                            </div>
-                                            <div className={classes.row} style={{marginBottom: 10}}>
-                                                {
-                                                    element.discount?
-                                                        <>
-                                                        <strike className={basketStyle.classes.priceBeforeDiscount}>
-                                                            {basket[element._id]&&basket[element._id].priceKGSCount?basket[element._id].priceKGSCount:element.priceKGS}
-                                                        </strike>
-                                                        &nbsp;
-                                                        </>
-                                                        :
-                                                        null
-                                                }
-                                                <div className={basketStyle.classes.price}>
-                                                    {`${basket[element._id]&&basket[element._id].priceAfterDiscountKGSCount?basket[element._id].priceAfterDiscountKGSCount:element.priceAfterDiscountKGS} сом`}
+                                if(!search||element.name.toLowerCase().includes(search.toLowerCase()))
+                                    return <div key={element._id}>
+                                        <div className={classes.rowTop}>
+                                            <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
+                                                setShowLightbox(true)
+                                                setImagesLightbox(element.images)
+                                                setIndexLightbox(0)
+                                            }}/>
+                                            <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
+                                                <div className={basketStyle.classes.name}>
+                                                    {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
+                                                    {element.name}
                                                 </div>
-                                            </div>
-                                            <div className={basketStyle.classes.counter}>
-                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
-                                                    if(basket[element._id]) {
-                                                        basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
-                                                        if(basket[element._id].count<0)
-                                                            basket[element._id].count = 0
-                                                        if (basket[element._id].count === 0)
-                                                            delete basket[element._id]
-                                                        setBasket({...basket})
-                                                    }
-                                                }}>–
-                                                </div>
-                                                <input type={isMobileApp?'number':'text'} className={basketStyle.classes.counternmbr}
-                                                       value={basket[element._id]?basket[element._id].count:''} onChange={(event) => {
-                                                    if(!basket[element._id])
-                                                        basket[element._id] = {
-                                                            ...element,
-                                                            priceKGSCount: 0,
-                                                            priceAfterDiscountKGSCount: 0,
-                                                            count: 0,
-                                                        }
-                                                    basket[element._id].count = inputFloat(event.target.value)
-                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
-                                                        basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
-                                                    setBasket({...basket})
-                                                }}/>
-                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
-                                                    if(!basket[element._id])
-                                                        basket[element._id] = {
-                                                            ...element,
-                                                            priceKGSCount: 0,
-                                                            priceAfterDiscountKGSCount: 0,
-                                                            count: 0,
-                                                        }
-                                                    let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
-                                                    if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
-                                                        basket[element._id].count = newCount
-                                                        setBasket({...basket})
-                                                    }
-                                                }}>+
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
-                                        {
-                                            data.type!=='order'?
-                                                <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
+                                                <div className={classes.row} style={{marginBottom: 10}}>
                                                     {
-                                                        itemsReservations[element._id]?
+                                                        element.discount?
                                                             <>
-                                                            <span style={{color: 'orange'}}>
-                                                                Бронь: {itemsReservations[element._id]} {element.unit}
-                                                            </span>
-                                                            <br/>
+                                                            <strike className={basketStyle.classes.priceBeforeDiscount}>
+                                                                {basket[element._id]&&basket[element._id].priceKGSCount?basket[element._id].priceKGSCount:element.priceKGS}
+                                                            </strike>
+                                                            &nbsp;
                                                             </>
                                                             :
                                                             null
                                                     }
-                                                    Остаток: {element.free} {element.unit}
+                                                    <div className={basketStyle.classes.price}>
+                                                        {`${basket[element._id]&&basket[element._id].priceAfterDiscountKGSCount?basket[element._id].priceAfterDiscountKGSCount:element.priceAfterDiscountKGS} сом`}
+                                                    </div>
                                                 </div>
+                                                <div className={basketStyle.classes.counter}>
+                                                    <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                        if(basket[element._id]) {
+                                                            basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
+                                                            if(basket[element._id].count<0)
+                                                                basket[element._id].count = 0
+                                                            if (basket[element._id].count === 0)
+                                                                delete basket[element._id]
+                                                            setBasket({...basket})
+                                                        }
+                                                    }}>–
+                                                    </div>
+                                                    <input type={isMobileApp?'number':'text'} className={basketStyle.classes.counternmbr}
+                                                           value={basket[element._id]?basket[element._id].count:''} onChange={(event) => {
+                                                        if(!basket[element._id])
+                                                            basket[element._id] = {
+                                                                ...element,
+                                                                priceKGSCount: 0,
+                                                                priceAfterDiscountKGSCount: 0,
+                                                                count: 0,
+                                                            }
+                                                        basket[element._id].count = inputFloat(event.target.value)
+                                                        if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
+                                                            basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
+                                                        setBasket({...basket})
+                                                    }}/>
+                                                    <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                        if(!basket[element._id])
+                                                            basket[element._id] = {
+                                                                ...element,
+                                                                priceKGSCount: 0,
+                                                                priceAfterDiscountKGSCount: 0,
+                                                                count: 0,
+                                                            }
+                                                        let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
+                                                        if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
+                                                            basket[element._id].count = newCount
+                                                            setBasket({...basket})
+                                                        }
+                                                    }}>+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
+                                            {
+                                                data.type!=='order'?
+                                                    <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
+                                                        {
+                                                            itemsReservations[element._id]?
+                                                                <>
+                                                                <span style={{color: 'orange'}}>
+                                                                    Бронь: {itemsReservations[element._id]} {element.unit}
+                                                                </span>
+                                                                <br/>
+                                                                </>
+                                                                :
+                                                                null
+                                                        }
+                                                        Остаток: {element.free} {element.unit}
+                                                    </div>
+                                                    :
+                                                    null
+                                            }
+                                            <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
+                                                zeroItems[idx].showCharacteristics = !zeroItems[idx].showCharacteristics
+                                                setZeroItems([...zeroItems])
+                                            }}>
+                                                {element.showCharacteristics?'🔼':'🔽'}Характеристики: {basket[element._id]?basket[element._id].characteristics.length:element.characteristics.length}
+                                            </div>
+                                        </div>
+                                        {
+                                            element.showCharacteristics?
+                                                <>
+                                                {
+                                                    (basket[element._id]?basket[element._id].characteristics:element.characteristics).map((characteristic) => <div className={classes.row}>
+                                                        <div className={basketStyle.classes.characteristic}>
+                                                            {characteristic[0]}:&nbsp;{characteristic[1]}
+                                                        </div>
+                                                    </div>)
+                                                }
+                                                <div className={basketStyle.classes.addCharacteristic} onClick={()=>{
+                                                    if(basket[element._id]) {
+                                                        if(isMobileApp) {
+                                                            setFullDialog('Характеристики', <SetCharacteristics
+                                                                _id={element._id} setBasket={setBasket} basket={basket}
+                                                                characteristics={basket[element._id].characteristics}/>)
+                                                            showFullDialog(true)
+                                                        }
+                                                        else {
+                                                            setMiniDialog('Характеристики', <SetCharacteristics
+                                                                _id={element._id} setBasket={setBasket} basket={basket}
+                                                                characteristics={basket[element._id].characteristics}/>)
+                                                            showMiniDialog(true)
+                                                        }
+                                                    }
+                                                }}>
+                                                    Добавить характеристику
+                                                </div>
+                                                </>
                                                 :
                                                 null
                                         }
-                                        <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
-                                            zeroItems[idx].showCharacteristics = !zeroItems[idx].showCharacteristics
-                                            setZeroItems([...zeroItems])
-                                        }}>
-                                            {element.showCharacteristics?'🔼':'🔽'}Характеристики: {basket[element._id]?basket[element._id].characteristics.length:element.characteristics.length}
-                                        </div>
+                                        <Divider/>
+                                        <br/>
                                     </div>
-                                    {
-                                        element.showCharacteristics?
-                                            <>
-                                            {
-                                                (basket[element._id]?basket[element._id].characteristics:element.characteristics).map((characteristic) => <div className={classes.row}>
-                                                    <div className={basketStyle.classes.characteristic}>
-                                                        {characteristic[0]}:&nbsp;{characteristic[1]}
-                                                    </div>
-                                                </div>)
-                                            }
-                                            <div className={basketStyle.classes.addCharacteristic} onClick={()=>{
-                                                if(basket[element._id]) {
-                                                    if(isMobileApp) {
-                                                        setFullDialog('Характеристики', <SetCharacteristics
-                                                            _id={element._id} setBasket={setBasket} basket={basket}
-                                                            characteristics={basket[element._id].characteristics}/>)
-                                                        showFullDialog(true)
-                                                    }
-                                                    else {
-                                                        setMiniDialog('Характеристики', <SetCharacteristics
-                                                            _id={element._id} setBasket={setBasket} basket={basket}
-                                                            characteristics={basket[element._id].characteristics}/>)
-                                                        showMiniDialog(true)
-                                                    }
-                                                }
-                                            }}>
-                                                Добавить характеристику
-                                            </div>
-                                            </>
-                                            :
-                                            null
-                                    }
-                                    <Divider/>
-                                    <br/>
-                                </div>
                             })
                         }
                         {
                             list&&list.map((element, idx) => {
-                                return <div key={element._id}>
-                                    <div className={classes.rowTop}>
-                                        <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
-                                            setShowLightbox(true)
-                                            setImagesLightbox(element.images)
-                                            setIndexLightbox(0)
-                                        }}/>
-                                        <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
-                                            <div className={basketStyle.classes.name}>
-                                                {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
-                                                {element.name}
-                                            </div>
-                                            <div className={classes.row} style={{marginBottom: 10}}>
-                                                {
-                                                    element.discount?
-                                                        <>
-                                                        <strike className={basketStyle.classes.priceBeforeDiscount}>
-                                                            {basket[element._id]&&basket[element._id].priceKGSCount?basket[element._id].priceKGSCount:element.priceKGS}
-                                                        </strike>
-                                                        &nbsp;
-                                                        </>
-                                                        :
-                                                        null
-                                                }
-                                                <div className={basketStyle.classes.price}>
-                                                    {`${basket[element._id]&&basket[element._id].priceAfterDiscountKGSCount?basket[element._id].priceAfterDiscountKGSCount:element.priceAfterDiscountKGS} сом`}
+                                if(!(zeroItems.map(zeroItem => zeroItem._id)).includes(element._id))
+                                    return <div key={element._id}>
+                                        <div className={classes.rowTop}>
+                                            <img className={basketStyle.classes.media} src={element.images[0]} onClick={()=>{
+                                                setShowLightbox(true)
+                                                setImagesLightbox(element.images)
+                                                setIndexLightbox(0)
+                                            }}/>
+                                            <div className={classes.column} style={{width: 'calc(100% - 110px)'}}>
+                                                <div className={basketStyle.classes.name}>
+                                                    {element.discount?<span className={basketStyle.classes.discount}>-{element.discount}{element.typeDiscount}&nbsp;</span>:null}
+                                                    {element.name}
                                                 </div>
-                                            </div>
-                                            <div className={basketStyle.classes.counter}>
-                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
-                                                    if(basket[element._id]) {
-                                                        basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
-                                                        if(basket[element._id].count<0)
-                                                            basket[element._id].count = 0
-                                                        if (basket[element._id].count === 0)
-                                                            delete basket[element._id]
-                                                        setBasket({...basket})
-                                                    }
-                                                }}>–
-                                                </div>
-                                                <input type={isMobileApp?'number':'text'} className={basketStyle.classes.counternmbr}
-                                                       value={basket[element._id]?basket[element._id].count:''} onChange={(event) => {
-                                                    if(!basket[element._id])
-                                                        basket[element._id] = {
-                                                            ...element,
-                                                            priceKGSCount: 0,
-                                                            priceAfterDiscountKGSCount: 0,
-                                                            count: 0,
-                                                        }
-                                                    basket[element._id].count = inputFloat(event.target.value)
-                                                    if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
-                                                        basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
-                                                    setBasket({...basket})
-                                                }}/>
-                                                <div className={basketStyle.classes.counterbtn} onClick={() => {
-                                                    if(!basket[element._id])
-                                                        basket[element._id] = {
-                                                            ...element,
-                                                            priceKGSCount: 0,
-                                                            priceAfterDiscountKGSCount: 0,
-                                                            count: 0,
-                                                        }
-                                                    let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
-                                                    if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
-                                                        basket[element._id].count = newCount
-                                                        setBasket({...basket})
-                                                    }
-                                                }}>+
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
-                                        {
-                                            data.type!=='order'?
-                                                <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
+                                                <div className={classes.row} style={{marginBottom: 10}}>
                                                     {
-                                                        itemsReservations[element._id]?
+                                                        element.discount?
                                                             <>
-                                                            <span style={{color: 'orange'}}>
-                                                                Бронь: {itemsReservations[element._id]} {element.unit}
-                                                            </span>
-                                                            <br/>
+                                                            <strike className={basketStyle.classes.priceBeforeDiscount}>
+                                                                {basket[element._id]&&basket[element._id].priceKGSCount?basket[element._id].priceKGSCount:element.priceKGS}
+                                                            </strike>
+                                                            &nbsp;
                                                             </>
                                                             :
                                                             null
                                                     }
-                                                    Остаток: {element.free} {element.unit}
+                                                    <div className={basketStyle.classes.price}>
+                                                        {`${basket[element._id]&&basket[element._id].priceAfterDiscountKGSCount?basket[element._id].priceAfterDiscountKGSCount:element.priceAfterDiscountKGS} сом`}
+                                                    </div>
                                                 </div>
+                                                <div className={basketStyle.classes.counter}>
+                                                    <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                        if(basket[element._id]) {
+                                                            basket[element._id].count = checkFloat(checkFloat(basket[element._id].count) - 1)
+                                                            if(basket[element._id].count<0)
+                                                                basket[element._id].count = 0
+                                                            if (basket[element._id].count === 0)
+                                                                delete basket[element._id]
+                                                            setBasket({...basket})
+                                                        }
+                                                    }}>–
+                                                    </div>
+                                                    <input type={isMobileApp?'number':'text'} className={basketStyle.classes.counternmbr}
+                                                           value={basket[element._id]?basket[element._id].count:''} onChange={(event) => {
+                                                        if(!basket[element._id])
+                                                            basket[element._id] = {
+                                                                ...element,
+                                                                priceKGSCount: 0,
+                                                                priceAfterDiscountKGSCount: 0,
+                                                                count: 0,
+                                                            }
+                                                        basket[element._id].count = inputFloat(event.target.value)
+                                                        if(basket[element._id].count>(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))&&data.type!=='order')
+                                                            basket[element._id].count = element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0)
+                                                        setBasket({...basket})
+                                                    }}/>
+                                                    <div className={basketStyle.classes.counterbtn} onClick={() => {
+                                                        if(!basket[element._id])
+                                                            basket[element._id] = {
+                                                                ...element,
+                                                                priceKGSCount: 0,
+                                                                priceAfterDiscountKGSCount: 0,
+                                                                count: 0,
+                                                            }
+                                                        let newCount = checkFloat(checkFloat(basket[element._id].count) + 1)
+                                                        if(newCount<=(element.free+(itemsReservations[element._id]?itemsReservations[element._id]:0))||data.type==='order') {
+                                                            basket[element._id].count = newCount
+                                                            setBasket({...basket})
+                                                        }
+                                                    }}>+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={classes.row} style={{marginTop: 10, height: element.showCharacteristics?30:itemsReservations[element._id]?50:40, position: 'relative'}}>
+                                            {
+                                                data.type!=='order'?
+                                                    <div className={basketStyle.classes.info} style={{right: 5, position: 'absolute'}}>
+                                                        {
+                                                            itemsReservations[element._id]?
+                                                                <>
+                                                                <span style={{color: 'orange'}}>
+                                                                    Бронь: {itemsReservations[element._id]} {element.unit}
+                                                                </span>
+                                                                <br/>
+                                                                </>
+                                                                :
+                                                                null
+                                                        }
+                                                        Остаток: {element.free} {element.unit}
+                                                    </div>
+                                                    :
+                                                    null
+                                            }
+                                            <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
+                                                list[idx].showCharacteristics = !list[idx].showCharacteristics
+                                                setList([...list])
+                                            }}>
+                                                {element.showCharacteristics?'🔼':'🔽'}Характеристики: {basket[element._id]?basket[element._id].characteristics.length:element.characteristics.length}
+                                            </div>
+                                        </div>
+                                        {
+                                            element.showCharacteristics?
+                                                <>
+                                                {
+                                                    (basket[element._id]?basket[element._id].characteristics:element.characteristics).map((characteristic) => <div className={classes.row}>
+                                                        <div className={basketStyle.classes.characteristic}>
+                                                            {characteristic[0]}:&nbsp;{characteristic[1]}
+                                                        </div>
+                                                    </div>)
+                                                }
+                                                <div className={basketStyle.classes.addCharacteristic} onClick={()=>{
+                                                    if(basket[element._id]) {
+                                                        if(isMobileApp) {
+                                                            setFullDialog('Характеристики', <SetCharacteristics
+                                                                _id={element._id} setBasket={setBasket} basket={basket}
+                                                                characteristics={basket[element._id].characteristics}/>)
+                                                            showFullDialog(true)
+                                                        }
+                                                        else {
+                                                            setMiniDialog('Характеристики', <SetCharacteristics
+                                                                _id={element._id} setBasket={setBasket} basket={basket}
+                                                                characteristics={basket[element._id].characteristics}/>)
+                                                            showMiniDialog(true)
+                                                        }
+                                                    }
+                                                }}>
+                                                    Добавить характеристику
+                                                </div>
+                                                </>
                                                 :
                                                 null
                                         }
-                                        <div className={basketStyle.classes.info} style={{left: 5, position: 'absolute'}} onClick={()=>{
-                                            list[idx].showCharacteristics = !list[idx].showCharacteristics
-                                            setList([...list])
-                                        }}>
-                                            {element.showCharacteristics?'🔼':'🔽'}Характеристики: {basket[element._id]?basket[element._id].characteristics.length:element.characteristics.length}
-                                        </div>
+                                        <Divider/>
+                                        <br/>
                                     </div>
-                                    {
-                                        element.showCharacteristics?
-                                            <>
-                                            {
-                                                (basket[element._id]?basket[element._id].characteristics:element.characteristics).map((characteristic) => <div className={classes.row}>
-                                                    <div className={basketStyle.classes.characteristic}>
-                                                        {characteristic[0]}:&nbsp;{characteristic[1]}
-                                                    </div>
-                                                </div>)
-                                            }
-                                            <div className={basketStyle.classes.addCharacteristic} onClick={()=>{
-                                                if(basket[element._id]) {
-                                                    if(isMobileApp) {
-                                                        setFullDialog('Характеристики', <SetCharacteristics
-                                                            _id={element._id} setBasket={setBasket} basket={basket}
-                                                            characteristics={basket[element._id].characteristics}/>)
-                                                        showFullDialog(true)
-                                                    }
-                                                    else {
-                                                        setMiniDialog('Характеристики', <SetCharacteristics
-                                                            _id={element._id} setBasket={setBasket} basket={basket}
-                                                            characteristics={basket[element._id].characteristics}/>)
-                                                        showMiniDialog(true)
-                                                    }
-                                                }
-                                            }}>
-                                                Добавить характеристику
-                                            </div>
-                                            </>
-                                            :
-                                            null
-                                    }
-                                    <Divider/>
-                                    <br/>
-                                </div>
                             })
                         }
                     </div>

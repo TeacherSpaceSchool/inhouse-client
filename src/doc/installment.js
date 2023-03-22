@@ -102,9 +102,9 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
       <span style="text-align:justify;font-size:10pt">3.1. Стоимость Товара составляет <strong>${sale.amountEnd} (${await numberToWord(sale.amountEnd, 'all')}) сом.</strong>
       </span>
       <br>
-      <span style="text-align:justify;font-size:10pt">3.2. Покупатель производит оплату первоначального взноса наличными в руки.</span>
+      <span style="text-align:justify;font-size:10pt">3.2. Покупатель производит оплату первоначального взноса наличными в кассу магазина, либо на электронный кошелек <strong>MBank</strong>.</span>
       <br>
-      <span style="text-align:justify;font-size:10pt">3.3. Покупатель обязуется произвести оплату оставшейся части стоимости Товара путем пополнения электронного кошелька <strong>${doc.wallet}</strong>
+      <span style="text-align:justify;font-size:10pt">3.3. Покупатель обязуется произвести оплату оставшейся части стоимости Товара(ов) путем пополнения электронного кошелька <strong>${doc.wallet}</strong>
       </span>
       <br>
       <span style="text-align:justify;font-size:10pt">Оплата за Товар Продавцу осуществляется по следующему графику:</span>

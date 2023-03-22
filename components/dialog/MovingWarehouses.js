@@ -83,7 +83,7 @@ const MovingWarehouses =  React.memo(
                                 if(item) {
                                     let balanceItem = (await getBalanceItems({item: item._id, warehouse: warehouse1._id, store: warehouse1.store._id}))[0];
                                     let storeBalanceItem = (await getStoreBalanceItems({item: item._id, store: warehouse1.store._id}))[0];
-                                    if(['Брак', 'Реставрация'].includes(warehouse1.name))
+                                    if(warehouse1.hide||['Брак', 'Реставрация'].includes(warehouse1.name))
                                         free = balanceItem.amount
                                     else if(!balanceItem||!storeBalanceItem)
                                         free = 0

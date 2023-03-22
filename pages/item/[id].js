@@ -605,12 +605,18 @@ const Item = React.memo((props) => {
                                                 :
                                                 null
                                         }
-                                        <Button color='primary' onClick={()=>{
-                                            setMiniDialog('Рассчитать по курсу', <UsdToKgs priceUSD={priceUSD} primeCostUSD={primeCostUSD} setPriceKGS={setPriceKGS} setPrimeCostKGS={setPrimeCostKGS}/>)
-                                            showMiniDialog(true)
-                                        }}>
-                                            Курс
-                                        </Button>
+                                            <Button color='primary' onClick={()=>{
+                                                setMiniDialog('Рассчитать USD->KGS', <UsdToKgs priceUSD={priceUSD} primeCostUSD={primeCostUSD} setPriceKGS={setPriceKGS} setPrimeCostKGS={setPrimeCostKGS}/>)
+                                                showMiniDialog(true)
+                                            }}>
+                                                {isMobileApp?'':'Рассчитать '}USD->KGS
+                                            </Button>
+                                            <Button color='primary' onClick={()=>{
+                                                setMiniDialog('Рассчитать KGS->USD', <UsdToKgs priceKGS={priceKGS} primeCostKGS={primeCostKGS} setPriceUSD={setPriceUSD} setPrimeCostUSD={setPrimeCostUSD}/>)
+                                                showMiniDialog(true)
+                                            }}>
+                                                {isMobileApp?'':'Рассчитать '}KGS->USD
+                                            </Button>
                                         <Button color='primary' onClick={()=>{
                                             let res
                                             let checkCharacteristics = true

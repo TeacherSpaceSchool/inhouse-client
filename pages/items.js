@@ -144,7 +144,7 @@ const Items = React.memo((props) => {
             {
                 data.edit?
                     <Fab color='primary' aria-label='add' className={classes.fab2} onClick={()=>{
-                        setMiniDialog('Рассчитать по курсу', <UsdToKgs getList={getList}/>)
+                        setMiniDialog('Рассчитать USD->KGS', <UsdToKgs getList={getList}/>)
                         showMiniDialog(true)
                     }}>
                         <Calculate/>

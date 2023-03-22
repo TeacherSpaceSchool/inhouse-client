@@ -25,7 +25,7 @@ import DivideSaleOrder from '../../components/dialog/DivideSaleOrder';
 import AcceptOrder from '../../components/dialog/AcceptOrder';
 import HistoryIcon from '@mui/icons-material/History';
 import { wrapper } from '../../src/redux/configureStore'
-import { inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdtDatePicker } from '../../src/lib'
+import {inputFloat, checkFloat, pdDDMMYYHHMM, cloneObject, pdtDatePicker, checkInt} from '../../src/lib'
 import AutocomplectOnline from '../../components/app/AutocomplectOnline'
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -44,6 +44,10 @@ import { getBalanceItems } from '../../src/gql/balanceItem'
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Shipment from '../../components/dialog/Shipment'
+import InputAdornment from '@mui/material/InputAdornment';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Input from '@mui/material/Input';
 const Geo = dynamic(import('../../components/dialog/Geo'), { ssr: false });
 
 const colors = {
@@ -74,6 +78,7 @@ const Order = React.memo((props) => {
     let [comment, setComment] = useState(data.object.comment);
     let [itemsSale, setItemsSale] = useState(cloneObject(data.object.itemsSale));
     let [discount, setDiscount] = useState(data.object.discount);
+    let [discountType, setDiscountType] = useState('сом');
     let [percentManager, setPercentManager] = useState('');
     let [percentCpa, setPercentCpa] = useState('');
     let [selfDelivery, setSelfDelivery] = useState(false);
@@ -91,17 +96,14 @@ const Order = React.memo((props) => {
             today.setHours(0, 0, 0, 0)
             setToday(today)
         }
-        let discountPrecent = discount*100/amountStart
         amountStart = 0
         for (let i = 0; i < itemsSale.length; i++) {
             amountStart = checkFloat(amountStart + itemsSale[i].amount)
         }
-        discount = checkFloat(amountStart/100*discountPrecent)
-        setDiscount(discount)
         setAmountStart(amountStart)
     },[itemsSale])
     useEffect(()=>{
-        amountEnd = checkFloat(amountStart - discount)
+        amountEnd = checkFloat(amountStart - (discountType==='%'?amountStart/100*discount:discount))
         if(amountEnd<0)
             amountEnd = 0
         setAmountEnd(amountEnd)
@@ -393,7 +395,7 @@ const Order = React.memo((props) => {
                                     null
                             }
                             {
-                                /*edit&&data.object.status==='обработка'?
+                                edit&&data.object.status==='обработка'?
                                     <FormControl className={classes.input}>
                                         <InputLabel>Скидка</InputLabel>
                                         <Input
@@ -402,14 +404,21 @@ const Order = React.memo((props) => {
                                             onChange={(event)=>setDiscount(inputFloat(event.target.value))}
                                             endAdornment={
                                                 <InputAdornment position='end'>
-                                                    <IconButton>
-                                                        сом
+                                                    <IconButton onClick={()=>{
+                                                        if(discountType==='%')
+                                                            discount = checkInt(discount*amountStart/100)
+                                                        else
+                                                            discount = checkInt(discount*100/amountStart)
+                                                        setDiscount(discount)
+                                                        setDiscountType(discountType==='%'?'сом':'%')
+                                                    }}>
+                                                        {discountType}
                                                     </IconButton>
                                                 </InputAdornment>
                                             }
                                         />
                                     </FormControl>
-                                    :*/
+                                    :
                                 discount?
                                     <div className={classes.row}>
                                         <div className={classes.nameField}>Скидка:&nbsp;</div>

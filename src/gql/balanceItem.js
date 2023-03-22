@@ -12,7 +12,7 @@ export const getBalanceItems = async({item, skip, sort, warehouse, store}, clien
                         balanceItems(item: $item, skip: $skip, sort: $sort, warehouse: $warehouse, store: $store) {
                             _id
                             createdAt
-                            item {_id name}
+                            item {_id name priceUSD primeCostUSD priceKGS primeCostKGS}
                             warehouse {_id name}
                             store {_id name}
                             amount

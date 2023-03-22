@@ -12,7 +12,7 @@ import * as appActions from '../../src/redux/actions/app'
 
 const UsdToKgs =  React.memo(
     (props) =>{
-        let { priceUSD, primeCostUSD, setPriceKGS, setPrimeCostKGS, getList } = props;
+        let { priceUSD, primeCostUSD, setPriceUSD, setPrimeCostUSD, priceKGS, primeCostKGS, setPriceKGS, setPrimeCostKGS, getList } = props;
         const { showLoad } = props.appActions;
         const { classes } = dialogContentStyle();
         const { isMobileApp } = props.app;
@@ -44,6 +44,13 @@ const UsdToKgs =  React.memo(
                                 setPriceKGS(priceKGS?priceKGS:'')
                                 let primeCostKGS = checkFloat(primeCostUSD * usdToKgs)
                                 setPrimeCostKGS(primeCostKGS?primeCostKGS:'')
+                                showMiniDialog(false)
+                            }
+                            else if (usdToKgs!=undefined && primeCostKGS!=undefined) {
+                                let priceUSD = checkFloat(priceKGS / usdToKgs)
+                                setPriceUSD(priceUSD?priceUSD:'')
+                                let primeCostUSD = checkFloat(primeCostKGS / usdToKgs)
+                                setPrimeCostUSD(primeCostUSD?primeCostUSD:'')
                                 showMiniDialog(false)
                             }
                             else {

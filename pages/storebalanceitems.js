@@ -108,6 +108,18 @@ const StoreBalanceItems = React.memo((props) => {
                 <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
                     Баланс
                 </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Цена доллары
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Цена сомы
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Себес. доллары
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Себес. сомы
+                </div>
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
@@ -162,6 +174,18 @@ const StoreBalanceItems = React.memo((props) => {
                                         {element.sale}
                                     </div>
                                 </div>
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.priceUSD}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.priceKGS}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.primeCostUSD}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.primeCostKGS}
                             </div>
                         </div>
                     )}

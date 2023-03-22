@@ -43,6 +43,7 @@ export const getWarehouses = async({search, skip, store}, client)=>{
                     query ($search: String, $skip: Int, $store: ID) {
                         warehouses(search: $search, skip: $skip, store: $store) {
                             _id
+                            hide
                             createdAt
                             name
                             store {_id name}
@@ -109,9 +110,10 @@ export const addWarehouse = async(variables)=>{
         let res = await client.mutate({
             variables,
             mutation : gql`
-                    mutation ($name: String!, $store: ID!) {
-                        addWarehouse(name: $name, store: $store)  {
+                    mutation ($name: String!, $store: ID!, $hide: Boolean!) {
+                        addWarehouse(name: $name, store: $store, hide: $hide)  {
                             _id
+                            hide
                             createdAt
                             name
                             store {_id name}

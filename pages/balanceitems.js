@@ -133,22 +133,34 @@ const BalanceItems = React.memo((props) => {
                 <meta property='og:url' content={`${urlMain}/balanceitems`} />
                 <link rel='canonical' href={`${urlMain}/balanceitems`}/>
             </Head>
-            <div className={classes.tableHead} style={isMobileApp?{width: 'fit-content'}:{}}>
+            <div className={classes.tableHead} style={{width: 'fit-content'}}>
                 {data.edit?<div style={{width: 40, padding: 0}}/>:null}
-                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                     Магазин
                 </div>
-                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                     Склад
                 </div>
-                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: `calc((100% - ${data.edit?190:150}px) / 3)`, justifyContent: data.edit?'center':'start'}}>
+                <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start'}}>
                     Модель
                 </div>
                 <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                     Остаток
                 </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Цена доллары
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Цена сомы
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Себес. доллары
+                </div>
+                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                    Себес. сомы
+                </div>
             </div>
-            <Card className={classes.page} style={isMobileApp?{width: 'fit-content'}:{}}>
+            <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
                     {
                         data.add&&!search?
@@ -196,7 +208,7 @@ const BalanceItems = React.memo((props) => {
                                         </Badge>
                                     </IconButton>
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
                                     {
                                         !filter.store&&!filter.warehouse?
                                             <AutocomplectOnline
@@ -224,7 +236,7 @@ const BalanceItems = React.memo((props) => {
                                                 null
                                     }
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
                                     {
                                         !filter.warehouse?
                                             <AutocomplectOnline
@@ -259,7 +271,7 @@ const BalanceItems = React.memo((props) => {
                                                 null
                                     }
                                 </div>
-                                <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, width: 'calc((100% - 190px) / 3)', justifyContent: 'center'}}>
+                                <div className={classes.tableCell} style={{width: 200, justifyContent: 'center'}}>
                                     {
                                         !filter.item?
                                         <AutocomplectOnline
@@ -303,6 +315,10 @@ const BalanceItems = React.memo((props) => {
                                         }}
                                     />
                                 </div>
+                                <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}/>
+                                <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}/>
+                                <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}/>
+                                <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}/>
                             </div>
                             :
                             null
@@ -361,17 +377,17 @@ const BalanceItems = React.memo((props) => {
                                     :
                                     null
                             }
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start', maxHeight: 100, overflow: 'auto'}}>
                                 {
                                     element.store.name
                                 }
                             </div>
-                              <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
+                              <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start', maxHeight: 100, overflow: 'auto'}}>
                                 {
                                     element.warehouse.name
                                 }
                             </div>
-                            <div className={classes.tableCell} style={{...isMobileApp?{minWidth: 200}:{}, justifyContent: data.edit?'center':'start', width: `calc((100% - ${data.edit?190:150}px) / 3)`, maxHeight: 100, overflow: 'auto'}}>
+                            <div className={classes.tableCell} style={{width: 200, justifyContent: data.edit?'center':'start', maxHeight: 100, overflow: 'auto'}}>
                                 <Link href='/item/[id]' as={`/item/${element.item._id}`}>
                                     <a>
                                         {
@@ -399,6 +415,18 @@ const BalanceItems = React.memo((props) => {
                                         :
                                         <>{element.amount} {element.item.unit}</>
                                 }
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.priceUSD}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.priceKGS}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.primeCostUSD}
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                {element.item.primeCostKGS}
                             </div>
                         </div>
                     )}

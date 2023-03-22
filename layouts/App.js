@@ -142,7 +142,10 @@ const App = React.memo(props => {
                 }
             }
             containerRef.current.addEventListener('scroll', scrollHandle);
-            return () => containerRef.current.removeEventListener('scroll', scrollHandle);
+            return () => {
+                if(containerRef.current)
+                    containerRef.current.removeEventListener('scroll', scrollHandle);
+            }
         }
     }, [filter, search, sort, list])
 
