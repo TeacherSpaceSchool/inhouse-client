@@ -184,14 +184,12 @@ const Catalog = React.memo((props) => {
                         ...filter.factory ? {factory: filter.factory._id} : {},
                         ...filter.category ? {category: filter.category._id} : {}
                     })
-                    if (addedList && addedList.length > 0) {
+                    if (addedList&&addedList.length) {
                         list = [...list, ...addedList];
                         setList(list);
+                        paginationWork.current = true
                     }
-                    else
-                        paginationWork.current = false
                     await showLoad(false)
-                    paginationWork.current = true
                 }
             };
             containerRef.current.addEventListener('scroll', scrollHandle);
