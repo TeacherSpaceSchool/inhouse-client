@@ -200,7 +200,7 @@ const Catalog = React.memo((props) => {
                     containerRef.current.removeEventListener('scroll', scrollHandle);
             }
         }
-    }, [])
+    }, [filter, search, list])
     return (
         <App filterShow={{factory: true, category: true}} qrScannerShow={true} searchShow={true} pageName='Каталог'>
             <Head>
