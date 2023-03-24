@@ -213,7 +213,7 @@ export const getInstallmentDoc = async ({client, itemsSale, doc, installment, sa
     `);
     const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    const id = 'donwloadInstallmentDocs'
+    const id = `donwloadInstallmentDocs-${installment._id}`
     link.id = id
     link.href = blobUrl;
     link.download = `Договор рассрочки №${sale.number}.docx`;

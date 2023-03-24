@@ -937,7 +937,6 @@ const Sale = React.memo((props) => {
                                                                             await getOrderDoc({
                                                                                 sale: data.object,
                                                                                 client: await getClient({_id: data.object.client._id}),
-                                                                                itemsSale: data.object.itemsSale,
                                                                                 doc: await getDoc()
                                                                             })
                                                                         let res = await getAttachmentSale(data.object._id)
@@ -1052,7 +1051,6 @@ const Sale = React.memo((props) => {
                                                                         await getOrderDoc({
                                                                             sale: data.object,
                                                                             client: await getClient({_id: data.object.client._id}),
-                                                                            itemsSale: data.object.itemsSale,
                                                                             doc: await getDoc()
                                                                         })
                                                                     let res = await getAttachmentSale(data.object._id)

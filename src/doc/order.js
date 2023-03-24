@@ -1,12 +1,8 @@
 import htmlDocx from 'html-docx-js/dist/html-docx';
-import { pdDDMMYYYY, checkFloat } from '../../src/lib'
-import numberToWord from '../../src/numberToWord'
+import { pdDDMMYYYY, checkFloat } from '../lib'
+import numberToWord from '../numberToWord'
 
-export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
-    let items = ''
-    for(let i=0; i<itemsSale.length; i++) {
-        items += `${itemsSale[i].name} - ${itemsSale[i].count} ${itemsSale[i].unit}; `
-    }
+export const getOrderDoc = async ({sale, client, doc})=>{
     const precentPaid = parseInt(sale.paid*100/(sale.amountEnd-checkFloat(sale.prepaid)))
     const blob = await htmlDocx.asBlob(`
     <p style="text-align:center;font-size:12pt">
@@ -37,7 +33,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     <br>
     <span style="text-align:justify;font-size:10pt">2.2 Общая стоимость поставляемого по настоящему Договору товара составляет <strong>${(sale.amountEnd-checkFloat(sale.prepaid))} (${await numberToWord((sale.amountEnd-checkFloat(sale.prepaid)), 'all')})</strong> сом.</span>
     <br>
-    <span style="text-align:justify;font-size:10pt">2.3 Данная стоимость не включает в себя доставку, сборку и установку товара у Покупателя.</span>
+    <span style="text-align:justify;font-size:10pt">2.3 Данная стоимость включает в себя доставку, сборку и установку товара у Покупателя по заранее согласованному адресу.</span>
     <br>
     <p style="text-align:center;font-size:10pt">
       <strong>3. УСЛОВИЯ ПЛАТЕЖА И ПОСТАВКИ</strong>
@@ -82,7 +78,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     <p style="text-align:center;font-size:10pt">
       <strong>5. ГАРАНТИЯ КАЧЕСТВА И ПОРЯДОК ПЕРЕДАЧИ ТОВАРА</strong>
     </p>
-    <span style="text-align:justify;font-size:10pt">5.1. Продавец гарантирует качество товара сроком на один год, при условии соблюдения Покупателем норм хранения и правильной эксплуатации мебели.</span>
+    <span style="text-align:justify;font-size:10pt">5.1. Продавец гарантирует сервисное обслуживание сроком на один год, при условии соблюдения Покупателем норм хранения и правильной эксплуатации мебели.</span>
     <br>
     <span style="text-align:justify;font-size:10pt">5.2. Продавец передает товар лично Покупателю или лицу, действующему в его интересах и предъявившему Договор и Доверенность от Покупателя.</span>
     <br>
@@ -181,7 +177,7 @@ export const getOrderDoc = async ({sale, client, itemsSale, doc})=>{
     `);
     const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    const id = 'donwloadSaleDocs'
+    const id = `donwloadSaleDocs-${sale._id}`
     link.id = id
     link.href = blobUrl;
     link.download = `Договор купли-продажи №${sale.number}.docx`;
