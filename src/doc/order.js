@@ -149,6 +149,10 @@ export const getOrderDoc = async ({sale, client, doc})=>{
           <span style="text-align: justify; font-size: 10pt;">
             <strong>Генеральный директор</strong>
           </span>
+          <br>
+          <span style="text-align: justify; font-size: 10pt;">
+            <strong>${doc.director}</strong>
+          </span>
         </td>
         <td style="vertical-align: top; width: 50%;">
           <span style="text-align: justify; font-size: 10pt;">ФИО: ${client.name}</span>
@@ -167,7 +171,7 @@ export const getOrderDoc = async ({sale, client, doc})=>{
       <tr style="height: 50px;"></tr>
       <tr style="width: 100%;">
         <td style="vertical-align: bottom; width: 50%;">
-          <span style="text-align: justify; font-size: 10pt;">${doc.director} _______________</span>
+          <span style="text-align: justify; font-size: 10pt;">Подпись _______________</span>
         </td>
         <td style="vertical-align: bottom; width: 50%;">
           <span style="text-align: justify; font-size: 10pt;">Подпись _______________</span>
