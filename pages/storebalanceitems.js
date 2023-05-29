@@ -46,6 +46,7 @@ const sorts = [
 const StoreBalanceItems = React.memo((props) => {
     const {classes} = pageListStyle();
     const { data } = props;
+    const { profile } = props.user;
     const { isMobileApp, filter, sort } = props.app;
     const { showSnackBar } = props.snackbarActions;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
@@ -114,12 +115,19 @@ const StoreBalanceItems = React.memo((props) => {
                 <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                     Цена сомы
                 </div>
-                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                    Себес. доллары
-                </div>
-                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                    Себес. сомы
-                </div>
+                {
+                    ['admin', 'управляющий'].includes(profile.role)?
+                        <>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                Себес. доллары
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                Себес. сомы
+                            </div>
+                        </>
+                        :
+                        null
+                }
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
@@ -181,12 +189,19 @@ const StoreBalanceItems = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
                                 {element.item.priceKGS}
                             </div>
-                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
-                                {element.item.primeCostUSD}
-                            </div>
-                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
-                                {element.item.primeCostKGS}
-                            </div>
+                            {
+                                ['admin', 'управляющий'].includes(profile.role)?
+                                    <>
+                                    <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                        {element.item.primeCostUSD}
+                                    </div>
+                                    <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                        {element.item.primeCostKGS}
+                                    </div>
+                                    </>
+                                    :
+                                    null
+                            }
                         </div>
                     )}
                 </div>
@@ -246,6 +261,7 @@ StoreBalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(c
 function mapStateToProps (state) {
     return {
         app: state.app,
+        user: state.user,
     }
 }
 

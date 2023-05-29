@@ -2,7 +2,7 @@ import Head from 'next/head';
 import React, { useState, useEffect, useRef } from 'react';
 import App from '../layouts/App';
 import { connect } from 'react-redux'
-import {getBalanceItems, getBalanceItemsCount, setBalanceItem, addBalanceItem, getItemsForBalanceItem, uploadBalanceItem, getUnloadBalanceItems} from '../src/gql/balanceItem'
+import {getBalanceItems, getBalanceItemsCount, setBalanceItem, uploadBalanceItem, getUnloadBalanceItems} from '../src/gql/balanceItem'
 import {getWarehouses} from '../src/gql/warehouse'
 import {getItems} from '../src/gql/item'
 import * as mini_dialogActions from '../src/redux/actions/mini_dialog'
@@ -49,7 +49,8 @@ const BalanceItems = React.memo((props) => {
     const { data } = props;
     const { setMiniDialog, showMiniDialog } = props.mini_dialogActions;
     const { showSnackBar } = props.snackbarActions;
-    const { search, isMobileApp, filter, sort } = props.app;
+    const { profile } = props.user;
+    const { search, filter, sort } = props.app;
     const unsaved = useRef({});
     const initialRender = useRef(true);
     let [newElement, setNewElement] = useState({
@@ -153,12 +154,19 @@ const BalanceItems = React.memo((props) => {
                 <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
                     Цена сомы
                 </div>
-                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                    Себес. доллары
-                </div>
-                <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
-                    Себес. сомы
-                </div>
+                {
+                    ['admin', 'управляющий'].includes(profile.role)?
+                        <>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                Себес. доллары
+                            </div>
+                            <div className={classes.tableCell} style={{width: 150, justifyContent: data.edit?'center':'start'}}>
+                                Себес. сомы
+                            </div>
+                        </>
+                        :
+                        null
+                }
             </div>
             <Card className={classes.page} style={{width: 'fit-content'}}>
                 <div className={classes.table}>
@@ -422,12 +430,19 @@ const BalanceItems = React.memo((props) => {
                             <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
                                 {element.item.priceKGS}
                             </div>
-                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
-                                {element.item.primeCostUSD}
-                            </div>
-                            <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
-                                {element.item.primeCostKGS}
-                            </div>
+                            {
+                                ['admin', 'управляющий'].includes(profile.role)?
+                                    <>
+                                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                            {element.item.primeCostUSD}
+                                        </div>
+                                        <div className={classes.tableCell} style={{width: 150, justifyContent: 'center'}}>
+                                            {element.item.primeCostKGS}
+                                        </div>
+                                    </>
+                                    :
+                                    null
+                            }
                         </div>
                     )}
                 </div>
@@ -482,6 +497,7 @@ BalanceItems.getInitialProps = wrapper.getInitialPageProps(store => async(ctx) =
 function mapStateToProps (state) {
     return {
         app: state.app,
+        user: state.user,
     }
 }
 
