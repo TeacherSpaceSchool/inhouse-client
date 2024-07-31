@@ -773,7 +773,7 @@ const Sale = React.memo((props) => {
                                                                 if (paid != data.object.paid) element.paid = checkFloat(paid)
                                                                 if (selfDelivery != data.object.selfDelivery) element.selfDelivery = selfDelivery
                                                                 if (pdDDMMYYHHMM(delivery) !== pdDDMMYYHHMM(data.object.delivery)) element.delivery = delivery
-                                                                if (discount != data.object.discount) element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
+                                                                element.discount = checkFloat(checkFloat(amountStart) - checkFloat(amountEnd))
                                                                 if (amountStart != data.object.amountStart) element.amountStart = checkFloat(amountStart)
                                                                 if (amountEnd != data.object.amountEnd) element.amountEnd = checkFloat(amountEnd)
                                                                 if (JSON.stringify(geo) !== JSON.stringify(data.object.geo)) element.geo = geo
